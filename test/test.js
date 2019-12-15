@@ -5,7 +5,7 @@ const sinon = require('sinon');
 const Switcher = require('../src/index')
 const request = require('request-promise')
 const services = require('../src/utils/services')
-const { StrategiesType } = require('../src/utils/index')
+// const { StrategiesType } = require('../src/utils/index')
 
 describe('Integrated test - Switcher offline:', function () {
   let switcher;
@@ -21,7 +21,7 @@ describe('Integrated test - Switcher offline:', function () {
   })
 
   it('Should be valid', async function () {
-    await switcher.prepare('FF2FOR2020', [StrategiesType.VALUE, 'Japan', StrategiesType.NETWORK, '10.0.0.3'])
+    await switcher.prepare('FF2FOR2020', [Switcher.StrategiesType.VALUE, 'Japan', Switcher.StrategiesType.NETWORK, '10.0.0.3'])
     
     await switcher.isItOn('FF2FOR2020').then(function (result) {
       console.log('Fullfilled:', result);
@@ -31,7 +31,7 @@ describe('Integrated test - Switcher offline:', function () {
   })
 
   it('Should be invalid - Input (IP) does not match', async function () {
-    await switcher.prepare('FF2FOR2020', [StrategiesType.VALUE, 'Japan', StrategiesType.NETWORK, '192.168.0.2'])
+    await switcher.prepare('FF2FOR2020', [Switcher.StrategiesType.VALUE, 'Japan', Switcher.StrategiesType.NETWORK, '192.168.0.2'])
     await switcher.isItOn().then(function (result) {
       console.log('Fullfilled:', result);
     }, function (error) {
@@ -40,7 +40,7 @@ describe('Integrated test - Switcher offline:', function () {
   })
 
   it('Should be valid assuming key to be false and then forgetting it', async function () {
-    await switcher.prepare('FF2FOR2020', [StrategiesType.VALUE, 'Japan', StrategiesType.NETWORK, '10.0.0.3'])
+    await switcher.prepare('FF2FOR2020', [Switcher.StrategiesType.VALUE, 'Japan', Switcher.StrategiesType.NETWORK, '10.0.0.3'])
     
     assert.isTrue(await switcher.isItOn())
     switcher.assume('FF2FOR2020').false()
@@ -50,7 +50,7 @@ describe('Integrated test - Switcher offline:', function () {
   })
 
   it('Should be valid assuming unknown key to be true', async function () {
-    await switcher.prepare('UNKNOWN', [StrategiesType.VALUE, 'Japan', StrategiesType.NETWORK, '10.0.0.3'])
+    await switcher.prepare('UNKNOWN', [Switcher.StrategiesType.VALUE, 'Japan', Switcher.StrategiesType.NETWORK, '10.0.0.3'])
     
     switcher.assume('UNKNOWN').true()
     assert.isTrue(await switcher.isItOn())
@@ -86,7 +86,7 @@ describe('Unit test - Switcher:', function () {
       clientAuth.returns(Promise.resolve({ token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 }));
 
       let switcher = new Switcher('url', 'apiKey', 'domain', 'component', 'default')
-      await switcher.prepare('FLAG_1', [StrategiesType.VALUE, 'User 1', StrategiesType.NETWORK, '192.168.0.1'])
+      await switcher.prepare('FLAG_1', [Switcher.StrategiesType.VALUE, 'User 1', Switcher.StrategiesType.NETWORK, '192.168.0.1'])
       assert.isTrue(await switcher.isItOn())
     })
     
@@ -122,7 +122,7 @@ describe('Unit test - Switcher:', function () {
       clientAuth.returns(Promise.resolve({ token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 }));
 
       let switcher = new Switcher('url', 'apiKey', 'domain', 'component', 'default')
-      assert.isTrue(await switcher.isItOn('MY_FLAG', [StrategiesType.VALUE, 'User 1', StrategiesType.NETWORK, '192.168.0.1']))
+      assert.isTrue(await switcher.isItOn('MY_FLAG', [Switcher.StrategiesType.VALUE, 'User 1', Switcher.StrategiesType.NETWORK, '192.168.0.1']))
     })
 
     it('should be valid - when preparing key and sending input strategy afterwards', async function () {
@@ -131,14 +131,14 @@ describe('Unit test - Switcher:', function () {
 
       let switcher = new Switcher('url', 'apiKey', 'domain', 'component', 'default')
       await switcher.prepare('MY_FLAG')
-      assert.isTrue(await switcher.isItOn(undefined, [StrategiesType.VALUE, 'User 1', StrategiesType.NETWORK, '192.168.0.1']))
+      assert.isTrue(await switcher.isItOn(undefined, [Switcher.StrategiesType.VALUE, 'User 1', Switcher.StrategiesType.NETWORK, '192.168.0.1']))
     })
 
     it('should be invalid - bad url', async function () {
       let switcher = new Switcher(undefined, 'apiKey', 'domain', 'component', 'default')
       clientAuth.returns(Promise.resolve({ token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 }));
 
-      await switcher.prepare('MY_FLAG', [StrategiesType.VALUE, 'User 1', StrategiesType.NETWORK, '192.168.0.1'])
+      await switcher.prepare('MY_FLAG', [Switcher.StrategiesType.VALUE, 'User 1', Switcher.StrategiesType.NETWORK, '192.168.0.1'])
       await switcher.isItOn().then(function (result) {
         assert.isUndefined(result)
       }, function (error) {
@@ -150,7 +150,7 @@ describe('Unit test - Switcher:', function () {
       let switcher = new Switcher('url', undefined, 'domain', 'component', 'default')
       clientAuth.returns(Promise.resolve({ token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 }));
 
-      await switcher.prepare('MY_FLAG', [StrategiesType.VALUE, 'User 1', StrategiesType.NETWORK, '192.168.0.1'])
+      await switcher.prepare('MY_FLAG', [Switcher.StrategiesType.VALUE, 'User 1', Switcher.StrategiesType.NETWORK, '192.168.0.1'])
       await switcher.isItOn().then(function (result) {
         assert.isUndefined(result)
       }, function (error) {
@@ -163,7 +163,7 @@ describe('Unit test - Switcher:', function () {
       clientAuth.returns(Promise.resolve({ token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 }));
 
       let switcher = new Switcher('url', 'apiKey', 'domain', 'component', 'default')
-      await switcher.prepare(undefined, [StrategiesType.VALUE, 'User 1', StrategiesType.NETWORK, '192.168.0.1'])
+      await switcher.prepare(undefined, [Switcher.StrategiesType.VALUE, 'User 1', Switcher.StrategiesType.NETWORK, '192.168.0.1'])
       
       await switcher.isItOn().then(function (result) {
         assert.isUndefined(result)

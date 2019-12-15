@@ -96,6 +96,10 @@ class Switcher {
   forget(key) {
     this.bypassedKeys.splice(this.bypassedKeys.indexOf(searchBypassed(key, this.bypassedKeys)), 1); 
   }
+
+  static get StrategiesType() {
+    return StrategiesType;
+  }
   
 }
 
@@ -120,6 +124,13 @@ class Key {
   getValue() {
     return this.value;
   }
+}
+
+const StrategiesType = {
+  NETWORK: 'NETWORK_VALIDATION',
+  VALUE: 'VALUE_VALIDATION',
+  TIME: 'TIME_VALIDATION',
+  DATE: 'DATE_VALIDATION'
 }
 
 function searchBypassed(key, bypassedKeys) {
