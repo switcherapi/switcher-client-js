@@ -1,0 +1,59 @@
+{
+    "data": {
+        "domain": {
+            "name": "currency-api",
+            "description": "Currency API",
+            "activated": true,
+            "group": [
+                {
+                    "name": "Rollout 2020",
+                    "description": "Changes that will be applied during the rollout",
+                    "activated": true,
+                    "config": [
+                        {
+                            "key": "FF2FOR2020",
+                            "description": "Feature Flag",
+                            "activated": true,
+                            "strategies": [
+                                {
+                                    "strategy": "NETWORK_VALIDATION",
+                                    "activated": true,
+                                    "operation": "EXIST",
+                                    "values": [
+                                        "10.0.0.3/24"
+                                    ]
+                                },
+                                {
+                                    "strategy": "VALUE_VALIDATION",
+                                    "activated": true,
+                                    "operation": "NOT_EXIST",
+                                    "values": [
+                                        "USA",
+                                        "Canada",
+                                        "Australia",
+                                        "Africa"
+                                    ]
+                                }
+                            ],
+                            "components": []
+                        }
+                    ]
+                },
+                {
+                    "name": "Rollout 2030",
+                    "description": "Changes that will be applied during the rollout",
+                    "activated": true,
+                    "config": [
+                        {
+                            "key": "FF2FOR2030",
+                            "description": "Feature Flag",
+                            "activated": true,
+                            "strategies": [],
+                            "components": []
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+}
