@@ -67,7 +67,8 @@ class Switcher {
     }
 
     if (this.offline) {
-      return await checkCriteriaOffline(this.key, this.input, this.snapshotLocation);
+      return await checkCriteriaOffline(
+        this.key ? this.key : key, this.input ? this.input : input, this.snapshotLocation);
     }
 
     try {

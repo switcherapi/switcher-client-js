@@ -22,9 +22,16 @@ describe('Integrated test - Switcher offline:', function () {
 
   it('Should be valid', async function () {
     await switcher.prepare('FF2FOR2020', [Switcher.StrategiesType.VALUE, 'Japan', Switcher.StrategiesType.NETWORK, '10.0.0.3'])
-    
-    await switcher.isItOn('FF2FOR2020').then(function (result) {
-      console.log('Fullfilled:', result);
+    switcher.isItOn('FF2FOR2020').then(function (result) {
+      assert.isTrue(result)
+    }, function (error) {
+      console.log('Rejected:', error);
+    })
+  })
+
+  it('Should be valid - No prepare function called', function () {
+    switcher.isItOn('FF2FOR2030').then(function (result) {
+      assert.isTrue(result)
     }, function (error) {
       console.log('Rejected:', error);
     })
@@ -32,8 +39,8 @@ describe('Integrated test - Switcher offline:', function () {
 
   it('Should be invalid - Input (IP) does not match', async function () {
     await switcher.prepare('FF2FOR2020', [Switcher.StrategiesType.VALUE, 'Japan', Switcher.StrategiesType.NETWORK, '192.168.0.2'])
-    await switcher.isItOn().then(function (result) {
-      console.log('Fullfilled:', result);
+    switcher.isItOn().then(function (result) {
+      assert.isFalse(result)
     }, function (error) {
       console.log('Rejected:', error);
     })
@@ -56,7 +63,7 @@ describe('Integrated test - Switcher offline:', function () {
     assert.isTrue(await switcher.isItOn())
 
     switcher.forget('UNKNOWN')
-    await switcher.isItOn().then(function (result) {
+    switcher.isItOn().then(function (result) {
       assert.isUndefined(result)
     }, function (error) {
       assert.equal('Offline - Something went wrong: {"error":"Unable to load a key UNKNOWN"}', error.message)
@@ -139,7 +146,7 @@ describe('Unit test - Switcher:', function () {
       clientAuth.returns(Promise.resolve({ token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 }));
 
       await switcher.prepare('MY_FLAG', [Switcher.StrategiesType.VALUE, 'User 1', Switcher.StrategiesType.NETWORK, '192.168.0.1'])
-      await switcher.isItOn().then(function (result) {
+      switcher.isItOn().then(function (result) {
         assert.isUndefined(result)
       }, function (error) {
         assert.equal('Something went wrong: Missing url field', error.message)
@@ -151,7 +158,7 @@ describe('Unit test - Switcher:', function () {
       clientAuth.returns(Promise.resolve({ token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 }));
 
       await switcher.prepare('MY_FLAG', [Switcher.StrategiesType.VALUE, 'User 1', Switcher.StrategiesType.NETWORK, '192.168.0.1'])
-      await switcher.isItOn().then(function (result) {
+      switcher.isItOn().then(function (result) {
         assert.isUndefined(result)
       }, function (error) {
         assert.equal('Something went wrong: Missing API Key field', error.message)
@@ -165,7 +172,7 @@ describe('Unit test - Switcher:', function () {
       let switcher = new Switcher('url', 'apiKey', 'domain', 'component', 'default')
       await switcher.prepare(undefined, [Switcher.StrategiesType.VALUE, 'User 1', Switcher.StrategiesType.NETWORK, '192.168.0.1'])
       
-      await switcher.isItOn().then(function (result) {
+      switcher.isItOn().then(function (result) {
         assert.isUndefined(result)
       }, function (error) {
         assert.equal('Something went wrong: Missing key field', error.message)
@@ -178,7 +185,7 @@ describe('Unit test - Switcher:', function () {
 
       let switcher = new Switcher('url', 'apiKey', 'domain', 'component', 'default')
       await switcher.prepare('MY_WRONG_FLAG', ['THIS IS WRONG'])
-      await switcher.isItOn().then(function (result) {
+      switcher.isItOn().then(function (result) {
         assert.isUndefined(result)
       }, function (error) {
         assert.equal('Something went wrong: Invalid input format for \'THIS IS WRONG\'', error.message)
