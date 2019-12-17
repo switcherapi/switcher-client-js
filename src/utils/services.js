@@ -42,8 +42,8 @@ exports.checkCriteria = async (url, token, key, input) => {
             }
         }
 
-        const result = await request.post(options);
-        return result.return;
+        const response = await request.post(options);
+        return response.result;
     } catch (e) {
         let error
         if (e.error) {

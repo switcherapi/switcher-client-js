@@ -89,7 +89,7 @@ describe('Unit test - Switcher:', function () {
     })
 
     it('should be valid', async function () {
-      requestStub.returns(Promise.resolve({ return: true }));
+      requestStub.returns(Promise.resolve({ result: true }));
       clientAuth.returns(Promise.resolve({ token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 }));
 
       let switcher = new Switcher('url', 'apiKey', 'domain', 'component', 'default')
@@ -100,7 +100,7 @@ describe('Unit test - Switcher:', function () {
     it('should renew the token after expiration', async function () {
       this.timeout(3000);
 
-      requestStub.returns(Promise.resolve({ return: true }));
+      requestStub.returns(Promise.resolve({ result: true }));
       clientAuth.returns(Promise.resolve({ token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+1000)/1000 }));
       let switcher = new Switcher('url', 'apiKey', 'domain', 'component', 'default')
       const spyPrepare = sinon.spy(switcher, 'prepare')
@@ -125,7 +125,7 @@ describe('Unit test - Switcher:', function () {
     })
 
     it('should be valid - when sending key without calling prepare', async function () {
-      requestStub.returns(Promise.resolve({ return: true }));
+      requestStub.returns(Promise.resolve({ result: true }));
       clientAuth.returns(Promise.resolve({ token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 }));
 
       let switcher = new Switcher('url', 'apiKey', 'domain', 'component', 'default')
@@ -133,7 +133,7 @@ describe('Unit test - Switcher:', function () {
     })
 
     it('should be valid - when preparing key and sending input strategy afterwards', async function () {
-      requestStub.returns(Promise.resolve({ return: true }));
+      requestStub.returns(Promise.resolve({ result: true }));
       clientAuth.returns(Promise.resolve({ token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 }));
 
       let switcher = new Switcher('url', 'apiKey', 'domain', 'component', 'default')
@@ -166,7 +166,7 @@ describe('Unit test - Switcher:', function () {
     })
 
     it('should be invalid - bad key', async function () {
-      requestStub.returns(Promise.resolve({ return: undefined }));
+      requestStub.returns(Promise.resolve({ result: undefined }));
       clientAuth.returns(Promise.resolve({ token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 }));
 
       let switcher = new Switcher('url', 'apiKey', 'domain', 'component', 'default')
@@ -180,7 +180,7 @@ describe('Unit test - Switcher:', function () {
     })
 
     it('should be invalid - bad strategy input', async function () {
-      requestStub.returns(Promise.resolve({ return: undefined }));
+      requestStub.returns(Promise.resolve({ result: undefined }));
       clientAuth.returns(Promise.resolve({ token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 }));
 
       let switcher = new Switcher('url', 'apiKey', 'domain', 'component', 'default')
