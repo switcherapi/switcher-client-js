@@ -21,7 +21,7 @@ declare class Switcher {
   forget(key: string): void;
 }
 
-class Key {
+declare class Key {
 
   constructor(key: string);
 

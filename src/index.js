@@ -194,7 +194,7 @@ async function resolveCriteria(key, input, { domain }) {
   }
 
   if (notFoundKey) {
-    throw new Error(`Offline - Something went wrong: {"error":"Unable to load a key ${key}"}`)
+    throw new Error(`Something went wrong: {"error":"Unable to load a key ${key}"}`)
   }
 
   return result;

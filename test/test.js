@@ -8,7 +8,7 @@ const services = require('../src/utils/services')
 // const { StrategiesType } = require('../src/utils/index')
 
 describe('Integrated test - Switcher offline:', function () {
-  let switcher;
+  let switcher = new Switcher();
 
   this.beforeAll(function() {
     const apiKey = '$2b$08$S2Wj/wG/Rfs3ij0xFbtgveDtyUAjML1/TOOhocDg5dhOaU73CEXfK';
@@ -66,7 +66,7 @@ describe('Integrated test - Switcher offline:', function () {
     switcher.isItOn().then(function (result) {
       assert.isUndefined(result)
     }, function (error) {
-      assert.equal('Offline - Something went wrong: {"error":"Unable to load a key UNKNOWN"}', error.message)
+      assert.equal('Something went wrong: {"error":"Unable to load a key UNKNOWN"}', error.message)
     })
   })
 })
@@ -79,7 +79,7 @@ describe('Unit test - Switcher:', function () {
     let clientAuth;
 
     beforeEach(function() {
-      requestStub = sinon.stub(request, 'get');
+      requestStub = sinon.stub(request, 'post');
       clientAuth = sinon.stub(services, 'auth');
     })
   

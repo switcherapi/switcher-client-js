@@ -42,7 +42,7 @@ exports.checkCriteria = async (url, token, key, input) => {
             }
         }
 
-        const result = await request.get(options);
+        const result = await request.post(options);
         return result.return;
     } catch (e) {
         let error
@@ -70,7 +70,7 @@ exports.auth = async (url, apiKey, domain, component, environment) => {
             }
         }
 
-        return await request.get(options);
+        return await request.post(options);
     } catch (e) {
         let error
         if (e.error) {
