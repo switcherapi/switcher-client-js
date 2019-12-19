@@ -1,6 +1,6 @@
 declare class Switcher {
 
-  constructor(url: string, apiKey: string, domain: string, component: string, environment: string, offline?: boolean, snapshotLocation?: string);
+  constructor(url: string, apiKey: string, domain: string, component: string, environment: string, options?: SwitcherOptions);
 
   url: string;
   token: string;
@@ -10,8 +10,6 @@ declare class Switcher {
   key: string;
   input: string[];
   exp: number;
-  offline: boolean;
-  snapshotLocation: string;
   bypassedKeys: Key;
   
   validate(): void;
@@ -19,6 +17,13 @@ declare class Switcher {
   isItOn(key?: string, input?: string[]): boolean;
   assume(key: string): Key;
   forget(key: string): void;
+}
+
+declare interface SwitcherOptions {
+  offline: boolean;
+  snapshotLocation: string;
+  silentMode: boolean;
+  retryAfter: string;
 }
 
 declare class Key {

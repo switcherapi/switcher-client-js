@@ -12,17 +12,19 @@ describe('Integrated test - Switcher offline:', function () {
 
   this.beforeAll(function() {
     const apiKey = '$2b$08$S2Wj/wG/Rfs3ij0xFbtgveDtyUAjML1/TOOhocDg5dhOaU73CEXfK';
-    const environment = 'default';
     const domain = 'currency-api';
     const component = 'Android';
+    const environment = 'default';
     const url = 'http://localhost:3000/criteria'
 
-    switcher = new Switcher(url, apiKey, domain, component, environment, true, './snapshot/default.json')
+    switcher = new Switcher(url, apiKey, domain, component, environment, {
+      offline: true
+    })
   })
 
   it('Should be valid', async function () {
     await switcher.prepare('FF2FOR2020', [Switcher.StrategiesType.VALUE, 'Japan', Switcher.StrategiesType.NETWORK, '10.0.0.3'])
-    switcher.isItOn('FF2FOR2020').then(function (result) {
+    await switcher.isItOn('FF2FOR2020').then(function (result) {
       assert.isTrue(result)
     }, function (error) {
       console.log('Rejected:', error);
@@ -92,7 +94,8 @@ describe('Unit test - Switcher:', function () {
       requestStub.returns(Promise.resolve({ result: true }));
       clientAuth.returns(Promise.resolve({ token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 }));
 
-      let switcher = new Switcher('url', 'apiKey', 'domain', 'component', 'default')
+      let switcher = new Switcher('url', 'apiKey', 'domain', 'component', 'default');
+      
       await switcher.prepare('FLAG_1', [Switcher.StrategiesType.VALUE, 'User 1', Switcher.StrategiesType.NETWORK, '192.168.0.1'])
       assert.isTrue(await switcher.isItOn())
     })
@@ -189,6 +192,79 @@ describe('Unit test - Switcher:', function () {
         assert.isUndefined(result)
       }, function (error) {
         assert.equal('Something went wrong: Invalid input format for \'THIS IS WRONG\'', error.message)
+      })
+    })
+
+    it('should run in silent mode', async function () {
+      requestStub.restore();
+      clientAuth.restore();
+      requestStub = sinon.stub(request, 'post');
+
+      this.timeout(5000);
+      requestStub.throws({
+        error: {
+          errno: 'ECONNREFUSED',
+          code: 'ECONNREFUSED',
+          syscall: 'connect'
+        }
+      });
+
+      let switcher = new Switcher('url', 'apiKey', 'domain', 'component', 'default', {
+        silentMode: true,
+        retryAfter: '1s'
+      })
+      const spyPrepare = sinon.spy(switcher, 'prepare')
+
+      // First attempt to reach the online API - Since it's configured to use silent mode, it should return true (according to the snapshot)
+      let result = await switcher.isItOn('FF2FOR2030')
+      assert.equal(result, true)
+
+      await new Promise(resolve => setTimeout(resolve, 500));
+      // The call below is in silent mode. It is getting the configuration from the offline snapshot again
+      result = await switcher.isItOn()
+      assert.equal(result, true)
+
+      // As the silent mode was configured to retry after 3 seconds, it's still in time, 
+      // therefore, it's not required to try to reach the online API yet.
+      assert.equal(spyPrepare.callCount, 1)
+
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Silent mode has expired its time. Again, the online API is still offline. Prepare is called once again.
+      result = await switcher.isItOn()
+      assert.equal(result, true)
+      assert.equal(spyPrepare.callCount, 2)
+
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Setup the online mocked response and made it to return false just to make sure it's not fetching into the snapshot
+      requestStub.returns(Promise.resolve({ result: false }));
+      clientAuth = sinon.stub(services, 'auth');
+      clientAuth.returns(Promise.resolve({ token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 }));
+
+      result = await switcher.isItOn()
+      assert.equal(result, false)
+    })
+
+    it('should throw error if not in silent mode', async function () {
+      requestStub.restore();
+      clientAuth.restore();
+      requestStub = sinon.stub(request, 'post');
+      
+      requestStub.throws({
+        error: {
+          errno: 'ECONNREFUSED',
+          code: 'ECONNREFUSED',
+          syscall: 'connect'
+        }
+      });
+
+      let switcher = new Switcher('url', 'apiKey', 'domain', 'component', 'default')
+
+      let result = await switcher.isItOn('FF2FOR2030').then(function (result) {
+        assert.isUndefined(result)
+      }, function (error) {
+        assert.equal('Something went wrong: {"errno":"ECONNREFUSED","code":"ECONNREFUSED","syscall":"connect"}', error.message)
       })
     })
 

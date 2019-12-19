@@ -1,4 +1,5 @@
 const request = require('request-promise');
+const moment = require('moment');
 
 exports.getEntry = (input) => {
 
@@ -55,9 +56,9 @@ exports.checkCriteria = async (url, token, key, input) => {
     }
 }
 
-exports.auth = async (url, apiKey, domain, component, environment) => {
+exports.auth = async (url, apiKey, domain, component, environment, options) => {
     try {
-        const options = {
+        const postOptions = {
             url: url + '/auth',
             headers: {
                 'switcher-api-key': apiKey
@@ -70,14 +71,25 @@ exports.auth = async (url, apiKey, domain, component, environment) => {
             }
         }
 
-        return await request.post(options);
+        return await request.post(postOptions);
     } catch (e) {
+        if (e.error.code === 'ECONNREFUSED' && options && 'silentMode' in options) {
+            if (options.silentMode) {
+                const expirationTime = moment().add(options.retryTime, options.retryDurationIn);
+                return {
+                    token: 'SILENT',
+                    exp: expirationTime.toDate().getTime()/1000  
+                }
+            }
+        }
+
         let error
         if (e.error) {
             error = JSON.stringify(e.error)
         } else {
             error = e.message
         }
+
         throw new Error(`Something went wrong: ${error}`)
     }
 }

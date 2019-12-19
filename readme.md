@@ -7,61 +7,75 @@ https://github.com/petruki/switcher-api
 
 Switcher Client is a friendly lib to interact with the Switcher API by:
 - Simplifying validations throughout your remote Switcher configuration.
-- Able to work offline using a snapshot claimed from your remote Switcher.
-- Being flexible in order to remove complexity of multi-staging (add as many environment as you want).
-- Being friendly by making possible to manipulate switchers without changing your online switchers. (Useful for automated tests).
+- Able to work offline using a snapshot claimed from your remote Switcher-API.
+- Able to run in silent mode that will prevent your application to not be 100% dependent on the online API.
+- Being flexible in order to remove the complexity of multi-staging (add as many environments as you want).
+- Being friendly by making possible to manipulate switchers without changing your online switchers. (useful for automated tests).
 - Being secure by using OAuth 2 flow. Requests are made using tokens that will validate your domain, component, environment and API key.
-    Tokens have expiration time and are not stored. The Switcher Client is responsible to renew it using your settings.
+Tokens have an expiration time and are not stored. The Switcher Client is responsible to renew it using your settings.
 
-# Example  
-
+# Example
+1) Configure your client
 ```js
 const Switcher = require("switcher-client");
 
 const apiKey = 'API Key'; // Generated after domain creation. It can be generated as many time you want. It can't be recovered due to security reasons
 const environment = 'default'; // Environment 'default' is created after domain creation. It's your production environment.
-const domain = 'Your Domain Name'; // This is our business name Id. It's an unique value used as owner authentication id.
+const domain = 'Your Domain Name'; // This is our business name Id. It's a unique value used as owner authentication id.
 const component = 'Android'; // Name of the application that will be using this API. It's necessary to sign this name up into the API
 const url = 'http://localhost:3000/criteria';
+```
+- **apiKey**: Obtained after creating your domain using the Switcher-API project.
+- **environment**: You can run multiple environments. Production environment is 'default' which is created automatically after creating the domain.
+- **domain**: This is your business name identification.
+- **component**: This is the name of the application that will be using this API.
+- **url**: Endpoint of your Swither-API.
 
-// Optional parameters
-const offline = true; // It says to use your snapshot file to read all the criterias (default: false)
+2) Options - you can also activate features such as offline and silent mode
+```js
+const offline = true;
 const snapshotLocation = './snapshot/default.json';
+const silentMode = true;
+const retryAfter = '5m';
+```
+- **offline**: If activated, the client will only fetch the configuration inside your snapshot file. The default value is 'false'.
+- **snapshotLocation**: Location of your snapshot. The default value is './snapshot/default.json'.
+- **silentMode**: If activated, all connections errors will be ignored and the client will automatically fetch the configuration into your snapshot.
+- **retryAfter** : Set the duration you want the client to try to reach the online API again. (see moment documentation for time signature). The default value is 5m.
 
-const switcher = new Switcher(url, apiKey, domain, component, environment, offline, snapshotLocation)
+3) Create the client
+```js
+const switcher = new Switcher(url, apiKey, domain, component, environment)
+//or - using silent mode
+const switcher = new Switcher(url, apiKey, domain, component, environment, { silentMode: true })
+//or - using offline mode
+const switcher = new Switcher(url, apiKey, domain, component, environment, { offline: true })
+```
 
-/**
- * Scenario #1:
- * You want to setup the input of your switch before using it. 
- * You can call prepare at any point of your code and use isItOn at another place afterwards.
- */
-switcher.prepare('KEY', [Switcher.StrategiesType.VALUE, 'USER_1', Switcher.StrategiesType.NETWORK, '10.0.0.3'])
+## Invoking your switch check
+**Scenario 1**
+
+You want to setup the input of your switch before using it and call 'isItOn' some elsewhere.
+```js
+switcher.prepare('MY_KEY', [Switcher.StrategiesType.VALUE, 'USER_1')
 switcher.isItOn()
+```
 
-/**
- * Scenario #2:
- * You want to setup the input of your switch before using it. 
- * However, you want to change the key
- */
-switcher.isItOn('NEW_KEY')
+**Scenario 2**
 
-/**
- * Scenario #3:
- * You want to call isItOn without preparing, as simple as this:
- */
+You want to call isItOn without preparing, as simple as this:
+```js
 switcher.isItOn('KEY')
+```
 
-/**
- * Using Switch API Client to run automated test for both situations, when switch is On and Off.
- * 
- * Scenario #4:
- * You want make sure your code works on both situation when using switcher API.
- * You just need to setup on your test method the feature assume.
- */
+## Bypassing your switch check
+You can also bypass your switcher configuration by invoking 'assume'. This is perfect for your test code where you want to test both scenarios when the switcher is true and false.
+```js
 switcher.assume('KEY').true()
-switcher.isItOn('KEY') // Is going to be true
+switcher.isItOn('KEY') // it is going to be true
+```
 
-/**
- * Use forget to remove any forced result over your switcher 
- */
+Invoke forget to remove any switch assumption, like this:
+```js
 switcher.forget('KEY')
+```
