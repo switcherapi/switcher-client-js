@@ -118,5 +118,6 @@ function processDate(operation, input, values) {
 module.exports = {
     loadDomain,
     processOperation,
-    StrategiesType
+    StrategiesType,
+    OperationsType
 }

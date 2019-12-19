@@ -31,7 +31,15 @@ describe('Integrated test - Switcher offline:', function () {
     })
   })
 
-  it('Should be valid - No prepare function called', function () {
+  it('Should be valid - No prepare function called', async function () {
+    switcher.isItOn('FF2FOR2020', [Switcher.StrategiesType.VALUE, 'Japan', Switcher.StrategiesType.NETWORK, '10.0.0.3']).then(function (result) {
+      assert.isTrue(result)
+    }, function (error) {
+      console.log('Rejected:', error);
+    })
+  })
+
+  it('Should be valid - No prepare function called (no input as well)', function () {
     switcher.isItOn('FF2FOR2030').then(function (result) {
       assert.isTrue(result)
     }, function (error) {
@@ -144,7 +152,7 @@ describe('Unit test - Switcher:', function () {
       assert.isTrue(await switcher.isItOn(undefined, [Switcher.StrategiesType.VALUE, 'User 1', Switcher.StrategiesType.NETWORK, '192.168.0.1']))
     })
 
-    it('should be invalid - bad url', async function () {
+    it('should be invalid - Missing url field', async function () {
       let switcher = new Switcher(undefined, 'apiKey', 'domain', 'component', 'default')
       clientAuth.returns(Promise.resolve({ token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 }));
 
@@ -156,7 +164,7 @@ describe('Unit test - Switcher:', function () {
       })
     })
 
-    it('should be invalid - bad api key', async function () {
+    it('should be invalid - Missing API Key field', async function () {
       let switcher = new Switcher('url', undefined, 'domain', 'component', 'default')
       clientAuth.returns(Promise.resolve({ token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 }));
 
@@ -168,7 +176,7 @@ describe('Unit test - Switcher:', function () {
       })
     })
 
-    it('should be invalid - bad key', async function () {
+    it('should be invalid - Missing key field', async function () {
       requestStub.returns(Promise.resolve({ result: undefined }));
       clientAuth.returns(Promise.resolve({ token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 }));
 
@@ -179,6 +187,30 @@ describe('Unit test - Switcher:', function () {
         assert.isUndefined(result)
       }, function (error) {
         assert.equal('Something went wrong: Missing key field', error.message)
+      })
+    })
+
+    it('should be invalid - Missing component field', async function () {
+      requestStub.returns(Promise.resolve({ result: undefined }));
+      clientAuth.returns(Promise.resolve({ token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 }));
+
+      let switcher = new Switcher('url', 'apiKey', 'domain', undefined, 'default')
+      switcher.isItOn('MY_FLAG', [Switcher.StrategiesType.VALUE, 'User 1', Switcher.StrategiesType.NETWORK, '192.168.0.1']).then(function (result) {
+        assert.isUndefined(result)
+      }, function (error) {
+        assert.equal('Something went wrong: Missing component field', error.message)
+      })
+    })
+
+    it('should be invalid - Missing token field', async function () {
+      requestStub.returns(Promise.resolve({ result: undefined }));
+      clientAuth.returns(Promise.resolve({ token: undefined, exp: (Date.now()+5000)/1000 }));
+
+      let switcher = new Switcher('url', 'apiKey', 'domain', 'component', 'default')
+      switcher.isItOn('MY_FLAG', [Switcher.StrategiesType.VALUE, 'User 1', Switcher.StrategiesType.NETWORK, '192.168.0.1']).then(function (result) {
+        assert.isUndefined(result)
+      }, function (error) {
+        assert.equal('Something went wrong: Missing token field', error.message)
       })
     })
 

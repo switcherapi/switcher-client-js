@@ -1,7 +1,7 @@
 "use strict";
 
 const services = require('./utils/services')
-const { loadDomain, processOperation } = require('./utils/index')
+const { loadDomain, processOperation, StrategiesType } = require('./utils/index')
 
 class Switcher {
 
@@ -161,13 +161,6 @@ class Key {
   getValue() {
     return this.value;
   }
-}
-
-const StrategiesType = {
-  NETWORK: 'NETWORK_VALIDATION',
-  VALUE: 'VALUE_VALIDATION',
-  TIME: 'TIME_VALIDATION',
-  DATE: 'DATE_VALIDATION'
 }
 
 function searchBypassed(key, bypassedKeys) {
