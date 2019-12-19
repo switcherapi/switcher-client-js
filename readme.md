@@ -19,10 +19,10 @@ Tokens have an expiration time and are not stored. The Switcher Client is respon
 ```js
 const Switcher = require("switcher-client");
 
-const apiKey = 'API Key'; // Generated after domain creation. It can be generated as many time you want. It can't be recovered due to security reasons
-const environment = 'default'; // Environment 'default' is created after domain creation. It's your production environment.
-const domain = 'Your Domain Name'; // This is our business name Id. It's a unique value used as owner authentication id.
-const component = 'Android'; // Name of the application that will be using this API. It's necessary to sign this name up into the API
+const apiKey = 'API Key';
+const environment = 'default';
+const domain = 'Your Domain Name';
+const component = 'Android';
 const url = 'http://localhost:3000/criteria';
 ```
 - **apiKey**: Obtained after creating your domain using the Switcher-API project.
