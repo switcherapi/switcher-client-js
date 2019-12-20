@@ -14,7 +14,7 @@
     "flag",
     "switcher-api"
   ],
-  "license": "ISC",
+  "license": "MIT",
   "scripts": {
     "test": "nyc --reporter=html --reporter=text mocha",
     "coverage": "nyc report --reporter=text-lcov | coveralls",
