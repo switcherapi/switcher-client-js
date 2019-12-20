@@ -1,5 +1,6 @@
 ![Build Status](https://travis-ci.com/petruki/switcher-client-master.svg?branch=master)
 [![Coverage Status](https://coveralls.io/repos/github/petruki/switcher-client-master/badge.svg?branch=master)](https://coveralls.io/github/petruki/switcher-client-master?branch=master)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=petruki_switcher-client-master&metric=alert_status)](https://sonarcloud.io/dashboard?id=petruki_switcher-client-master)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 # Install  
