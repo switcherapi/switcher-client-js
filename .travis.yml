@@ -5,7 +5,6 @@ language: node_js
 node_js:
 - '10'
 - '8'
-after_success: npm run coverage
 
 addons:
   sonarcloud:
@@ -15,3 +14,5 @@ addons:
 
 script:
   - sonar-scanner
+
+after_success: npm run coverage

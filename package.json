@@ -17,7 +17,6 @@
   "license": "MIT",
   "scripts": {
     "test": "nyc --reporter=lcov --reporter=text mocha",
-    "sonar:report": "mocha -R mocha-sonar-reporter",
     "coverage": "nyc report --reporter=text-lcov | coveralls",
     "build": "browserify ./switcher-client.js > ./dist/switcher-client.js"
   },
