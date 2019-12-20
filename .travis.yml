@@ -11,7 +11,7 @@ addons:
   sonarcloud:
     organization: "petruki"
     token:
-      token: ${SONAR_TOKEN}
+      secure: ${SONAR_TOKEN}
 
 script:
   - sonar-scanner
