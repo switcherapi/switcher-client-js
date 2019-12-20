@@ -1,7 +1,9 @@
 sudo: false
 language: node_js
 node_js:
-  - "10"
-  - "8"
-  
+- '10'
+- '8'
 after_success: npm run coverage
+env:
+  global:
+    secure: r4Lv1cO5edBS6P7OZureyjZXHpNzvyElwV6LJ5UPJw/H4h7d2CWLMNVtvigZmFSgPkUD4h4pEMpa7ElRNYosjyAasYOf1J26uFFXoKOlTtrIVW2TPnSpzEHy9/a3/BF7pqIQmo32AJYuA8er+FEfeQMunr6CzYaljwKfjkzKrAHCErM1uKZgECmPVCqH/2Aa39P66xhGvXXxIwZfD88Vi77APACRwyQ7CqREbrq1nTkHFIGJB7oHY3GSjBcF5X4kbSrC0fs9s6qfA8poS3AjU/L2IiumI2eK4LkOJv04xo9FeL0N1F23ovt0i7ihzRZfIRtCpMO4ZHiFwmhKyJcyh4IEcjRQk+iWWmxjxZE+9j4VERdVEwQDI2yNPyjH38oJFH2zP5VNh3udFiF62zCsyPI8AVe/FUCPk2YIqzsYmBX2FvsQDWxXE5GQjuB9SErVG+WUmmtmdH7qzTdH/nFp5cvfjuAXJU9EjAKdYNqgkigSio/x/t4GEAm3QWHLaQShcV63TW5GSVAMnYx1XWnaFa+aWbc0fqn2I/TraHEuIKHvG7fRZZr8CU2G3N99tQbwI16krrand2v/ve3lUULhJpVpsdeQJiYFj1eOqYyHjLP3klyvVoHs4mbGiE3cdXew+VnF1XxR/ZiUQAMYE7c+lVsrzSv0payR+JAQSsxQe4g=
