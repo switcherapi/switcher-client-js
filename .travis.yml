@@ -3,7 +3,6 @@ sudo: required
 
 language: node_js
 node_js:
-- '10'
 - '8'
 
 addons:
@@ -11,10 +10,10 @@ addons:
     organization: "petruki"
     token:
       secure: ${SONAR_TOKEN}
-  artifacts: true
-    artifacts:
-        paths:
-          - coverage/lcov.info
+  artifacts:
+    expose_as: 'artifact lcov'
+    paths:
+      - coverage/lcov.info
 
 script:
   - sonar-scanner
