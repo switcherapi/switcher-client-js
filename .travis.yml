@@ -10,12 +10,22 @@ addons:
     organization: "petruki"
     token:
       secure: ${SONAR_TOKEN}
-  artifacts:
-    expose_as: 'artifact lcov'
-    paths:
-      - coverage/lcov.info
 
-script:
-  - sonar-scanner
+jobs:
+  include:
+    - stage: compile
+      script:
+        - npm install
+    - stage: test
+      script:
+        - npm test
+    - stage: sonar
+      script:
+        - sonar-scanner
+
+stages:
+  - compile
+  - test
+  - sonar
 
 after_success: npm run coverage
