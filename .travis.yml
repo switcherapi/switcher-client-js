@@ -19,8 +19,6 @@ jobs:
     - stage: test
       script:
         - npm test
-        - lcov --capture --directory . --output-file coverage.info
-        - lcov --list coverage.info
     - stage: sonar
       script:
         - sonar-scanner
