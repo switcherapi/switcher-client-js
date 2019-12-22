@@ -102,19 +102,15 @@ class Switcher {
         this.key ? this.key : key, this.input ? this.input : input, this.snapshotLocation);
     }
 
-    try {
-      if (key) { this.key = key; }
-      if (input) { this.input = input; }
-      
-      await this.validate();
-      if (this.token === 'SILENT') {
-        return await checkCriteriaOffline(
-          this.key ? this.key : key, this.input ? this.input : input, this.snapshotLocation);
-      } else {
-        return await services.checkCriteria(this.url, this.token, this.key, this.input);
-      }
-    } catch (e) {
-      throw e;
+    if (key) { this.key = key; }
+    if (input) { this.input = input; }
+    
+    await this.validate();
+    if (this.token === 'SILENT') {
+      return await checkCriteriaOffline(
+        this.key ? this.key : key, this.input ? this.input : input, this.snapshotLocation);
+    } else {
+      return await services.checkCriteria(this.url, this.token, this.key, this.input);
     }
   }
 
@@ -179,8 +175,6 @@ async function checkCriteriaOffline(key, input, snapshotLocation) {
 }
 
 async function resolveCriteria(key, input, { domain }) {
-  const args = {}
-
   if (!domain.activated) {
     return false;
   }
