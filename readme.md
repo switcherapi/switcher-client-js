@@ -1,6 +1,7 @@
 ![Build Status](https://travis-ci.com/petruki/switcher-client-master.svg?branch=master)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=switcher-client-master&metric=alert_status)](https://sonarcloud.io/dashboard?id=switcher-client-master)
 [![Coverage Status](https://coveralls.io/repos/github/petruki/switcher-client-master/badge.svg?branch=master)](https://coveralls.io/github/petruki/switcher-client-master?branch=master)
+[![npm version](https://badge.fury.io/js/switcher-client.svg)](https://badge.fury.io/js/switcher-client)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 # Install  
@@ -57,7 +58,7 @@ const switcher = new Switcher(url, apiKey, domain, component, environment, { sil
 const switcher = new Switcher(url, apiKey, domain, component, environment, { offline: true })
 ```
 
-## Invoking your switch check
+## Invoking switchers
 **Scenario 1**
 
 You want to setup the input of your switch before using it and call 'isItOn' some elsewhere.
@@ -73,7 +74,7 @@ You want to call isItOn without preparing, as simple as this:
 switcher.isItOn('KEY')
 ```
 
-## Bypassing your switch check
+## Bypassing switchers
 You can also bypass your switcher configuration by invoking 'assume'. This is perfect for your test code where you want to test both scenarios when the switcher is true and false.
 ```js
 switcher.assume('KEY').true()
