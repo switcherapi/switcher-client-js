@@ -52,8 +52,7 @@ class Switcher {
         retryTime: this.retryTime,
         retryDurationIn: this.retryDurationIn
       });
-
-      // console.log(response)
+      
       this.token = response.token;
       this.exp = response.exp;
     }
