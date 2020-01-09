@@ -1,4 +1,4 @@
-![Build Status](https://travis-ci.com/petruki/switcher-client-master.svg?branch=master)
+[![Build Status](https://travis-ci.com/petruki/switcher-client-master.svg?branch=master)](https://travis-ci.com/petruki/switcher-client-master)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=switcher-client-master&metric=alert_status)](https://sonarcloud.io/dashboard?id=switcher-client-master)
 [![Coverage Status](https://coveralls.io/repos/github/petruki/switcher-client-master/badge.svg?branch=master)](https://coveralls.io/github/petruki/switcher-client-master?branch=master)
 [![npm version](https://badge.fury.io/js/switcher-client.svg)](https://badge.fury.io/js/switcher-client)
