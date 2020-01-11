@@ -7,16 +7,15 @@ const request = require('request-promise')
 const services = require('../src/utils/services')
 // const { StrategiesType } = require('../src/utils/index')
 
-describe('Integrated test - Switcher offline:', function () {
+describe('E2E test - Switcher offline:', function () {
   let switcher = new Switcher();
+  const apiKey = '$2b$08$S2Wj/wG/Rfs3ij0xFbtgveDtyUAjML1/TOOhocDg5dhOaU73CEXfK';
+  const domain = 'currency-api';
+  const component = 'Android';
+  const environment = 'default';
+  const url = 'http://localhost:3000'
 
   this.beforeAll(function() {
-    const apiKey = '$2b$08$S2Wj/wG/Rfs3ij0xFbtgveDtyUAjML1/TOOhocDg5dhOaU73CEXfK';
-    const domain = 'currency-api';
-    const component = 'Android';
-    const environment = 'default';
-    const url = 'http://localhost:3000/criteria'
-
     switcher = new Switcher(url, apiKey, domain, component, environment, {
       offline: true
     })
@@ -77,6 +76,18 @@ describe('Integrated test - Switcher offline:', function () {
       assert.isUndefined(result)
     }, function (error) {
       assert.equal('Something went wrong: {"error":"Unable to load a key UNKNOWN"}', error.message)
+    })
+  })
+
+  it('Should be invalid - Offline file not found', async function () {
+    const offlineSwitcher = new Switcher(url, apiKey, domain, component, environment, {
+      offline: true,
+      snapshotLocation: 'somewhere/snapshot.json'
+    })
+
+    await offlineSwitcher.isItOn('FF2FOR2020').then(function (result) {
+    }, function (error) {
+      assert.equal('Something went wrong: It was not possible to load the file at somewhere/snapshot.json', error.message)
     })
   })
 })

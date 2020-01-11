@@ -2,7 +2,6 @@ const request = require('request-promise');
 const moment = require('moment');
 
 exports.getEntry = (input) => {
-
     if (!input) {
         return undefined
     }
@@ -27,7 +26,7 @@ exports.checkCriteria = async (url, token, key, input) => {
     try {
         const entry = this.getEntry(input)
         const options = {
-            url,
+            url: `${url}/criteria`,
             qs: {
                 key
             },
@@ -52,14 +51,14 @@ exports.checkCriteria = async (url, token, key, input) => {
         } else {
             error = e.message
         }
-        throw new Error(`Something went wrong: ${error}`)
+        throw new CriteriaError(error)
     }
 }
 
 exports.auth = async (url, apiKey, domain, component, environment, options) => {
     try {
         const postOptions = {
-            url: url + '/auth',
+            url: `${url}/criteria/auth`,
             headers: {
                 'switcher-api-key': apiKey
             },
@@ -78,7 +77,7 @@ exports.auth = async (url, apiKey, domain, component, environment, options) => {
                 const expirationTime = moment().add(options.retryTime, options.retryDurationIn);
                 return {
                     token: 'SILENT',
-                    exp: expirationTime.toDate().getTime()/1000  
+                    exp: expirationTime.toDate().getTime() / 1000
                 }
             }
         }
@@ -90,6 +89,22 @@ exports.auth = async (url, apiKey, domain, component, environment, options) => {
             error = e.message
         }
 
-        throw new Error(`Something went wrong: ${error}`)
+        throw new AuthError(error)
+    }
+}
+
+class AuthError extends Error {
+    constructor(message) {
+        super(`Something went wrong: ${message}`)
+        this.name = this.constructor.name
+        Error.captureStackTrace(this, this.constructor)
+    }
+}
+
+class CriteriaError extends Error {
+    constructor(message) {
+        super(`Something went wrong: ${message}`)
+        this.name = this.constructor.name
+        Error.captureStackTrace(this, this.constructor)
     }
 }

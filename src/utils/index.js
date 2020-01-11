@@ -8,8 +8,7 @@ const loadDomain = (snapshotLocation) => {
         const dataJSON = dataBuffer.toString()
         return JSON.parse(dataJSON)
     } catch (e) {
-        console.error(e)
-        return []
+        throw new Error(`Something went wrong: It was not possible to load the file at ${snapshotLocation}`)
     }
 }
 

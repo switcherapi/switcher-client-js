@@ -15,6 +15,7 @@ declare class Switcher {
   validate(): void;
   prepare(key: string, input?: string[]): void;
   isItOn(key?: string, input?: string[]): boolean;
+  isItOnPromise(key?: string, input?: string[]): Promise<boolean>;
   assume(key: string): Key;
   forget(key: string): void;
 }

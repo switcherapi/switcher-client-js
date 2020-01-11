@@ -113,6 +113,10 @@ class Switcher {
     }
   }
 
+  isItOnPromise(key, input) {
+    return new Promise((resolve) => resolve(this.isItOn(key, input)));
+  }
+
   assume(key) {
     
     const existentKey = searchBypassed(key, this.bypassedKeys);
