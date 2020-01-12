@@ -76,6 +76,15 @@ You want to call isItOn without preparing, as simple as this:
 switcher.isItOn('KEY')
 ```
 
+**Scenario 3**
+
+Using promise is another way to call the API if you want:
+```js
+switcher.isItOnPromise('KEY')
+    .then(result => console.log('Promise result:', result))
+    .catch(error => console.log(error));
+```
+
 ## Bypassing switchers
 You can also bypass your switcher configuration by invoking 'assume'. This is perfect for your test code where you want to test both scenarios when the switcher is true and false.
 ```js
