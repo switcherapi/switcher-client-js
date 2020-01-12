@@ -4,7 +4,7 @@
 [![npm version](https://badge.fury.io/js/switcher-client.svg)](https://badge.fury.io/js/switcher-client)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-![Switcher API: JavaScript Client: Cloud-based Feature Flag API](https://github.com/petruki/switcher-client-master/blob/master/images/switcherclient.png)
+![Switcher API: JavaScript Client: Cloud-based Feature Flag API](https://github.com/petruki/switcherapi-assets/blob/master/logo/switcherapi_js_client.png)
 
 # Install  
 `npm install switcher-client`
