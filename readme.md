@@ -3,6 +3,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/petruki/switcher-client-master/badge.svg?branch=master)](https://coveralls.io/github/petruki/switcher-client-master?branch=master)
 [![npm version](https://badge.fury.io/js/switcher-client.svg)](https://badge.fury.io/js/switcher-client)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Slack: Switcher-HQ](https://img.shields.io/badge/slack-@switcher/hq-blue.svg?logo=slack)](https://switcher-hq.slack.com/)
 
 ![Switcher API: JavaScript Client: Cloud-based Feature Flag API](https://github.com/petruki/switcherapi-assets/blob/master/logo/switcherapi_js_client.png)
 
