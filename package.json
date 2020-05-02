@@ -5,7 +5,7 @@
   "main": "./src/index.js",
   "types": "./src/index.d.ts",
   "author": {
-    "name": "Rogerio Petruki",
+    "name": "Roger Floriano",
     "email": "switcher.project@gmail.com"
   },
   "keywords": [

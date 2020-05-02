@@ -1,7 +1,12 @@
 "use strict";
 
-const services = require('./utils/services')
-const { loadDomain, processOperation, StrategiesType } = require('./utils/index')
+const services = require('./utils/services');
+const { loadDomain, processOperation, StrategiesType } = require('./utils/index');
+const fs = require('fs');
+
+const DEFAULT_SNAPSHOT_LOCATION = './snapshot/';
+const DEFAULT_RETRY_TIME = '5m';
+const DEFAULT_OFFLINE = false;
 
 class Switcher {
 
@@ -13,8 +18,8 @@ class Switcher {
     this.environment = environment;
 
     // Default values
-    this.offline = false;
-    this.snapshotLocation = './snapshot/default.json';
+    this.offline = DEFAULT_OFFLINE;
+    this.snapshotLocation = DEFAULT_SNAPSHOT_LOCATION;
 
     if (options) {
       if ('offline' in options) {
@@ -33,11 +38,12 @@ class Switcher {
         this.retryTime =  options.retryAfter.slice(0, -1);
         this.retryDurationIn = options.retryAfter.slice(-1);
       } else {
-        this.retryTime =  5;
-        this.retryDurationIn = 'm';
+        this.retryTime = DEFAULT_RETRY_TIME.charAt(0);
+        this.retryDurationIn = DEFAULT_RETRY_TIME.charAt(1);
       }
     }
 
+    this.loadSnapshot();
     this.bypassedKeys = new Array();
   }
 
@@ -70,11 +76,11 @@ class Switcher {
     }
 
     if (!this.key) {
-        errors.push('Missing key field');
+      errors.push('Missing key field');
     }
 
     if (!this.url) {
-        errors.push('Missing url field');
+      errors.push('Missing url field');
     }
 
     if (!this.exp || Date.now() > (this.exp*1000)) {
@@ -86,7 +92,7 @@ class Switcher {
     }
 
     if (errors.length) {
-        throw new Error(`Something went wrong: ${errors.join(', ')}`)
+      throw new Error(`Something went wrong: ${errors.join(', ')}`);
     }
   }
 
@@ -98,7 +104,7 @@ class Switcher {
 
     if (this.offline) {
       return await checkCriteriaOffline(
-        this.key ? this.key : key, this.input ? this.input : input, this.snapshotLocation);
+        this.key ? this.key : key, this.input ? this.input : input, this.snapshot);
     }
 
     if (key) { this.key = key; }
@@ -107,7 +113,7 @@ class Switcher {
     await this.validate();
     if (this.token === 'SILENT') {
       return await checkCriteriaOffline(
-        this.key ? this.key : key, this.input ? this.input : input, this.snapshotLocation);
+        this.key ? this.key : key, this.input ? this.input : input, this.snapshot);
     } else {
       return await services.checkCriteria(this.url, this.token, this.key, this.input);
     }
@@ -131,6 +137,26 @@ class Switcher {
 
   forget(key) {
     this.bypassedKeys.splice(this.bypassedKeys.indexOf(searchBypassed(key, this.bypassedKeys)), 1); 
+  }
+
+  loadSnapshot() {
+    if (this.snapshotLocation) {
+      const snapshotFile = `${this.snapshotLocation}${this.environment}.json`;
+      this.snapshot = loadDomain(snapshotFile);
+
+      fs.unwatchFile(snapshotFile);
+      fs.watchFile(snapshotFile, (curr, prev) => {
+        this.snapshot = loadDomain(snapshotFile);
+      });
+    }
+  }
+
+  unloadSnapshot() {
+    if (this.snapshotLocation) {
+      const snapshotFile = `${this.snapshotLocation}${this.environment}.json`;
+      this.snapshot = undefined;
+      fs.unwatchFile(snapshotFile);
+    }
   }
 
   static get StrategiesType() {
@@ -172,8 +198,8 @@ function searchBypassed(key, bypassedKeys) {
   return existentKey;
 }
 
-async function checkCriteriaOffline(key, input, snapshotLocation) {
-  const { data } = await loadDomain(snapshotLocation);
+async function checkCriteriaOffline(key, input, snapshot) {
+  const { data } = snapshot;
   return await resolveCriteria(key, input, data);
 }
 

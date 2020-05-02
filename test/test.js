@@ -5,10 +5,11 @@ const sinon = require('sinon');
 const Switcher = require('../src/index')
 const request = require('request-promise')
 const services = require('../src/utils/services')
+const fs = require('fs');
 // const { StrategiesType } = require('../src/utils/index')
 
 describe('E2E test - Switcher offline:', function () {
-  let switcher = new Switcher();
+  let switcher;
   const apiKey = '$2b$08$S2Wj/wG/Rfs3ij0xFbtgveDtyUAjML1/TOOhocDg5dhOaU73CEXfK';
   const domain = 'currency-api';
   const component = 'Android';
@@ -19,6 +20,10 @@ describe('E2E test - Switcher offline:', function () {
     switcher = new Switcher(url, apiKey, domain, component, environment, {
       offline: true
     })
+  })
+
+  this.afterAll(function() {
+    fs.unwatchFile('./snapshot/default.json');
   })
 
   it('Should be valid', async function () {
@@ -80,19 +85,22 @@ describe('E2E test - Switcher offline:', function () {
   })
 
   it('Should be invalid - Offline file not found', async function () {
-    const offlineSwitcher = new Switcher(url, apiKey, domain, component, environment, {
-      offline: true,
-      snapshotLocation: 'somewhere/snapshot.json'
-    })
-
-    await offlineSwitcher.isItOn('FF2FOR2020').then(function (result) {
-    }, function (error) {
-      assert.equal('Something went wrong: It was not possible to load the file at somewhere/snapshot.json', error.message)
-    })
+    try {
+      new Switcher(url, apiKey, domain, component, environment, {
+        offline: true,
+        snapshotLocation: 'somewhere/'
+      })
+    } catch (error) {
+      assert.equal('Something went wrong: It was not possible to load the file at somewhere/default.json', error.message)
+    }
   })
 })
 
 describe('Unit test - Switcher:', function () {
+
+  this.afterAll(function() {
+    fs.unwatchFile('./snapshot/default.json');
+  })
 
   describe('check criteria:', function () {
 

@@ -1,6 +1,12 @@
 declare class Switcher {
 
-  constructor(url: string, apiKey: string, domain: string, component: string, environment: string, options?: SwitcherOptions);
+  constructor(
+    url: string, 
+    apiKey: string, 
+    domain: string, 
+    component: string, 
+    environment: string, 
+    options?: SwitcherOptions);
 
   url: string;
   token: string;
@@ -11,6 +17,7 @@ declare class Switcher {
   input: string[];
   exp: number;
   bypassedKeys: Key;
+  snapshot?: string;
   
   validate(): void;
   prepare(key: string, input?: string[]): void;
@@ -18,6 +25,8 @@ declare class Switcher {
   isItOnPromise(key?: string, input?: string[]): Promise<boolean>;
   assume(key: string): Key;
   forget(key: string): void;
+  loadSnapshot(): void;
+  unloadSnapshot(): void;
 }
 
 declare interface SwitcherOptions {

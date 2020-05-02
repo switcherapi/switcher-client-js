@@ -23,13 +23,13 @@ Switcher Client is a friendly lib to interact with the Switcher API by:
 - Being secure by using OAuth 2 flow. Requests are made using tokens that will validate your domain, component, environment and API key.
 Tokens have an expiration time and are not stored. The Switcher Client is responsible to renew it using your settings.
 
-# Example
+# Usage
 1) Configure your client
 ```js
 const Switcher = require("switcher-client");
 
 const apiKey = 'API Key';
-const environment = 'default';
+const environment = 'default'; // Production = default
 const domain = 'Your Domain Name';
 const component = 'Android';
 const url = 'http://localhost:3000/criteria';
@@ -43,12 +43,12 @@ const url = 'http://localhost:3000/criteria';
 2) Options - you can also activate features such as offline and silent mode
 ```js
 const offline = true;
-const snapshotLocation = './snapshot/default.json';
+const snapshotLocation = './snapshot/';
 const silentMode = true;
 const retryAfter = '5m';
 ```
 - **offline**: If activated, the client will only fetch the configuration inside your snapshot file. The default value is 'false'.
-- **snapshotLocation**: Location of your snapshot. The default value is './snapshot/default.json'.
+- **snapshotLocation**: Location of snapshot files. The default value is './snapshot/'.
 - **silentMode**: If activated, all connections errors will be ignored and the client will automatically fetch the configuration into your snapshot.
 - **retryAfter** : Set the duration you want the client to try to reach the online API again. (see moment documentation for time signature). The default value is 5m.
 

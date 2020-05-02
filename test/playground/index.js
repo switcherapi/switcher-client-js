@@ -1,20 +1,30 @@
 const Switcher = require('../../src/index')
 
-let switcher = new Switcher();
+let switcher;
 
 function setupSwitcher() {
     const apiKey = '$2b$08$m.8yx5ekyqWnAGgZjvG/AOTaMO3l1riBO/r4fHQ4EHqM87TdvHU9S';
     const domain = 'My Domain';
     const component = 'Android';
     const environment = 'default';
-    const url = 'http://localhost:3000'
+    const url = 'http://localhost:3000';
 
     switcher = new Switcher(url, apiKey, domain, component, environment, {
-        offline: false
+        offline: true
     })
 }
 
-const main = async () => {
+const test2 = async () => {
+    setupSwitcher();
+
+    await new Promise(resolve => setTimeout(resolve, 10000));
+    let result = await switcher.isItOn('FF2FOR2030');
+    console.log(result);
+
+    switcher.unloadSnapshot();
+}
+
+const test1 = async () => {
     setupSwitcher();
 
     let result = await switcher.isItOn('FEATURE2020');
@@ -27,6 +37,8 @@ const main = async () => {
     switcher.assume('FEATURE2020').false();
     result = await switcher.isItOn('FEATURE2020');
     console.log('Value changed:', result);
+
+    switcher.unloadSnapshot();
 }
 
-main()
+test2()
