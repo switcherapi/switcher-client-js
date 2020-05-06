@@ -48,10 +48,8 @@ exports.checkCriteria = async (url, token, key, input) => {
         let error
         if (e.error) {
             error = JSON.stringify(e.error)
-        } else {
-            error = e.message
         }
-        throw new CriteriaError(error)
+        throw new CriteriaError(e.error ? error : e.message)
     }
 }
 
@@ -85,11 +83,66 @@ exports.auth = async (url, apiKey, domain, component, environment, options) => {
         let error
         if (e.error) {
             error = JSON.stringify(e.error)
-        } else {
-            error = e.message
+        }
+        throw new AuthError(e.error ? error : e.message)
+    }
+}
+
+exports.checkSnapshotVersion = async (url, token, version) => {
+    try {
+        const options = {
+            url: `${url}/criteria/snapshot_check/${version}`,
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            json: true
         }
 
-        throw new AuthError(error)
+        const response = await request.get(options);
+        return response;
+    } catch (e) {
+        let error
+        if (e.error) {
+            error = JSON.stringify(e.error)
+        }
+        throw new SnapshotServiceError(e.error ? error : e.message)
+    }
+}
+
+exports.resolveSnapshot = async (url, token, domain, environment) => {
+    var query = `query domain($domain: String!, $environment: String!) {
+        domain(name: $domain, environment: $environment) {
+            name version activated
+            group { name activated
+                config { key activated
+                    strategies { strategy activated operation values }
+                    components
+                }
+            }
+        }
+    }`;
+
+    try {
+        const options = {
+            url: `${url}/graphql`,
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+                query,
+                variables: { domain, environment }
+            })
+        }
+
+        const response = await request.post(options);
+        return JSON.stringify(JSON.parse(response), null, 4);
+    } catch (e) {
+        let error
+        if (e.error) {
+            error = JSON.stringify(e.error)
+        }
+        throw new SnapshotServiceError(e.error ? error : e.message)
     }
 }
 
@@ -102,6 +155,14 @@ class AuthError extends Error {
 }
 
 class CriteriaError extends Error {
+    constructor(message) {
+        super(`Something went wrong: ${message}`)
+        this.name = this.constructor.name
+        Error.captureStackTrace(this, this.constructor)
+    }
+}
+
+class SnapshotServiceError extends Error {
     constructor(message) {
         super(`Something went wrong: ${message}`)
         this.name = this.constructor.name

@@ -4,7 +4,7 @@ const assert = require('chai').assert
 const sinon = require('sinon');
 const Switcher = require('../src/index')
 const request = require('request-promise')
-const services = require('../src/utils/services')
+const services = require('../src/lib/services')
 const fs = require('fs');
 // const { StrategiesType } = require('../src/utils/index')
 
@@ -26,7 +26,7 @@ describe('E2E test - Switcher offline:', function () {
     fs.unwatchFile('./snapshot/default.json');
   })
 
-  it('Should be valid', async function () {
+  it('should be valid', async function () {
     await switcher.prepare('FF2FOR2020', [Switcher.StrategiesType.VALUE, 'Japan', Switcher.StrategiesType.NETWORK, '10.0.0.3'])
     await switcher.isItOn('FF2FOR2020').then(function (result) {
       assert.isTrue(result)
@@ -35,7 +35,7 @@ describe('E2E test - Switcher offline:', function () {
     })
   })
 
-  it('Should be valid - No prepare function called', async function () {
+  it('should be valid - No prepare function called', async function () {
     switcher.isItOn('FF2FOR2020', [Switcher.StrategiesType.VALUE, 'Japan', Switcher.StrategiesType.NETWORK, '10.0.0.3']).then(function (result) {
       assert.isTrue(result)
     }, function (error) {
@@ -43,7 +43,7 @@ describe('E2E test - Switcher offline:', function () {
     })
   })
 
-  it('Should be valid - No prepare function called (no input as well)', function () {
+  it('should be valid - No prepare function called (no input as well)', function () {
     switcher.isItOn('FF2FOR2030').then(function (result) {
       assert.isTrue(result)
     }, function (error) {
@@ -51,7 +51,7 @@ describe('E2E test - Switcher offline:', function () {
     })
   })
 
-  it('Should be invalid - Input (IP) does not match', async function () {
+  it('should be invalid - Input (IP) does not match', async function () {
     await switcher.prepare('FF2FOR2020', [Switcher.StrategiesType.VALUE, 'Japan', Switcher.StrategiesType.NETWORK, '192.168.0.2'])
     switcher.isItOn().then(function (result) {
       assert.isFalse(result)
@@ -60,7 +60,7 @@ describe('E2E test - Switcher offline:', function () {
     })
   })
 
-  it('Should be valid assuming key to be false and then forgetting it', async function () {
+  it('should be valid assuming key to be false and then forgetting it', async function () {
     await switcher.prepare('FF2FOR2020', [Switcher.StrategiesType.VALUE, 'Japan', Switcher.StrategiesType.NETWORK, '10.0.0.3'])
     
     assert.isTrue(await switcher.isItOn())
@@ -70,7 +70,7 @@ describe('E2E test - Switcher offline:', function () {
     assert.isTrue(await switcher.isItOn())
   })
 
-  it('Should be valid assuming unknown key to be true', async function () {
+  it('should be valid assuming unknown key to be true', async function () {
     await switcher.prepare('UNKNOWN', [Switcher.StrategiesType.VALUE, 'Japan', Switcher.StrategiesType.NETWORK, '10.0.0.3'])
     
     switcher.assume('UNKNOWN').true()
@@ -84,7 +84,7 @@ describe('E2E test - Switcher offline:', function () {
     })
   })
 
-  it('Should be invalid - Offline file not found', async function () {
+  it('should be invalid - Offline file not found', async function () {
     try {
       new Switcher(url, apiKey, domain, component, environment, {
         offline: true,
@@ -312,13 +312,111 @@ describe('Unit test - Switcher:', function () {
 
       let switcher = new Switcher('url', 'apiKey', 'domain', 'component', 'default')
 
-      let result = await switcher.isItOn('FF2FOR2030').then(function (result) {
+      await switcher.isItOn('FF2FOR2030').then(function (result) {
         assert.isUndefined(result)
       }, function (error) {
         assert.equal('Something went wrong: {"errno":"ECONNREFUSED","code":"ECONNREFUSED","syscall":"connect"}', error.message)
       })
     })
 
+  })
+
+})
+
+describe('E2E test - Switcher offline - Snapshot:', function () {
+  let switcher;
+  const apiKey = '$2b$08$S2Wj/wG/Rfs3ij0xFbtgveDtyUAjML1/TOOhocDg5dhOaU73CEXfK';
+  const domain = 'currency-api';
+  const component = 'Android';
+  const environment = 'dev';
+  const url = 'http://localhost:3000'
+
+  const dataBuffer = fs.readFileSync('./snapshot/dev.json');
+  const dataJSON = dataBuffer.toString();
+
+  let requestGetStub;
+  let requestPostStub;
+  let clientAuth;
+  let fsStub;
+
+  afterEach(function() {
+    requestGetStub.restore();
+    requestPostStub.restore();
+    clientAuth.restore();
+    fsStub.restore();
+  })
+
+  beforeEach(function() {
+    switcher = new Switcher(url, apiKey, domain, component, environment, {
+      offline: true
+    })
+
+    clientAuth = sinon.stub(services, 'auth');
+    requestGetStub = sinon.stub(request, 'get');
+    requestPostStub = sinon.stub(request, 'post');
+    fsStub = sinon.stub(fs, 'writeFileSync');
+  })
+
+  this.afterAll(function() {
+    switcher.unloadSnapshot();
+  })
+
+  it('should update snapshot', async function () {
+    // Mocking starts
+    clientAuth.returns(Promise.resolve({ token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 }));
+    requestGetStub.returns(Promise.resolve({ status: false })); // Snapshot outdated
+    requestPostStub.returns(Promise.resolve(JSON.stringify(JSON.parse(dataJSON), null, 4)));
+    // Mocking finishes
+    
+    assert.isTrue(await switcher.checkSnapshot());
+  })
+
+  it('should NOT update snapshot', async function () {
+    // Mocking starts
+    clientAuth.returns(Promise.resolve({ token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 }));
+    requestGetStub.returns(Promise.resolve({ status: true })); // No available update
+    // Mocking finishes
+    
+    assert.isFalse(await switcher.checkSnapshot());
+  })
+
+  it('should NOT update snapshot - check Snapshot Error', async function () {
+    // Mocking starts
+    clientAuth.returns(Promise.resolve({ token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 }));
+    requestGetStub.throws({
+      error: {
+        errno: 'ECONNREFUSED',
+        code: 'ECONNREFUSED',
+        syscall: 'connect'
+      }
+    });
+    // Mocking finishes
+    
+    await switcher.checkSnapshot().then(function (result) {
+      assert.isUndefined(result)
+    }, function (error) {
+      assert.equal('Something went wrong: {"errno":"ECONNREFUSED","code":"ECONNREFUSED","syscall":"connect"}', error.message)
+    })
+  })
+
+  it('should NOT update snapshot - resolve Snapshot Error', async function () {
+    // Mocking starts
+    clientAuth.returns(Promise.resolve({ token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 }));
+    requestGetStub.returns(Promise.resolve({ status: false })); // Snapshot outdated
+    requestPostStub.throws({
+      error: {
+        errno: 'ECONNREFUSED',
+        code: 'ECONNREFUSED',
+        syscall: 'connect'
+      }
+    });
+    // Mocking finishes
+    
+    await switcher.checkSnapshot().then(function (result) {
+      assert.isUndefined(result)
+    }, function (error) {
+      assert.equal('Something went wrong: {"errno":"ECONNREFUSED","code":"ECONNREFUSED","syscall":"connect"}', error.message)
+    })
   })
 
 })

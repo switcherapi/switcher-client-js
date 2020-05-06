@@ -1,5 +1,5 @@
 const { processOperation } = require('../utils/index');
-const services = require('../utils/services');
+const services = require('../lib/services');
 
 async function resolveCriteria(key, input, {
     domain

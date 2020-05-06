@@ -1,9 +1,10 @@
 "use strict";
 
-const services = require('./utils/services');
 const { loadDomain, StrategiesType } = require('./utils/index');
 const { Key, searchBypassed } = require('./lib/bypasser');
+const services = require('./lib/services');
 const checkCriteriaOffline = require('./lib/resolver');
+const validateSnapshot = require('./lib/snapshot');
 const fs = require('fs');
 
 const DEFAULT_SNAPSHOT_LOCATION = './snapshot/';
@@ -119,6 +120,28 @@ class Switcher {
     } else {
       return await services.checkCriteria(this.url, this.token, this.key, this.input);
     }
+  }
+
+  async checkSnapshot() {
+    if (!this.exp || Date.now() > (this.exp*1000)) {
+      const response = await services.auth(this.url, this.apiKey, this.domain, this.component, this.environment, {
+        silentMode: this.silentMode,
+        retryTime: this.retryTime,
+        retryDurationIn: this.retryDurationIn
+      });
+      
+      this.token = response.token;
+      this.exp = response.exp;
+
+      const result = await validateSnapshot(
+        this.url, this.token, this.domain, this.environment, this.snapshotLocation, this.snapshot.data.domain.version);
+      
+      if (result) {
+        this.loadSnapshot();
+        return true;
+      }
+    }
+    return false;
   }
 
   isItOnPromise(key, input) {

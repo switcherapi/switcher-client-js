@@ -1,37 +1,43 @@
 {
     "data": {
         "domain": {
-            "name": "currency-api",
-            "description": "Currency API",
+            "name": "My Domain",
+            "version": 1588557288037,
             "activated": true,
             "group": [
                 {
-                    "name": "Rollout 2020",
-                    "description": "Changes that will be applied during the rollout",
+                    "name": "Project 1",
                     "activated": true,
                     "config": [
                         {
-                            "key": "FF2FOR2020",
-                            "description": "Feature Flag",
-                            "activated": true,
+                            "key": "FEATURE01",
+                            "activated": false,
                             "strategies": [
-                                {
-                                    "strategy": "NETWORK_VALIDATION",
-                                    "activated": true,
-                                    "operation": "EXIST",
-                                    "values": [
-                                        "10.0.0.3/24"
-                                    ]
-                                },
                                 {
                                     "strategy": "VALUE_VALIDATION",
                                     "activated": true,
-                                    "operation": "NOT_EXIST",
+                                    "operation": "EXIST",
                                     "values": [
-                                        "USA",
-                                        "Canada",
-                                        "Australia",
-                                        "Africa"
+                                        "TEST"
+                                    ]
+                                }
+                            ],
+                            "components": [
+                                "5e0ecf7d6f4f994eac9007b6",
+                                "5e31372fe8533b5944d4e408",
+                                "5e30f1898db9c44460d22770"
+                            ]
+                        },
+                        {
+                            "key": "FEATURE02",
+                            "activated": true,
+                            "strategies": [
+                                {
+                                    "strategy": "VALUE_VALIDATION",
+                                    "activated": true,
+                                    "operation": "EQUAL",
+                                    "values": [
+                                        "USA"
                                     ]
                                 }
                             ],
@@ -40,16 +46,25 @@
                     ]
                 },
                 {
-                    "name": "Rollout 2030",
-                    "description": "Changes that will be applied during the rollout",
+                    "name": "Project 2",
                     "activated": true,
                     "config": [
                         {
-                            "key": "FF2FOR2030",
-                            "description": "Feature Flag",
+                            "key": "FEATURE2020",
                             "activated": true,
-                            "strategies": [],
-                            "components": []
+                            "strategies": [
+                                {
+                                    "strategy": "NETWORK_VALIDATION",
+                                    "activated": false,
+                                    "operation": "NOT_EXIST",
+                                    "values": [
+                                        "10.0.0.3/21"
+                                    ]
+                                }
+                            ],
+                            "components": [
+                                "5e0ecf7d6f4f994eac9007b6"
+                            ]
                         }
                     ]
                 }
