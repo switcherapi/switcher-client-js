@@ -16,12 +16,13 @@ https://github.com/petruki/switcher-api
 
 Switcher Client is a friendly lib to interact with the Switcher API by:
 - Simplifying validations throughout your remote Switcher configuration.
-- Able to work offline using a snapshot claimed from your remote Switcher-API.
-- Able to run in silent mode that will prevent your application to not be 100% dependent on the online API.
+- Able to work offline using a snapshot claimed from your configured remote Switcher-API.
+- Able to run in silent mode that will prevent your application to not run 100% dependent on the online API.
 - Being flexible in order to remove the complexity of multi-staging (add as many environments as you want).
 - Being friendly by making possible to manipulate switchers without changing your online switchers. (useful for automated tests).
 - Being secure by using OAuth 2 flow. Requests are made using tokens that will validate your domain, component, environment and API key.
-Tokens have an expiration time and are not stored. The Switcher Client is responsible to renew it using your settings.
+- Keep your snapshot files updated by just calling one method and work with zero-latency for critical/sensitive applications.
+Tokens have an expiration time and are not stored. The Switcher Client is responsible to renew it when necessary.
 
 # Usage
 1) Configure your client
@@ -96,4 +97,10 @@ switcher.isItOn('KEY') // it is going to be true
 Invoke forget to remove any switch assumption, like this:
 ```js
 switcher.forget('KEY')
+```
+
+## Snapshot version check
+For working with zero-latency set this library to offline and keep your snapshot file updated by just calling checkSnapshot()
+```js
+switcher.checkSnapshot()
 ```
