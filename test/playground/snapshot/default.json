@@ -3,14 +3,17 @@
         "domain": {
             "name": "My Domain",
             "version": 1588557288037,
+            "description": "Technology solutions - Test 1\n\n$2b$08$CkraR0sT8JNcKPgLD6FJBuDf.JE4aUXqMloYFGFcl04sw8RcAwywm",
             "activated": true,
             "group": [
                 {
                     "name": "Project 1",
+                    "description": "Project #1 description",
                     "activated": true,
                     "config": [
                         {
                             "key": "FEATURE01",
+                            "description": "Feature #1 description",
                             "activated": false,
                             "strategies": [
                                 {
@@ -23,13 +26,14 @@
                                 }
                             ],
                             "components": [
-                                "5e0ecf7d6f4f994eac9007b6",
-                                "5e31372fe8533b5944d4e408",
-                                "5e30f1898db9c44460d22770"
+                                "Android",
+                                "iOS",
+                                "Windows"
                             ]
                         },
                         {
                             "key": "FEATURE02",
+                            "description": "Feature #2 description",
                             "activated": true,
                             "strategies": [
                                 {
@@ -47,10 +51,12 @@
                 },
                 {
                     "name": "Project 2",
+                    "description": "Project #2 description",
                     "activated": true,
                     "config": [
                         {
                             "key": "FEATURE2020",
+                            "description": "Feature #22020 description",
                             "activated": true,
                             "strategies": [
                                 {
@@ -63,7 +69,7 @@
                                 }
                             ],
                             "components": [
-                                "5e0ecf7d6f4f994eac9007b6"
+                                "Android"
                             ]
                         }
                     ]
