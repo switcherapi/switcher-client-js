@@ -1,3 +1,33 @@
+class Bypasser {
+    static bypassedKeys = [];
+
+    static assume(key) {
+        const existentKey = this.searchBypassed(key, Bypasser.bypassedKeys);
+        if (existentKey) {
+            return existentKey;
+        }
+
+        const keyBypassed = new Key(key);
+        Bypasser.bypassedKeys.push(keyBypassed);
+        return keyBypassed;
+    }
+
+    static forget(key) {
+        Bypasser.bypassedKeys.splice(
+            Bypasser.bypassedKeys.indexOf(this.searchBypassed(key, Bypasser.bypassedKeys)), 1);
+    }
+
+    static searchBypassed(key) {
+        let existentKey;
+        Bypasser.bypassedKeys.forEach(async bk => {
+            if (bk.getKey() === key) {
+                return existentKey = bk;
+            }
+        })
+        return existentKey;
+    }
+}
+
 class Key {
     constructor(key) {
         this.key = key;
@@ -21,17 +51,4 @@ class Key {
     }
 }
 
-function searchBypassed(key, bypassedKeys) {
-    let existentKey;
-    bypassedKeys.forEach(async bk => {
-        if (bk.getKey() === key) {
-            return existentKey = bk;
-        }
-    })
-    return existentKey;
-}
-
-module.exports = {
-    Key,
-    searchBypassed
-}
+module.exports = Bypasser;

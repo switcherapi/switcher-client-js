@@ -1,3 +1,5 @@
+import Bypasser from "./lib/bypasser";
+
 declare class Switcher {
 
   constructor(
@@ -16,7 +18,6 @@ declare class Switcher {
   key: string;
   input: string[];
   exp: number;
-  bypassedKeys: Key;
   snapshot?: string;
   
   /**
@@ -32,22 +33,21 @@ declare class Switcher {
    */
   prepare(key: string, input?: string[]): void;
   
+  /**
+   * Execute async criteria
+   * 
+   * @param key 
+   * @param input 
+   */
   isItOn(key?: string, input?: string[]): boolean;
+
+  /**
+   * Execute async criteria
+   * 
+   * @param key 
+   * @param input 
+   */
   isItOnPromise(key?: string, input?: string[]): Promise<boolean>;
-
-  /**
-   * Force a switcher value to return a given value by calling one of both methods - true() false()
-   * 
-   * @param key 
-   */
-  assume(key: string): Key;
-
-  /**
-   * Remove forced value from a switcher
-   * 
-   * @param key 
-   */
-  forget(key: string): void;
 
   /**
    * Read snapshot file locally and store in a parsed JSON object
@@ -64,6 +64,20 @@ declare class Switcher {
    * Remove snapshot from real-time update
    */
   unloadSnapshot(): void;
+
+  /**
+   * Force a switcher value to return a given value by calling one of both methods - true() false()
+   * 
+   * @param key 
+   */
+  static assume(key: string): Key;
+
+  /**
+   * Remove forced value from a switcher
+   * 
+   * @param key 
+   */
+  static forget(key: string): void;
 }
 
 declare interface SwitcherOptions {
@@ -71,19 +85,6 @@ declare interface SwitcherOptions {
   snapshotLocation: string;
   silentMode: boolean;
   retryAfter: string;
-}
-
-declare class Key {
-
-  constructor(key: string);
-
-  key: string;
-  valaue: boolean;
-
-  true(): void;
-  false(): void;
-  getKey(): string;
-  getValue(): boolean;
 }
 
 export = Switcher;

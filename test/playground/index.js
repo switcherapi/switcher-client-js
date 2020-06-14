@@ -1,8 +1,8 @@
-const Switcher = require('../../src/index')
+const Switcher = require('../../src/index');
 
-let switcher
+let switcher;
 
-function setupSwitcher() {
+function setupSwitcher(offline) {
     const apiKey = '$2b$08$7U/KJBVgG.FQtYEKKnbLe.o6p7vBrfHFRgMipZTaokSmVFiduXq/y'
     // const apiKey = '$2b$08$m.8yx5ekyqWnAGgZjvG/AOTaMO3l1riBO/r4fHQ4EHqM87TdvHU9S'
     const domain = 'My Domain'
@@ -11,41 +11,58 @@ function setupSwitcher() {
     const url = 'http://localhost:3000'
 
     switcher = new Switcher(url, apiKey, domain, component, environment, {
-        offline: true
-    })
+        offline
+    });
 }
 
 // Requires online API
 const testSnapshotUpdate = async () => {
-    setupSwitcher()
+    setupSwitcher(false);
 
-    let result = await switcher.isItOn('FEATURE2020')
-    console.log(result)
+    let result = await switcher.isItOn('FEATURE2020');
+    console.log(result);
     
-    await switcher.checkSnapshot()
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    await switcher.checkSnapshot();
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
-    result = await switcher.isItOn('FEATURE2020')
-    console.log(result)
+    result = await switcher.isItOn('FEATURE2020');
+    console.log(result);
 
-    switcher.unloadSnapshot()
+    switcher.unloadSnapshot();
 }
 
 const testAsyncCall = async () => {
-    setupSwitcher();
+    setupSwitcher(true);
 
     let result = await switcher.isItOn('FEATURE2020');
-    console.log(result)
+    console.log(result);
 
     switcher.isItOnPromise('FEATURE2020')
         .then(result => console.log('Promise result:', result))
-        .catch(error => console.log(error))
+        .catch(error => console.log(error));
 
-    switcher.assume('FEATURE2020').false()
-    result = await switcher.isItOn('FEATURE2020')
-    console.log('Value changed:', result)
+    switcher.assume('FEATURE2020').false();
+    result = await switcher.isItOn('FEATURE2020');
+    console.log('Value changed:', result);
 
-    switcher.unloadSnapshot()
+    switcher.unloadSnapshot();
 }
 
-testAsyncCall()
+const testBypasser = async () => {
+    setupSwitcher(true);
+
+    let result = await switcher.isItOn('FEATURE2020');
+    console.log(result);
+
+    Switcher.assume('FEATURE2020').false();
+    result = await switcher.isItOn('FEATURE2020');
+    console.log(result);
+
+    Switcher.forget('FEATURE2020');
+    result = await switcher.isItOn('FEATURE2020');
+    console.log(result);
+
+    switcher.unloadSnapshot();
+}
+
+testBypasser();

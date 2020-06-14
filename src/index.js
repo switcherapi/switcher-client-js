@@ -1,7 +1,7 @@
 "use strict";
 
+const Bypasser = require('./lib/bypasser');
 const { loadDomain, StrategiesType } = require('./utils/index');
-const { Key, searchBypassed } = require('./lib/bypasser');
 const services = require('./lib/services');
 const checkCriteriaOffline = require('./lib/resolver');
 const validateSnapshot = require('./lib/snapshot');
@@ -47,7 +47,6 @@ class Switcher {
     }
 
     this.loadSnapshot();
-    this.bypassedKeys = new Array();
   }
 
   async prepare(key, input) {
@@ -100,7 +99,7 @@ class Switcher {
   }
 
   async isItOn(key, input) {
-    const bypassKey = searchBypassed(this.key ? this.key : key, this.bypassedKeys);
+    const bypassKey = Bypasser.searchBypassed(this.key ? this.key : key);
     if (bypassKey) {
       return bypassKey.getValue();
     }
@@ -148,22 +147,6 @@ class Switcher {
     return new Promise((resolve) => resolve(this.isItOn(key, input)));
   }
 
-  assume(key) {
-    
-    const existentKey = searchBypassed(key, this.bypassedKeys);
-    if (existentKey) {
-      return existentKey;
-    }
-
-    const keyBypassed = new Key(key);
-    this.bypassedKeys.push(keyBypassed)
-    return keyBypassed;
-  }
-
-  forget(key) {
-    this.bypassedKeys.splice(this.bypassedKeys.indexOf(searchBypassed(key, this.bypassedKeys)), 1); 
-  }
-
   loadSnapshot() {
     if (this.snapshotLocation) {
       const snapshotFile = `${this.snapshotLocation}${this.environment}.json`;
@@ -186,6 +169,14 @@ class Switcher {
 
   static get StrategiesType() {
     return StrategiesType;
+  }
+
+  static assume(key) {
+    return Bypasser.assume(key);
+  }
+
+  static forget(key) {
+    return Bypasser.forget(key);
   }
   
 }

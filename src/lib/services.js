@@ -3,11 +3,11 @@ const moment = require('moment');
 
 exports.getEntry = (input) => {
     if (!input) {
-        return undefined
+        return undefined;
     }
 
     if (input.length % 2 !== 0) {
-        throw new Error(`Invalid input format for '${input}'`)
+        throw new Error(`Invalid input format for '${input}'`);
     }
 
     let entry = [];
@@ -16,15 +16,15 @@ exports.getEntry = (input) => {
         entry.push({
             strategy: input[i],
             input: input[i + 1]
-        })
+        });
     }
 
-    return entry
+    return entry;
 }
 
 exports.checkCriteria = async (url, token, key, input) => {
     try {
-        const entry = this.getEntry(input)
+        const entry = this.getEntry(input);
         const options = {
             url: `${url}/criteria`,
             qs: {
@@ -34,22 +34,22 @@ exports.checkCriteria = async (url, token, key, input) => {
                 'Authorization': `Bearer ${token}`
             },
             json: true
-        }
+        };
 
         if (entry) {
             options.body = {
                 entry
-            }
+            };
         }
 
         const response = await request.post(options);
         return response.result;
     } catch (e) {
-        let error
+        let error;
         if (e.error) {
-            error = JSON.stringify(e.error)
+            error = JSON.stringify(e.error);
         }
-        throw new CriteriaError(e.error ? error : e.message)
+        throw new CriteriaError(e.error ? error : e.message);
     }
 }
 
@@ -66,7 +66,7 @@ exports.auth = async (url, apiKey, domain, component, environment, options) => {
                 component,
                 environment
             }
-        }
+        };
 
         return await request.post(postOptions);
     } catch (e) {
@@ -76,15 +76,15 @@ exports.auth = async (url, apiKey, domain, component, environment, options) => {
                 return {
                     token: 'SILENT',
                     exp: expirationTime.toDate().getTime() / 1000
-                }
+                };
             }
         }
 
-        let error
+        let error;
         if (e.error) {
-            error = JSON.stringify(e.error)
+            error = JSON.stringify(e.error);
         }
-        throw new AuthError(e.error ? error : e.message)
+        throw new AuthError(e.error ? error : e.message);
     }
 }
 
@@ -96,16 +96,16 @@ exports.checkSnapshotVersion = async (url, token, version) => {
                 'Authorization': `Bearer ${token}`
             },
             json: true
-        }
+        };
 
         const response = await request.get(options);
         return response;
     } catch (e) {
-        let error
+        let error;
         if (e.error) {
-            error = JSON.stringify(e.error)
+            error = JSON.stringify(e.error);
         }
-        throw new SnapshotServiceError(e.error ? error : e.message)
+        throw new SnapshotServiceError(e.error ? error : e.message);
     }
 }
 
@@ -133,39 +133,39 @@ exports.resolveSnapshot = async (url, token, domain, environment) => {
                 query,
                 variables: { domain, environment }
             })
-        }
+        };
 
         const response = await request.post(options);
         return JSON.stringify(JSON.parse(response), null, 4);
     } catch (e) {
-        let error
+        let error;
         if (e.error) {
-            error = JSON.stringify(e.error)
+            error = JSON.stringify(e.error);
         }
-        throw new SnapshotServiceError(e.error ? error : e.message)
+        throw new SnapshotServiceError(e.error ? error : e.message);
     }
 }
 
 class AuthError extends Error {
     constructor(message) {
-        super(`Something went wrong: ${message}`)
-        this.name = this.constructor.name
-        Error.captureStackTrace(this, this.constructor)
+        super(`Something went wrong: ${message}`);
+        this.name = this.constructor.name;
+        Error.captureStackTrace(this, this.constructor);
     }
 }
 
 class CriteriaError extends Error {
     constructor(message) {
-        super(`Something went wrong: ${message}`)
-        this.name = this.constructor.name
-        Error.captureStackTrace(this, this.constructor)
+        super(`Something went wrong: ${message}`);
+        this.name = this.constructor.name;
+        Error.captureStackTrace(this, this.constructor);
     }
 }
 
 class SnapshotServiceError extends Error {
     constructor(message) {
-        super(`Something went wrong: ${message}`)
-        this.name = this.constructor.name
-        Error.captureStackTrace(this, this.constructor)
+        super(`Something went wrong: ${message}`);
+        this.name = this.constructor.name;
+        Error.captureStackTrace(this, this.constructor);
     }
 }
