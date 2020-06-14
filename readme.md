@@ -38,7 +38,7 @@ const url = 'https://switcher-load-balance.herokuapp.com';
 - **environment**: Environment name. Production environment is named as 'default'.
 - **domain**: Domain name.
 - **component**: Application name.
-- **url**: Endpoint of your Swither-API.
+- **url**: Swither-API endpoint.
 
 ## Options
 You can also activate features such as offline and silent mode:
