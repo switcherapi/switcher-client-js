@@ -1,3 +1,5 @@
+import Key from "./key";
+
 declare class Bypasser {
     
   static bypassedKeys: Key;
@@ -22,18 +24,6 @@ declare class Bypasser {
    * @param key 
    */
   static searchBypassed(key: string): Key;
-}
-
-declare class Key {
-  constructor(key: string);
-
-  key: string;
-  valaue: boolean;
-
-  true(): void;
-  false(): void;
-  getKey(): string;
-  getValue(): boolean;
 }
 
 export = Bypasser;

@@ -1,27 +1,6 @@
 "use strict";
 
-class Key {
-    constructor(key) {
-        this.key = key;
-        this.value = undefined;
-    }
-
-    true() {
-        this.value = true;
-    }
-
-    false() {
-        this.value = false;
-    }
-
-    getKey() {
-        return this.key;
-    }
-
-    getValue() {
-        return this.value;
-    }
-}
+const Key = require('./key');
 
 class Bypasser {
     static bypassedKeys = new Array();
