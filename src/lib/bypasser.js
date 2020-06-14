@@ -1,5 +1,5 @@
 class Bypasser {
-    static bypassedKeys = [];
+    static bypassedKeys = new Array();
 
     static assume(key) {
         const existentKey = this.searchBypassed(key, Bypasser.bypassedKeys);
