@@ -33,8 +33,7 @@
     "mocha": "^6.2.2",
     "mocha-sonarqube-reporter": "^1.0.1",
     "nyc": "^14.1.1",
-    "sinon": "^7.5.0",
-    "typescript": "^3.9.5"
+    "sinon": "^7.5.0"
   },
   "repository": {
     "type": "git",
