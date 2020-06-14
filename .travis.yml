@@ -15,7 +15,6 @@ jobs:
     - stage: compile
       script:
         - npm install
-        - npm install -g typescript
     - stage: test
       script:
         - npm test
