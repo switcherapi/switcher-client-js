@@ -1,10 +1,8 @@
-"use strict"
-
 const assert = require('chai').assert
 const sinon = require('sinon');
-const Switcher = require('../src/index')
-const request = require('request-promise')
-const services = require('../src/lib/services')
+const Switcher = require('../src/index');
+const request = require('request-promise');
+const services = require('../src/lib/services');
 const fs = require('fs');
 // const { StrategiesType } = require('../src/utils/index')
 

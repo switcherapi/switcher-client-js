@@ -1,4 +1,4 @@
-import Bypasser from "./lib/bypasser";
+import Key from "./lib/key";
 
 declare class Switcher {
 

@@ -5,6 +5,8 @@ const Key = require('./key');
 class Bypasser {
     static bypassedKeys = new Array();
 
+    constructor() {}
+
     static assume(key) {
         const existentKey = this.searchBypassed(key, Bypasser.bypassedKeys);
         if (existentKey) {
