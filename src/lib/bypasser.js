@@ -1,3 +1,28 @@
+"use strict";
+
+class Key {
+    constructor(key) {
+        this.key = key;
+        this.value = undefined;
+    }
+
+    true() {
+        this.value = true;
+    }
+
+    false() {
+        this.value = false;
+    }
+
+    getKey() {
+        return this.key;
+    }
+
+    getValue() {
+        return this.value;
+    }
+}
+
 class Bypasser {
     static bypassedKeys = new Array();
 
@@ -25,29 +50,6 @@ class Bypasser {
             }
         })
         return existentKey;
-    }
-}
-
-class Key {
-    constructor(key) {
-        this.key = key;
-        this.value = undefined;
-    }
-
-    true() {
-        this.value = true;
-    }
-
-    false() {
-        this.value = false;
-    }
-
-    getKey() {
-        return this.key;
-    }
-
-    getValue() {
-        return this.value;
     }
 }
 
