@@ -1,21 +1,38 @@
-const Switcher = require('../../src/index')
+const Switcher = require('../../src/index');
 
-let switcher = new Switcher();
+let switcher;
 
-function setupSwitcher() {
-    const apiKey = '$2b$08$m.8yx5ekyqWnAGgZjvG/AOTaMO3l1riBO/r4fHQ4EHqM87TdvHU9S';
-    const domain = 'My Domain';
-    const component = 'Android';
-    const environment = 'default';
+function setupSwitcher(offline) {
+    const apiKey = '$2b$08$7U/KJBVgG.FQtYEKKnbLe.o6p7vBrfHFRgMipZTaokSmVFiduXq/y'
+    // const apiKey = '$2b$08$m.8yx5ekyqWnAGgZjvG/AOTaMO3l1riBO/r4fHQ4EHqM87TdvHU9S'
+    const domain = 'My Domain'
+    const component = 'Android'
+    const environment = 'default'
     const url = 'http://localhost:3000'
 
     switcher = new Switcher(url, apiKey, domain, component, environment, {
-        offline: false
-    })
+        offline
+    });
 }
 
-const main = async () => {
-    setupSwitcher();
+// Requires online API
+const testSnapshotUpdate = async () => {
+    setupSwitcher(false);
+
+    let result = await switcher.isItOn('FEATURE2020');
+    console.log(result);
+    
+    await switcher.checkSnapshot();
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    result = await switcher.isItOn('FEATURE2020');
+    console.log(result);
+
+    switcher.unloadSnapshot();
+}
+
+const testAsyncCall = async () => {
+    setupSwitcher(true);
 
     let result = await switcher.isItOn('FEATURE2020');
     console.log(result);
@@ -27,6 +44,25 @@ const main = async () => {
     switcher.assume('FEATURE2020').false();
     result = await switcher.isItOn('FEATURE2020');
     console.log('Value changed:', result);
+
+    switcher.unloadSnapshot();
 }
 
-main()
+const testBypasser = async () => {
+    setupSwitcher(true);
+
+    let result = await switcher.isItOn('FEATURE2020');
+    console.log(result);
+
+    Switcher.assume('FEATURE2020').false();
+    result = await switcher.isItOn('FEATURE2020');
+    console.log(result);
+
+    Switcher.forget('FEATURE2020');
+    result = await switcher.isItOn('FEATURE2020');
+    console.log(result);
+
+    switcher.unloadSnapshot();
+}
+
+testBypasser();

@@ -1,0 +1,80 @@
+{
+    "data": {
+        "domain": {
+            "name": "My Domain",
+            "version": 1588557288037,
+            "description": "Technology solutions - Test 1\n\n$2b$08$CkraR0sT8JNcKPgLD6FJBuDf.JE4aUXqMloYFGFcl04sw8RcAwywm",
+            "activated": true,
+            "group": [
+                {
+                    "name": "Project 1",
+                    "description": "Project #1 description",
+                    "activated": true,
+                    "config": [
+                        {
+                            "key": "FEATURE01",
+                            "description": "Feature #1 description",
+                            "activated": false,
+                            "strategies": [
+                                {
+                                    "strategy": "VALUE_VALIDATION",
+                                    "activated": true,
+                                    "operation": "EXIST",
+                                    "values": [
+                                        "TEST"
+                                    ]
+                                }
+                            ],
+                            "components": [
+                                "Android",
+                                "iOS",
+                                "Windows"
+                            ]
+                        },
+                        {
+                            "key": "FEATURE02",
+                            "description": "Feature #2 description",
+                            "activated": true,
+                            "strategies": [
+                                {
+                                    "strategy": "VALUE_VALIDATION",
+                                    "activated": true,
+                                    "operation": "EQUAL",
+                                    "values": [
+                                        "USA"
+                                    ]
+                                }
+                            ],
+                            "components": []
+                        }
+                    ]
+                },
+                {
+                    "name": "Project 2",
+                    "description": "Project #2 description",
+                    "activated": true,
+                    "config": [
+                        {
+                            "key": "FEATURE2020",
+                            "description": "Feature #22020 description",
+                            "activated": true,
+                            "strategies": [
+                                {
+                                    "strategy": "NETWORK_VALIDATION",
+                                    "activated": false,
+                                    "operation": "NOT_EXIST",
+                                    "values": [
+                                        "10.0.0.3/21"
+                                    ]
+                                }
+                            ],
+                            "components": [
+                                "Android"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+}

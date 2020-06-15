@@ -7,93 +7,112 @@
 
 ![Switcher API: JavaScript Client: Cloud-based Feature Flag API](https://github.com/petruki/switcherapi-assets/blob/master/logo/switcherapi_js_client.png)
 
-# Install  
-`npm install switcher-client`
-
 # About  
-Module for working with Switcher-API.
+Client JavaScript for working with Switcher-API.
 https://github.com/petruki/switcher-api
 
-Switcher Client is a friendly lib to interact with the Switcher API by:
-- Simplifying validations throughout your remote Switcher configuration.
-- Able to work offline using a snapshot claimed from your remote Switcher-API.
-- Able to run in silent mode that will prevent your application to not be 100% dependent on the online API.
-- Being flexible in order to remove the complexity of multi-staging (add as many environments as you want).
-- Being friendly by making possible to manipulate switchers without changing your online switchers. (useful for automated tests).
-- Being secure by using OAuth 2 flow. Requests are made using tokens that will validate your domain, component, environment and API key.
-Tokens have an expiration time and are not stored. The Switcher Client is responsible to renew it using your settings.
+- Able to work offline using a snapshot file downloaded from your remote Switcher-API Domain.
+- Silent mode automatically enables a contingent sub-process in case of connectivity issues.
+- Built-in mock implementation for automated testing.
+- Easy to setup. Switcher Context is responsible to manage all the complexity between your application and API.
 
-# Example
-1) Configure your client
+# Usage
+
+## Install  
+`npm install switcher-client`
+
+## Module initialization
+The context properties stores all information regarding connectivity and strategy settings.
+
 ```js
 const Switcher = require("switcher-client");
 
 const apiKey = 'API Key';
-const environment = 'default';
-const domain = 'Your Domain Name';
-const component = 'Android';
-const url = 'http://localhost:3000/criteria';
+const environment = 'default'; // Production = default
+const domain = 'My Domain';
+const component = 'MyApp';
+const url = 'https://switcher-load-balance.herokuapp.com';
 ```
-- **apiKey**: Obtained after creating your domain using the Switcher-API project.
-- **environment**: You can run multiple environments. Production environment is 'default' which is created automatically after creating the domain.
-- **domain**: This is your business name identification.
-- **component**: This is the name of the application that will be using this API.
-- **url**: Endpoint of your Swither-API.
 
-2) Options - you can also activate features such as offline and silent mode
+- **apiKey**: Switcher-API key generated after creating a domain..
+- **environment**: Environment name. Production environment is named as 'default'.
+- **domain**: Domain name.
+- **component**: Application name.
+- **url**: Swither-API endpoint.
+
+## Options
+You can also activate features such as offline and silent mode:
+
 ```js
 const offline = true;
-const snapshotLocation = './snapshot/default.json';
+const snapshotLocation = './snapshot/';
 const silentMode = true;
 const retryAfter = '5m';
+
+let switcher = new Switcher(url, apiKey, domain, component, environment, {
+      offline, snapshotLocation, silentMode, retryAfter
+});
 ```
+
 - **offline**: If activated, the client will only fetch the configuration inside your snapshot file. The default value is 'false'.
-- **snapshotLocation**: Location of your snapshot. The default value is './snapshot/default.json'.
-- **silentMode**: If activated, all connections errors will be ignored and the client will automatically fetch the configuration into your snapshot.
-- **retryAfter** : Set the duration you want the client to try to reach the online API again. (see moment documentation for time signature). The default value is 5m.
+- **snapshotLocation**: Location of snapshot files. The default value is './snapshot/'.
+- **silentMode**: If activated, all connectivity issues will be ignored and the client will automatically fetch the configuration into your snapshot file.
+- **retryAfter** : Time given to the module to re-establish connectivity with the API - e.g. 5s (s: seconds - m: minutes - h: hours).
 
-3) Create the client
+
+## Executing
+There are a few different ways to call the API using the JavaScript module.
+Here are some examples:
+
+1. **No parameters**
+Invoking the API can be done by instantiating the switcher and calling *isItOn* passing its key as a parameter.
+
 ```js
-const switcher = new Switcher(url, apiKey, domain, component, environment)
-//or - using silent mode
-const switcher = new Switcher(url, apiKey, domain, component, environment, { silentMode: true })
-//or - using offline mode
-const switcher = new Switcher(url, apiKey, domain, component, environment, { offline: true })
+const switcher = new Switcher(url, apiKey, domain, component, environment);
+await switcher.isItOn('FEATURE01');
 ```
 
-## Invoking switchers
-**Scenario 1**
+2. **Promise**
+Using promise is another way to call the API if you want, like:
 
-You want to setup the input of your switch before using it and call 'isItOn' some elsewhere.
-```js
-switcher.prepare('MY_KEY', [Switcher.StrategiesType.VALUE, 'USER_1')
-switcher.isItOn()
-```
-
-**Scenario 2**
-
-You want to call isItOn without preparing, as simple as this:
-```js
-switcher.isItOn('KEY')
-```
-
-**Scenario 3**
-
-Using promise is another way to call the API if you want:
 ```js
 switcher.isItOnPromise('KEY')
-    .then(result => console.log('Promise result:', result))
+    .then(result => console.log('Result:', result))
     .catch(error => console.log(error));
 ```
 
-## Bypassing switchers
-You can also bypass your switcher configuration by invoking 'assume'. This is perfect for your test code where you want to test both scenarios when the switcher is true and false.
+3. **Strategy validation - preparing input**
+Loading information into the switcher can be made by using *prepare*, in case you want to include input from a different place of your code. Otherwise, it is also possible to include everything in the same call.
+
 ```js
-switcher.assume('KEY').true()
-switcher.isItOn('KEY') // it is going to be true
+switcher.prepare('FEATURE01', [Switcher.StrategiesType.VALUE, 'USER_1');
+switcher.isItOn();
 ```
 
-Invoke forget to remove any switch assumption, like this:
+4. **Strategy validation - all-in-one execution**
+All-in-one method is fast and include everything you need to execute a complex call to the API.
+
 ```js
-switcher.forget('KEY')
+await switcher.isItOn('FEATURE01',
+    [Switcher.StrategiesType.VALUE, 'User 1', 
+    Switcher.StrategiesType.NETWORK, '192.168.0.1']
+);
+```
+
+## Built-in mock feature
+You can also bypass your switcher configuration by invoking 'Switcher.assume'. This is perfect for your test code where you want to test both scenarios when the switcher is true and false.
+
+```js
+Switcher.assume('FEATURE01').true();
+switcher.isItOn('FEATURE01'); // true
+
+Switcher.forget('FEATURE01');
+switcher.isItOn('FEATURE01'); // Now, it's going to return the result retrieved from the API or the Snaopshot file
+```
+
+## Snapshot version check
+For convenience, an implementation of a domain version checker is available if you have external processes that manage snapshot files.
+
+```js
+switcher.checkSnapshot();
 ```

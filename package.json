@@ -5,7 +5,7 @@
   "main": "./src/index.js",
   "types": "./src/index.d.ts",
   "author": {
-    "name": "Rogerio Petruki",
+    "name": "Roger Floriano",
     "email": "switcher.project@gmail.com"
   },
   "keywords": [
@@ -40,6 +40,6 @@
     "url": "https://github.com/petruki/switcher-client-master"
   },
   "engines": {
-    "node": ">= 8.0.0"
+    "node": "^12.0.0"
   }
 }
