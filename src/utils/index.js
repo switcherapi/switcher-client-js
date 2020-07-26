@@ -15,6 +15,7 @@ const loadDomain = (snapshotLocation) => {
 const StrategiesType = Object.freeze({
     NETWORK: 'NETWORK_VALIDATION',
     VALUE: 'VALUE_VALIDATION',
+    NUMERIC: 'NUMERIC_VALIDATION',
     TIME: 'TIME_VALIDATION',
     DATE: 'DATE_VALIDATION'
 });
@@ -35,6 +36,8 @@ const processOperation = (strategy, operation, input, values) => {
             return processNETWORK(operation, input, values);
         case StrategiesType.VALUE:
             return processVALUE(operation, input, values);
+        case StrategiesType.NUMERIC:
+            return processNUMERIC(operation, input, values);
         case StrategiesType.TIME:
             return processTime(operation, input, values);
         case StrategiesType.DATE:
@@ -87,6 +90,25 @@ function processVALUE(operation, input, values) {
         case OperationsType.NOT_EQUAL:
             const result = values.filter(element => element === input);
             return result.length === 0;
+    }
+}
+
+function processNUMERIC(operation, input, values) {
+    switch(operation) {
+        case OperationsType.EXIST:
+            return values.includes(input);
+        case OperationsType.NOT_EXIST:
+            return !values.includes(input);
+        case OperationsType.EQUAL:
+            return input === values[0];
+        case OperationsType.NOT_EQUAL:
+            return values.filter(element => element === input).length === 0;
+        case OperationsType.LOWER:
+            return input < values[0];
+        case OperationsType.GREATER:
+            return input > values[0];
+        case OperationsType.BETWEEN:
+            return input >= values[0] && input <= values[1];
     }
 }
 
