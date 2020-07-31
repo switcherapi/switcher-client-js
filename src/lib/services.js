@@ -22,11 +22,11 @@ exports.getEntry = (input) => {
     return entry;
 }
 
-exports.checkCriteria = async (url, token, key, input) => {
+exports.checkCriteria = async (url, token, key, input, showReason = false) => {
     try {
         const entry = this.getEntry(input);
         const options = {
-            url: `${url}/criteria`,
+            url: `${url}/criteria?showReason=${showReason}`,
             qs: {
                 key
             },
@@ -42,8 +42,7 @@ exports.checkCriteria = async (url, token, key, input) => {
             };
         }
 
-        const response = await request.post(options);
-        return response.result;
+        return await request.post(options);
     } catch (e) {
         let error;
         if (e.error) {

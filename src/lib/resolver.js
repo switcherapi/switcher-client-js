@@ -1,7 +1,7 @@
 const { processOperation } = require('../utils/index');
 const services = require('../lib/services');
 
-async function resolveCriteria(key, input, {
+function resolveCriteria(key, input, {
     domain
 }) {
     if (!domain.activated) {
@@ -52,9 +52,9 @@ async function resolveCriteria(key, input, {
     return result;
 }
 
-async function checkCriteriaOffline(key, input, snapshot) {
+function checkCriteriaOffline(key, input, snapshot) {
     const {  data } = snapshot;
-    return await resolveCriteria(key, input, data);
+    return resolveCriteria(key, input, data);
 }
 
 module.exports = checkCriteriaOffline;

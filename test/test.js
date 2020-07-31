@@ -16,7 +16,7 @@ describe('E2E test - Switcher offline:', function () {
 
   this.beforeAll(function() {
     switcher = new Switcher(url, apiKey, domain, component, environment, {
-      offline: true
+      offline: true, logger: true
     });
   });
 
@@ -24,13 +24,22 @@ describe('E2E test - Switcher offline:', function () {
     fs.unwatchFile('./snapshot/default.json');
   });
 
-  it('should be valid', async function () {
+  it('should be valid - isItOn', async function () {
     await switcher.prepare('FF2FOR2020', [Switcher.StrategiesType.VALUE, 'Japan', Switcher.StrategiesType.NETWORK, '10.0.0.3']);
     await switcher.isItOn('FF2FOR2020').then(function (result) {
       assert.isTrue(result);
+      assert.isNotEmpty(Switcher.getLogger('FF2FOR2020'));
     }, function (error) {
       console.log('Rejected:', error);
     });
+  });
+
+  it('should be valid - isItOnPromise', async function () {
+    await switcher.prepare('FF2FOR2020', [Switcher.StrategiesType.VALUE, 'Japan', Switcher.StrategiesType.NETWORK, '10.0.0.3']);
+
+    switcher.isItOnPromise('FF2FOR2020')
+        .then(result => assert.isTrue(result))
+        .catch(error => console.log('Rejected:', error));
   });
 
   it('should be valid - No prepare function called', async function () {
@@ -63,10 +72,11 @@ describe('E2E test - Switcher offline:', function () {
     
     assert.isTrue(await switcher.isItOn());
     Switcher.assume('FF2FOR2020').false();
+    Switcher.assume('FF2FOR2020').false();
     assert.isFalse(await switcher.isItOn());
     Switcher.forget('FF2FOR2020');
     assert.isTrue(await switcher.isItOn());
-  })
+  });
 
   it('should be valid assuming unknown key to be true', async function () {
     await switcher.prepare('UNKNOWN', [Switcher.StrategiesType.VALUE, 'Japan', Switcher.StrategiesType.NETWORK, '10.0.0.3']);

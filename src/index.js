@@ -1,6 +1,7 @@
 "use strict";
 
 const Bypasser = require('./lib/bypasser');
+const ExecutionLogger = require('./lib/executionLogger');
 const { loadDomain, StrategiesType } = require('./utils/index');
 const services = require('./lib/services');
 const checkCriteriaOffline = require('./lib/resolver');
@@ -10,6 +11,7 @@ const fs = require('fs');
 const DEFAULT_SNAPSHOT_LOCATION = './snapshot/';
 const DEFAULT_RETRY_TIME = '5m';
 const DEFAULT_OFFLINE = false;
+const DEFAULT_LOGGER = false;
 
 class Switcher {
 
@@ -23,6 +25,7 @@ class Switcher {
     // Default values
     this.offline = DEFAULT_OFFLINE;
     this.snapshotLocation = DEFAULT_SNAPSHOT_LOCATION;
+    this.logger = DEFAULT_LOGGER;
 
     if (options) {
       if ('offline' in options) {
@@ -35,6 +38,10 @@ class Switcher {
 
       if ('silentMode' in options) {
         this.silentMode = options.silentMode;
+      }
+
+      if ('logger' in options) {
+        this.logger = options.logger;
       }
 
       if ('retryAfter' in options) {
@@ -98,15 +105,18 @@ class Switcher {
     }
   }
 
-  async isItOn(key, input) {
+  async isItOn(key, input, showReason = false) {
     const bypassKey = Bypasser.searchBypassed(this.key ? this.key : key);
     if (bypassKey) {
       return bypassKey.getValue();
     }
 
     if (this.offline) {
-      return await checkCriteriaOffline(
+      const result = checkCriteriaOffline(
         this.key ? this.key : key, this.input ? this.input : input, this.snapshot);
+
+      ExecutionLogger.add(this.key, result);
+      return result;
     }
 
     if (key) { this.key = key; }
@@ -114,10 +124,17 @@ class Switcher {
     
     await this.validate();
     if (this.token === 'SILENT') {
-      return await checkCriteriaOffline(
+      const result = checkCriteriaOffline(
         this.key ? this.key : key, this.input ? this.input : input, this.snapshot);
+
+      if (this.logger) ExecutionLogger.add(this.key, result);
+      return result;
     } else {
-      return await services.checkCriteria(this.url, this.token, this.key, this.input);
+      const response = await services.checkCriteria(
+        this.url, this.token, this.key, this.input, showReason);
+
+      if (this.logger) ExecutionLogger.add(this.key, response);
+      return response.result;
     }
   }
 
@@ -143,8 +160,8 @@ class Switcher {
     return false;
   }
 
-  isItOnPromise(key, input) {
-    return new Promise((resolve) => resolve(this.isItOn(key, input)));
+  isItOnPromise(key, input, showReason = false) {
+    return new Promise((resolve) => resolve(this.isItOn(key, input, showReason)));
   }
 
   loadSnapshot() {
@@ -177,6 +194,10 @@ class Switcher {
 
   static forget(key) {
     return Bypasser.forget(key);
+  }
+
+  static getLogger(key) {
+    return ExecutionLogger.getByKey(key);
   }
   
 }

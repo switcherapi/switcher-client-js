@@ -3,16 +3,26 @@ const Switcher = require('../../src/index');
 let switcher;
 
 function setupSwitcher(offline) {
-    const apiKey = '$2b$08$7U/KJBVgG.FQtYEKKnbLe.o6p7vBrfHFRgMipZTaokSmVFiduXq/y'
-    // const apiKey = '$2b$08$m.8yx5ekyqWnAGgZjvG/AOTaMO3l1riBO/r4fHQ4EHqM87TdvHU9S'
+    const apiKey = '$2b$08$e6EUI0358sk5QBAZlxrBF.Eg5jwhLSRfoKLvCAcbctCnKMoqcM5Fi'
     const domain = 'My Domain'
-    const component = 'Android'
+    const component = 'CustomerAPI'
     const environment = 'default'
     const url = 'http://localhost:3000'
 
     switcher = new Switcher(url, apiKey, domain, component, environment, {
-        offline
+        offline, logger: true
     });
+}
+
+// Requires online API
+const testSimpleAPICall = async () => {
+    setupSwitcher(false);
+
+    await switcher.isItOn('FEATURE01', null, true);
+    await switcher.isItOn('FEATURE02', null, true);
+    console.log(Switcher.getLogger('FEATURE01'));
+
+    switcher.unloadSnapshot();
 }
 
 // Requires online API
@@ -41,7 +51,7 @@ const testAsyncCall = async () => {
         .then(result => console.log('Promise result:', result))
         .catch(error => console.log(error));
 
-    switcher.assume('FEATURE2020').false();
+    Switcher.assume('FEATURE2020').false();
     result = await switcher.isItOn('FEATURE2020');
     console.log('Value changed:', result);
 
@@ -65,4 +75,4 @@ const testBypasser = async () => {
     switcher.unloadSnapshot();
 }
 
-testBypasser();
+testSimpleAPICall();

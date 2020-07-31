@@ -38,16 +38,18 @@ declare class Switcher {
    * 
    * @param key 
    * @param input 
+   * @param showReason
    */
-  isItOn(key?: string, input?: string[]): boolean;
+  isItOn(key?: string, input?: string[], showReason?: boolean): boolean;
 
   /**
    * Execute async criteria
    * 
    * @param key 
    * @param input 
+   * @param showReason
    */
-  isItOnPromise(key?: string, input?: string[]): Promise<boolean>;
+  isItOnPromise(key?: string, input?: string[], showReason?: boolean): Promise<boolean>;
 
   /**
    * Read snapshot file locally and store in a parsed JSON object
@@ -78,10 +80,18 @@ declare class Switcher {
    * @param key 
    */
   static forget(key: string): void;
+
+  /**
+   * Retrieve execution log given a switcher key
+   * 
+   * @param key 
+   */
+  static getLogger(key: string): any[];
 }
 
 declare interface SwitcherOptions {
   offline: boolean;
+  logger: boolean;
   snapshotLocation: string;
   silentMode: boolean;
   retryAfter: string;

@@ -1,6 +1,6 @@
 import Key from "./key";
 
-declare class Bypasser {
+export declare class Bypasser {
     
   static bypassedKeys: Key;
 
@@ -25,5 +25,3 @@ declare class Bypasser {
    */
   static searchBypassed(key: string): Key;
 }
-
-export = Bypasser;

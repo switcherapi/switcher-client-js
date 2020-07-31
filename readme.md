@@ -46,16 +46,18 @@ You can also activate features such as offline and silent mode:
 
 ```js
 const offline = true;
+const logger = true;
 const snapshotLocation = './snapshot/';
 const silentMode = true;
 const retryAfter = '5m';
 
 let switcher = new Switcher(url, apiKey, domain, component, environment, {
-      offline, snapshotLocation, silentMode, retryAfter
+      offline, logger, snapshotLocation, silentMode, retryAfter
 });
 ```
 
 - **offline**: If activated, the client will only fetch the configuration inside your snapshot file. The default value is 'false'.
+- **logger**: If activated, it is possible to retrieve the last results from a given Switcher key using Switcher.getLogger('KEY')
 - **snapshotLocation**: Location of snapshot files. The default value is './snapshot/'.
 - **silentMode**: If activated, all connectivity issues will be ignored and the client will automatically fetch the configuration into your snapshot file.
 - **retryAfter** : Time given to the module to re-establish connectivity with the API - e.g. 5s (s: seconds - m: minutes - h: hours).
