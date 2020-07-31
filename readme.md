@@ -2,7 +2,7 @@
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=switcher-client-master&metric=alert_status)](https://sonarcloud.io/dashboard?id=switcher-client-master)
 [![Coverage Status](https://coveralls.io/repos/github/petruki/switcher-client-master/badge.svg?branch=master)](https://coveralls.io/github/petruki/switcher-client-master?branch=master)
 [![npm version](https://badge.fury.io/js/switcher-client.svg)](https://badge.fury.io/js/switcher-client)
-[![Known Vulnerabilities](https://snyk.io/test/npm/switcher-client/2.0.1/badge.svg)](https://snyk.io/test/npm/switcher-client/2.0.1)
+[![Known Vulnerabilities](https://snyk.io/test/npm/switcher-client/2.0.2/badge.svg)](https://snyk.io/test/npm/switcher-client/2.0.2)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Slack: Switcher-HQ](https://img.shields.io/badge/slack-@switcher/hq-blue.svg?logo=slack)](https://switcher-hq.slack.com/)
 
