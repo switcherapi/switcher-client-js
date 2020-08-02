@@ -12,9 +12,10 @@
 Client JavaScript for working with Switcher-API.
 https://github.com/switcherapi/switcher-api
 
+- Flexible and robust functions that will keep your code clean and maintainable.
 - Able to work offline using a snapshot file downloaded from your remote Switcher-API Domain.
-- Silent mode automatically enables a contingent sub-process in case of connectivity issues.
-- Built-in mock implementation for automated testing.
+- Silent mode is a hybrid configuration that automatically enables a contingent sub-process in case of any connectivity issue.
+- Built-in mock implementation for clear and easy implementation of automated testing.
 - Easy to setup. Switcher Context is responsible to manage all the complexity between your application and API.
 
 # Usage
