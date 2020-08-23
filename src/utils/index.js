@@ -17,7 +17,8 @@ const StrategiesType = Object.freeze({
     VALUE: 'VALUE_VALIDATION',
     NUMERIC: 'NUMERIC_VALIDATION',
     TIME: 'TIME_VALIDATION',
-    DATE: 'DATE_VALIDATION'
+    DATE: 'DATE_VALIDATION',
+    REGEX: 'REGEX_VALIDATION'
 });
 
 const OperationsType = Object.freeze({
@@ -42,6 +43,8 @@ const processOperation = (strategy, operation, input, values) => {
             return processTime(operation, input, values);
         case StrategiesType.DATE:
             return processDate(operation, input, values);
+        case StrategiesType.REGEX:
+            return processREGEX(operation, input, values);
     }
 }
 
@@ -133,6 +136,29 @@ function processDate(operation, input, values) {
             return moment(input).isSameOrAfter(values[0]);
         case OperationsType.BETWEEN:
             return moment(input).isBetween(values[0], values[1]);
+    }
+}
+
+function processREGEX(operation, input, values) {
+    switch(operation) {
+        case OperationsType.EXIST:
+            for (var i = 0; i < values.length; i++) {
+                if (input.match(values[i])) {
+                    return true;
+                }
+            }
+            return false;
+        case OperationsType.NOT_EXIST:
+            for (var i = 0; i < values.length; i++) {
+                if (input.match(values[i])) {
+                    return false;
+                }
+            }
+            return true;
+        case OperationsType.EQUAL:
+            return input.match(`\\b${values[0]}\\b`) != null;
+        case OperationsType.NOT_EQUAL:
+            return input.match(`\\b${values[0]}\\b`) == null;
     }
 }
 
