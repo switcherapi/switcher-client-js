@@ -397,9 +397,18 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
     requestGetStub.returns(Promise.resolve({ status: false })); // Snapshot outdated
     requestPostStub.returns(Promise.resolve(JSON.stringify(JSON.parse(dataJSON), null, 4)));
     // Mocking finishes
+
+    switcher = new Switcher(url, apiKey, domain, component, environment, {
+      snapshotLocation: 'generated-snapshots/',
+      snapshotAutoload: true,
+      offline: true
+    });
     
     await switcher.loadSnapshot();
     assert.isTrue(await switcher.checkSnapshot());
+
+    switcher.unloadSnapshot();
+    fs.unlinkSync(`generated-snapshots/${environment}.json`);
   });
 
   it('should NOT update snapshot', async function () {
