@@ -18,6 +18,7 @@ describe('E2E test - Switcher offline:', function () {
     switcher = new Switcher(url, apiKey, domain, component, environment, {
       offline: true, logger: true
     });
+    switcher.loadSnapshot();
   });
 
   this.afterAll(function() {
@@ -26,20 +27,12 @@ describe('E2E test - Switcher offline:', function () {
 
   it('should be valid - isItOn', async function () {
     await switcher.prepare('FF2FOR2020', [Switcher.StrategiesType.VALUE, 'Japan', Switcher.StrategiesType.NETWORK, '10.0.0.3']);
-    await switcher.isItOn('FF2FOR2020').then(function (result) {
+    switcher.isItOn('FF2FOR2020').then(function (result) {
       assert.isTrue(result);
       assert.isNotEmpty(Switcher.getLogger('FF2FOR2020'));
     }, function (error) {
       console.log('Rejected:', error);
     });
-  });
-
-  it('should be valid - isItOnPromise', async function () {
-    await switcher.prepare('FF2FOR2020', [Switcher.StrategiesType.VALUE, 'Japan', Switcher.StrategiesType.NETWORK, '10.0.0.3']);
-
-    switcher.isItOnPromise('FF2FOR2020')
-        .then(result => assert.isTrue(result))
-        .catch(error => console.log('Rejected:', error));
   });
 
   it('should be valid - No prepare function called', async function () {
@@ -68,6 +61,7 @@ describe('E2E test - Switcher offline:', function () {
   });
 
   it('should be valid assuming key to be false and then forgetting it', async function () {
+    await switcher.loadSnapshot();
     await switcher.prepare('FF2FOR2020', [Switcher.StrategiesType.VALUE, 'Japan', Switcher.StrategiesType.NETWORK, '10.0.0.3']);
     
     assert.isTrue(await switcher.isItOn());
@@ -92,14 +86,35 @@ describe('E2E test - Switcher offline:', function () {
     });
   });
 
-  it('should be invalid - Offline file not found', async function () {
+  it('should be invalid - Offline mode did not found a snapshot file', async function () {
     try {
-      new Switcher(url, apiKey, domain, component, environment, {
+      const switcher = new Switcher(url, apiKey, domain, component, environment, {
         offline: true,
         snapshotLocation: 'somewhere/'
       });
+      await switcher.loadSnapshot();
+      assert.isNotNull(switcher.snapshot);
     } catch (error) {
-      assert.equal('Something went wrong: It was not possible to load the file at somewhere/default.json', error.message);
+      assert.equal('Something went wrong: It was not possible to load the file at somewhere/', error.message);
+    }
+  });
+
+  it('should be valid - Offline mode w/ autoload snapshot', async function () {
+    this.timeout(3000);
+
+    try {
+      const switcher = new Switcher(url, apiKey, domain, component, environment, {
+        offline: true,
+        snapshotLocation: 'generated-snapshots/',
+        snapshotAutoload: true
+      });
+      await switcher.loadSnapshot();
+      assert.isNotNull(switcher.snapshot);
+
+      switcher.unloadSnapshot();
+      fs.unlinkSync(`generated-snapshots/${environment}.json`);
+    } catch (error) {
+      assert.equal('Something went wrong: It was not possible to load the file at generated-snapshots/', error.message);
     }
   });
 });
@@ -272,6 +287,7 @@ describe('Unit test - Switcher:', function () {
         silentMode: true,
         retryAfter: '1s'
       });
+      await switcher.loadSnapshot();
       const spyPrepare = sinon.spy(switcher, 'prepare');
 
       // First attempt to reach the online API - Since it's configured to use silent mode, it should return true (according to the snapshot)
@@ -348,21 +364,23 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
   let fsStub;
 
   afterEach(function() {
-    requestGetStub.restore();
-    requestPostStub.restore();
-    clientAuth.restore();
-    fsStub.restore();
+    if (requestGetStub != undefined)
+      requestGetStub.restore();
+    
+    if (requestPostStub != undefined)
+      requestPostStub.restore();
+    
+    if (clientAuth != undefined)
+      clientAuth.restore();
+
+    if (fsStub != undefined)
+      fsStub.restore();
   })
 
   beforeEach(function() {
     switcher = new Switcher(url, apiKey, domain, component, environment, {
       offline: true
     });
-
-    clientAuth = sinon.stub(services, 'auth');
-    requestGetStub = sinon.stub(request, 'get');
-    requestPostStub = sinon.stub(request, 'post');
-    fsStub = sinon.stub(fs, 'writeFileSync');
   });
 
   this.afterAll(function() {
@@ -371,25 +389,38 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
 
   it('should update snapshot', async function () {
     // Mocking starts
+    clientAuth = sinon.stub(services, 'auth');
+    requestGetStub = sinon.stub(request, 'get');
+    requestPostStub = sinon.stub(request, 'post');
+
     clientAuth.returns(Promise.resolve({ token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 }));
     requestGetStub.returns(Promise.resolve({ status: false })); // Snapshot outdated
     requestPostStub.returns(Promise.resolve(JSON.stringify(JSON.parse(dataJSON), null, 4)));
     // Mocking finishes
     
+    await switcher.loadSnapshot();
     assert.isTrue(await switcher.checkSnapshot());
   });
 
   it('should NOT update snapshot', async function () {
     // Mocking starts
+    clientAuth = sinon.stub(services, 'auth');
+    requestGetStub = sinon.stub(request, 'get');
+
     clientAuth.returns(Promise.resolve({ token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 }));
     requestGetStub.returns(Promise.resolve({ status: true })); // No available update
     // Mocking finishes
     
+    await switcher.loadSnapshot();
     assert.isFalse(await switcher.checkSnapshot());
   });
 
   it('should NOT update snapshot - check Snapshot Error', async function () {
+    this.timeout(3000);
+
     // Mocking starts
+    clientAuth = sinon.stub(services, 'auth');
+
     clientAuth.returns(Promise.resolve({ token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 }));
     requestGetStub.throws({
       error: {
@@ -400,15 +431,20 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
     });
     // Mocking finishes
     
+    await switcher.loadSnapshot();
     await switcher.checkSnapshot().then(function (result) {
       assert.isUndefined(result);
     }, function (error) {
-      assert.equal('Something went wrong: {"errno":"ECONNREFUSED","code":"ECONNREFUSED","syscall":"connect"}', error.message);
+      assert.equal('Something went wrong: {"errno":"ECONNREFUSED","code":"ECONNREFUSED","syscall":"connect","address":"127.0.0.1","port":3000}', error.message);
     });
   });
 
   it('should NOT update snapshot - resolve Snapshot Error', async function () {
     // Mocking starts
+    clientAuth = sinon.stub(services, 'auth');
+    requestGetStub = sinon.stub(request, 'get');
+    requestPostStub = sinon.stub(request, 'post');
+
     clientAuth.returns(Promise.resolve({ token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 }));
     requestGetStub.returns(Promise.resolve({ status: false })); // Snapshot outdated
     requestPostStub.throws({
@@ -420,11 +456,38 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
     });
     // Mocking finishes
     
+    await switcher.loadSnapshot();
     await switcher.checkSnapshot().then(function (result) {
       assert.isUndefined(result);
     }, function (error) {
       assert.equal('Something went wrong: {"errno":"ECONNREFUSED","code":"ECONNREFUSED","syscall":"connect"}', error.message);
     });
+  });
+
+  it('should update snapshot - snapshot autoload activated', async function () {
+    // Mocking starts
+    clientAuth = sinon.stub(services, 'auth');
+    requestGetStub = sinon.stub(request, 'get');
+    requestPostStub = sinon.stub(request, 'post');
+
+    clientAuth.returns(Promise.resolve({ token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 }));
+    requestGetStub.returns(Promise.resolve({ status: false })); // Snapshot outdated
+    requestPostStub.returns(Promise.resolve(JSON.stringify(JSON.parse(dataJSON), null, 4)));
+    // Mocking finishes
+
+    try {
+      const switcher = new Switcher(url, apiKey, domain, component, environment, {
+        snapshotLocation: 'generated-snapshots/',
+        snapshotAutoload: true
+      });
+      await switcher.loadSnapshot();
+      assert.isNotNull(switcher.snapshot);
+
+      switcher.unloadSnapshot();
+      fs.unlinkSync(`generated-snapshots/${environment}.json`);
+    } catch (error) {
+      assert.equal('Something went wrong: It was not possible to load the file at generated-snapshots/', error.message);
+    }
   });
 
 });

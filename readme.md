@@ -48,21 +48,31 @@ You can also activate features such as offline and silent mode:
 ```js
 const offline = true;
 const logger = true;
+const snapshotAutoload = true;
 const snapshotLocation = './snapshot/';
 const silentMode = true;
 const retryAfter = '5m';
 
 let switcher = new Switcher(url, apiKey, domain, component, environment, {
-      offline, logger, snapshotLocation, silentMode, retryAfter
+      offline, logger, snapshotLocation, snapshotAutoload, silentMode, retryAfter
 });
 ```
 
 - **offline**: If activated, the client will only fetch the configuration inside your snapshot file. The default value is 'false'.
 - **logger**: If activated, it is possible to retrieve the last results from a given Switcher key using Switcher.getLogger('KEY')
 - **snapshotLocation**: Location of snapshot files. The default value is './snapshot/'.
+- **snapshotAutload**: If activated, snapshot folder and files are going to be created automatically.
 - **silentMode**: If activated, all connectivity issues will be ignored and the client will automatically fetch the configuration into your snapshot file.
 - **retryAfter** : Time given to the module to re-establish connectivity with the API - e.g. 5s (s: seconds - m: minutes - h: hours).
 
+## Pre-execution
+Before you call the API, there is one single step you need to execute to complete the configuration.
+If you are not running the API expecting to use the offline features, you can ignore this step. 
+
+After instantiating the Switcher, you need to load the snapshot engine to watch for changes in your Domain structure.
+```js
+await switcher.loadSnapshot();
+```
 
 ## Executing
 There are a few different ways to call the API using the JavaScript module.
@@ -77,10 +87,10 @@ await switcher.isItOn('FEATURE01');
 ```
 
 2. **Promise**
-Using promise is another way to call the API if you want, like:
+Most functions were implemented using async operations. Here it is a differnet way to execute the criteria:
 
 ```js
-switcher.isItOnPromise('KEY')
+switcher.isItOn('KEY')
     .then(result => console.log('Result:', result))
     .catch(error => console.log(error));
 ```

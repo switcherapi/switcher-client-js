@@ -12,6 +12,7 @@ function setupSwitcher(offline) {
     switcher = new Switcher(url, apiKey, domain, component, environment, {
         offline, logger: true
     });
+    switcher.loadSnapshot();
 }
 
 // Requires online API
@@ -47,7 +48,7 @@ const testAsyncCall = async () => {
     let result = await switcher.isItOn('FEATURE2020');
     console.log(result);
 
-    switcher.isItOnPromise('FEATURE2020')
+    switcher.isItOn('FEATURE2020')
         .then(result => console.log('Promise result:', result))
         .catch(error => console.log(error));
 
@@ -75,4 +76,24 @@ const testBypasser = async () => {
     switcher.unloadSnapshot();
 }
 
-testSimpleAPICall();
+// Requires online API
+const testSnapshotAutoload = async () => {
+    const apiKey = '$2b$08$DYcg9NUcJouQkTtB6XxqeOQJ3DCprslij6Te.8aTF1Ds7y2sAvTjm'
+    const domain = 'My Domain'
+    const component = 'CustomerAPI'
+    const environment = 'generated'
+    const url = 'http://localhost:3000'
+
+    switcher = new Switcher(url, apiKey, domain, component, environment, {
+        snapshotAutoload: true
+    });
+
+    await switcher.loadSnapshot();
+
+    let result = await switcher.isItOn('FEATURE2020');
+    console.log(result);
+
+    switcher.unloadSnapshot();
+}
+
+testSnapshotAutoload();

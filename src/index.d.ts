@@ -23,7 +23,7 @@ declare class Switcher {
   /**
    * Validate the input provided to access the API
    */
-  validate(): void;
+  validate(): Promise<void>;
 
   /**
    * Pre-set input values before calling the API
@@ -31,7 +31,7 @@ declare class Switcher {
    * @param key 
    * @param input 
    */
-  prepare(key: string, input?: string[]): void;
+  prepare(key: string, input?: string[]): Promise<void>;
   
   /**
    * Execute async criteria
@@ -40,27 +40,18 @@ declare class Switcher {
    * @param input 
    * @param showReason
    */
-  isItOn(key?: string, input?: string[], showReason?: boolean): boolean;
-
-  /**
-   * Execute async criteria
-   * 
-   * @param key 
-   * @param input 
-   * @param showReason
-   */
-  isItOnPromise(key?: string, input?: string[], showReason?: boolean): Promise<boolean>;
+  isItOn(key?: string, input?: string[], showReason?: boolean): Promise<boolean>;
 
   /**
    * Read snapshot file locally and store in a parsed JSON object
    */
-  loadSnapshot(): void;
+  loadSnapshot(): Promise<void>;
 
   /**
    * Verifies if the current snapshot file is updated.
    * Return true if an update has been made.
    */
-  checkSnapshot(): boolean;
+  checkSnapshot(): Promise<boolean>;
 
   /**
    * Remove snapshot from real-time update
@@ -93,6 +84,7 @@ declare interface SwitcherOptions {
   offline: boolean;
   logger: boolean;
   snapshotLocation: string;
+  snapshotAutoload: string;
   silentMode: boolean;
   retryAfter: string;
 }
