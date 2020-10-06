@@ -3,7 +3,7 @@ const Switcher = require('../../src/index');
 let switcher;
 
 function setupSwitcher(offline) {
-    const apiKey = '$2b$08$e6EUI0358sk5QBAZlxrBF.Eg5jwhLSRfoKLvCAcbctCnKMoqcM5Fi'
+    const apiKey = '$2b$08$DYcg9NUcJouQkTtB6XxqeOQJ3DCprslij6Te.8aTF1Ds7y2sAvTjm'
     const domain = 'My Domain'
     const component = 'CustomerAPI'
     const environment = 'default'
@@ -96,4 +96,4 @@ const testSnapshotAutoload = async () => {
     switcher.unloadSnapshot();
 }
 
-testSnapshotAutoload();
+testSimpleAPICall();

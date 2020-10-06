@@ -21,8 +21,8 @@
     "build": "browserify ./switcher-client.js > ./dist/switcher-client.js"
   },
   "dependencies": {
-    "ip-cidr": "^2.0.6",
-    "request-promise": "^4.2.6"
+    "axios": "^0.20.0",
+    "ip-cidr": "^2.0.6"
   },
   "devDependencies": {
     "browserify": "^16.5.0",

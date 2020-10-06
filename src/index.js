@@ -71,8 +71,8 @@ class Switcher {
         retryDurationIn: this.retryDurationIn
       });
       
-      this.token = response.token;
-      this.exp = response.exp;
+      this.token = response.data.token;
+      this.exp = response.data.exp;
     }
   }
 
@@ -136,8 +136,8 @@ class Switcher {
       const response = await services.checkCriteria(
         this.url, this.token, this.key, this.input, showReason);
 
-      if (this.logger) ExecutionLogger.add(this.key, response);
-      return response.result;
+      if (this.logger) ExecutionLogger.add(this.key, response.data);
+      return response.data.result;
     }
   }
 

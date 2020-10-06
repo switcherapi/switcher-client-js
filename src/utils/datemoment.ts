@@ -17,17 +17,17 @@ declare class DateMoment {
   /**
    * It verifies if the configured date is before the given date/time
    */
-  isSameOrBefore(date: Date, time: string): Boolean
+  isSameOrBefore(date: Date, time: string): boolean
 
   /**
    * It verifies if the configured date is after the given date/time
    */
-  isSameOrAfter(date: Date, time: string): Boolean
+  isSameOrAfter(date: Date, time: string): boolean
 
   /**
    * It verifies if the configured date is in between the given date/time (A/B)
    */
-  isBetween(dateA: Date, dateB: Date, timeA: string, timeB: string): Boolean
+  isBetween(dateA: Date, dateB: Date, timeA: string, timeB: string): boolean
 
   /**
    * Add time to the configured date based on the unit
