@@ -1,5 +1,5 @@
 const request = require('request-promise');
-const moment = require('moment');
+const DateMoment = require('../utils/datemoment');
 
 exports.getEntry = (input) => {
     if (!input) {
@@ -71,10 +71,13 @@ exports.auth = async (url, apiKey, domain, component, environment, options) => {
     } catch (e) {
         if (e.error.code === 'ECONNREFUSED' && options && 'silentMode' in options) {
             if (options.silentMode) {
-                const expirationTime = moment().add(options.retryTime, options.retryDurationIn);
+
+                const expirationTime = new DateMoment(new Date())
+                    .add(options.retryTime, options.retryDurationIn).getDate();
+
                 return {
                     token: 'SILENT',
-                    exp: expirationTime.toDate().getTime() / 1000
+                    exp: expirationTime.getTime() / 1000
                 };
             }
         }

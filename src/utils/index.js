@@ -1,6 +1,6 @@
 const fs = require('fs');
-const moment = require('moment');
 const IPCIDR = require('ip-cidr');
+const DateMoment = require('./datemoment');
 
 const loadDomain = (snapshotLocation, environment, snapshotAutoload) => {
     try {
@@ -126,26 +126,28 @@ function processNUMERIC(operation, input, values) {
 }
 
 function processTime(operation, input, values) {
-    const today = moment().format('YYYY-MM-DD');
+    const dateMoment = new DateMoment(new Date(), input);
 
     switch(operation) {
         case OperationsType.LOWER:
-            return moment(`${today}T${input}`).isSameOrBefore(`${today}T${values[0]}`);
+            return dateMoment.isSameOrBefore(dateMoment.getDate(), values[0]);
         case OperationsType.GREATER:
-            return moment(`${today}T${input}`).isSameOrAfter(`${today}T${values[0]}`);
+            return dateMoment.isSameOrAfter(dateMoment.getDate(), values[0]);
         case OperationsType.BETWEEN:
-            return moment(`${today}T${input}`).isBetween(`${today}T${values[0]}`, `${today}T${values[1]}`);
+            return dateMoment.isBetween(dateMoment.getDate(), dateMoment.getDate(), values[0], values[1]);
     }
 }
 
 function processDate(operation, input, values) {
+    const dateMoment = new DateMoment(input);
+
     switch(operation) {
         case OperationsType.LOWER:
-            return moment(input).isSameOrBefore(values[0]);
+            return dateMoment.isSameOrBefore(values[0]);
         case OperationsType.GREATER:
-            return moment(input).isSameOrAfter(values[0]);
+            return dateMoment.isSameOrAfter(values[0]);
         case OperationsType.BETWEEN:
-            return moment(input).isBetween(values[0], values[1]);
+            return dateMoment.isBetween(values[0], values[1]);
     }
 }
 
