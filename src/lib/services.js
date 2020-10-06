@@ -1,4 +1,4 @@
-const request = require('request-promise');
+const axios = require('axios');
 const DateMoment = require('../utils/datemoment');
 
 exports.getEntry = (input) => {
@@ -25,126 +25,89 @@ exports.getEntry = (input) => {
 exports.checkCriteria = async (url, token, key, input, showReason = false) => {
     try {
         const entry = this.getEntry(input);
-        const options = {
-            url: `${url}/criteria?showReason=${showReason}`,
-            qs: {
-                key
-            },
+        return await axios.post(`${url}/criteria?showReason=${showReason}&key=${key}`, { entry }, {
             headers: {
-                'Authorization': `Bearer ${token}`
-            },
-            json: true
-        };
-
-        if (entry) {
-            options.body = {
-                entry
-            };
-        }
-
-        return await request.post(options);
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
     } catch (e) {
-        let error;
-        if (e.error) {
-            error = JSON.stringify(e.error);
-        }
-        throw new CriteriaError(e.error ? error : e.message);
+        throw new CriteriaError(e.errno ? e.errno : e.message);
     }
 }
 
 exports.auth = async (url, apiKey, domain, component, environment, options) => {
     try {
-        const postOptions = {
-            url: `${url}/criteria/auth`,
+        return await axios.post(`${url}/criteria/auth`, {
+            domain,
+            component,
+            environment
+        }, {
             headers: {
-                'switcher-api-key': apiKey
-            },
-            json: true,
-            body: {
-                domain,
-                component,
-                environment
+                'switcher-api-key': apiKey,
+                'Content-Type': 'application/json'
             }
-        };
-
-        return await request.post(postOptions);
+        })
     } catch (e) {
-        if (e.error.code === 'ECONNREFUSED' && options && 'silentMode' in options) {
+        if (e.errno === 'ECONNREFUSED' && options && 'silentMode' in options) {
             if (options.silentMode) {
-
                 const expirationTime = new DateMoment(new Date())
                     .add(options.retryTime, options.retryDurationIn).getDate();
 
                 return {
-                    token: 'SILENT',
-                    exp: expirationTime.getTime() / 1000
+                    data: {
+                        token: 'SILENT',
+                        exp: expirationTime.getTime() / 1000
+                    }
                 };
             }
         }
 
-        let error;
-        if (e.error) {
-            error = JSON.stringify(e.error);
-        }
-        throw new AuthError(e.error ? error : e.message);
+        throw new AuthError(e.errno ? e.errno : e.message);
     }
 }
 
 exports.checkSnapshotVersion = async (url, token, version) => {
     try {
-        const options = {
-            url: `${url}/criteria/snapshot_check/${version}`,
+        const response = await axios.get(`${url}/criteria/snapshot_check/${version}`, {
             headers: {
-                'Authorization': `Bearer ${token}`
-            },
-            json: true
-        };
-
-        const response = await request.get(options);
-        return response;
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        })
+        return response.data;
     } catch (e) {
-        let error;
-        if (e.error) {
-            error = JSON.stringify(e.error);
-        }
-        throw new SnapshotServiceError(e.error ? error : e.message);
+        throw new SnapshotServiceError(e.errno ? e.errno : e.message);
     }
 }
 
 exports.resolveSnapshot = async (url, token, domain, environment) => {
-    var query = `query domain($domain: String!, $environment: String!) {
-        domain(name: $domain, environment: $environment) {
-            name version activated
-            group { name activated
-                config { key activated
-                    strategies { strategy activated operation values }
-                    components
+    var data = { 
+        query: `
+            query domain {
+                domain(name: ${domain}, environment: ${environment}) {
+                    name version activated
+                    group { name activated
+                        config { key activated
+                            strategies { strategy activated operation values }
+                            components
+                        }
+                    }
                 }
-            }
-        }
-    }`;
+            }`
+        };
 
     try {
-        const options = {
-            url: `${url}/graphql`,
+        const response = await axios.post(`${url}/graphql`, data, {
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({
-                query,
-                variables: { domain, environment }
-            })
-        };
+            }
+        });
 
-        const response = await request.post(options);
-        return JSON.stringify(JSON.parse(response), null, 4);
+        return response;
     } catch (e) {
-        let error;
-        if (e.error) {
-            error = JSON.stringify(e.error);
-        }
-        throw new SnapshotServiceError(e.error ? error : e.message);
+        throw new SnapshotServiceError(e.errno ? e.errno : e.message);
     }
 }
 
