@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 class ExecutionLogger {
     static logger = new Array();

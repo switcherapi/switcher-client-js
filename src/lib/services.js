@@ -47,7 +47,7 @@ exports.auth = async (url, apiKey, domain, component, environment, options) => {
                 'switcher-api-key': apiKey,
                 'Content-Type': 'application/json'
             }
-        })
+        });
     } catch (e) {
         if (e.errno === 'ECONNREFUSED' && options && 'silentMode' in options) {
             if (options.silentMode) {
@@ -85,7 +85,7 @@ exports.resolveSnapshot = async (url, token, domain, environment) => {
     var data = { 
         query: `
             query domain {
-                domain(name: ${domain}, environment: ${environment}) {
+                domain(name: "${domain}", environment: "${environment}") {
                     name version activated
                     group { name activated
                         config { key activated
@@ -104,8 +104,7 @@ exports.resolveSnapshot = async (url, token, domain, environment) => {
                 'Authorization': `Bearer ${token}`
             }
         });
-
-        return response;
+        return JSON.stringify(response.data, null, 4);
     } catch (e) {
         throw new SnapshotServiceError(e.errno ? e.errno : e.message);
     }

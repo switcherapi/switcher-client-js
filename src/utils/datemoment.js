@@ -1,3 +1,5 @@
+'use strict';
+
 class DateMoment {
     constructor(date, time) {
         this.date = new Date(date);

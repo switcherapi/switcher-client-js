@@ -9,12 +9,13 @@ const loadDomain = (snapshotLocation, environment, snapshotAutoload) => {
         if (fs.existsSync(snapshotFile)) {
             dataBuffer = fs.readFileSync(snapshotFile);
         } else if (snapshotAutoload) {
-            dataBuffer = '{ "data": { "domain": { "version": 0 } } }';
+            dataBuffer = JSON.stringify({ data: { domain: { version: 0 } } }, null, 4);
             fs.mkdir(snapshotLocation, { recursive: true }, (err) => {});
             fs.writeFileSync(snapshotFile, dataBuffer);
         } else {
             throw new Error();
         }
+
         const dataJSON = dataBuffer.toString();
         return JSON.parse(dataJSON);
     } catch (e) {
