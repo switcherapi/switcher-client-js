@@ -1,6 +1,6 @@
 {
   "name": "switcher-client",
-  "version": "2.0.3",
+  "version": "2.0.6",
   "description": "Module for working with Switcher-API",
   "main": "./src/index.js",
   "types": "./src/index.d.ts",
@@ -22,16 +22,14 @@
   },
   "dependencies": {
     "ip-cidr": "^2.0.6",
-    "moment": "^2.24.0",
-    "request": "^2.88.0",
-    "request-promise": "^4.2.5"
+    "request-promise": "^4.2.6"
   },
   "devDependencies": {
     "browserify": "^16.5.0",
     "chai": "^4.2.0",
     "coveralls": "^3.0.9",
     "mocha": "^6.2.2",
-    "mocha-sonarqube-reporter": "^1.0.1",
+    "mocha-sonarqube-reporter": "^1.0.2",
     "nyc": "^14.1.1",
     "sinon": "^7.5.0"
   },
