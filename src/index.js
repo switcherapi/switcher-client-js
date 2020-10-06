@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 const Bypasser = require('./lib/bypasser');
 const ExecutionLogger = require('./lib/executionLogger');
@@ -12,7 +12,6 @@ const DEFAULT_SNAPSHOT_LOCATION = './snapshot/';
 const DEFAULT_RETRY_TIME = '5m';
 const DEFAULT_OFFLINE = false;
 const DEFAULT_LOGGER = false;
-const DEFAULT_SNAPSHOT_AUTOLOAD = false;
 
 class Switcher {
 
@@ -149,8 +148,8 @@ class Switcher {
         retryDurationIn: this.retryDurationIn
       });
       
-      this.token = response.token;
-      this.exp = response.exp;
+      this.token = response.data.token;
+      this.exp = response.data.exp;
 
       const result = await validateSnapshot(
         this.url, this.token, this.domain, this.environment, this.snapshotLocation, this.snapshot.data.domain.version);
@@ -172,7 +171,7 @@ class Switcher {
         await this.checkSnapshot();
       } else {
         fs.unwatchFile(snapshotFile);
-        fs.watchFile(snapshotFile, (curr, prev) => {
+        fs.watchFile(snapshotFile, () => {
           this.snapshot = loadDomain(this.snapshotLocation, this.environment, this.snapshotAutoload);
         });
       }
