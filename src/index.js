@@ -2,10 +2,9 @@
 
 const Bypasser = require('./lib/bypasser');
 const ExecutionLogger = require('./lib/executionLogger');
-const { loadDomain, StrategiesType } = require('./utils/index');
+const { loadDomain, validateSnapshot, StrategiesType } = require('./lib/snapshot');
 const services = require('./lib/services');
 const checkCriteriaOffline = require('./lib/resolver');
-const validateSnapshot = require('./lib/snapshot');
 const fs = require('fs');
 
 const DEFAULT_SNAPSHOT_LOCATION = './snapshot/';

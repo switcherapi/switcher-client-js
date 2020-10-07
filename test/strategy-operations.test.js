@@ -6,7 +6,7 @@ const {
     processOperation,
     StrategiesType,
     OperationsType
-} = require('../src/utils/index');
+} = require('../src/lib/snapshot');
 
 describe('Processing strategy: NETWORK', () => {
 

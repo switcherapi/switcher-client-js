@@ -1,5 +1,5 @@
 const axios = require('axios');
-const DateMoment = require('../utils/datemoment');
+const DateMoment = require('./datemoment');
 
 exports.getEntry = (input) => {
     if (!input) {
