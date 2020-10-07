@@ -1,7 +1,7 @@
 "use strict"
 
 const assert = require('chai').assert
-const DateMoment = require('../src/utils/datemoment');
+const DateMoment = require('../src/lib/datemoment');
 
 describe('Manipulate date and time', () => {
 

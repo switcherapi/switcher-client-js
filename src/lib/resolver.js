@@ -1,4 +1,4 @@
-const { processOperation } = require('../utils/index');
+const { processOperation } = require('./snapshot');
 const services = require('../lib/services');
 
 function resolveCriteria(key, input, {
