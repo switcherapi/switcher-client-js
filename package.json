@@ -20,6 +20,11 @@
     "coverage": "nyc report --reporter=text-lcov | coveralls",
     "build": "browserify ./switcher-client.js > ./dist/switcher-client.js"
   },
+  "files": [
+    "LICENSE",
+    "switcher-client.js",
+    "src/"
+  ],
   "dependencies": {
     "axios": "^0.20.0",
     "ip-cidr": "^2.0.6"
