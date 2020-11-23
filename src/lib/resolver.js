@@ -15,7 +15,7 @@ function resolveCriteria(key, input, {
         group.forEach(function (g) {
 
             const { config } = g;
-            const configFound = config.filter(c => c.key === key)
+            const configFound = config.filter(c => c.key === key);
 
             if (configFound[0]) {
                 notFoundKey = false;
@@ -27,7 +27,7 @@ function resolveCriteria(key, input, {
                     return result = false;
                 }
 
-                const { strategies } = configFound[0]
+                const { strategies } = configFound[0];
                 strategies.forEach(function (strategy) {
                     if (strategy.activated) {
                         if (!input) {
@@ -35,14 +35,14 @@ function resolveCriteria(key, input, {
                         }
 
                         const entry = services.getEntry(input);
-                        const entryInput = entry.filter(e => e.strategy === strategy.strategy)
+                        const entryInput = entry.filter(e => e.strategy === strategy.strategy);
                         if (!processOperation(strategy.strategy, strategy.operation, entryInput[0].input, strategy.values)) {
                             return result = false;
                         }
                     }
-                })
+                });
             }
-        })
+        });
     }
 
     if (notFoundKey) {

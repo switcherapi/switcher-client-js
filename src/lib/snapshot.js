@@ -11,7 +11,7 @@ const loadDomain = (snapshotLocation, environment, snapshotAutoload) => {
             dataBuffer = fs.readFileSync(snapshotFile);
         } else if (snapshotAutoload) {
             dataBuffer = JSON.stringify({ data: { domain: { version: 0 } } }, null, 4);
-            fs.mkdir(snapshotLocation, { recursive: true }, (err) => {});
+            fs.mkdir(snapshotLocation, { recursive: true }, () => {});
             fs.writeFileSync(snapshotFile, dataBuffer);
         } else {
             throw new Error();
@@ -22,7 +22,7 @@ const loadDomain = (snapshotLocation, environment, snapshotAutoload) => {
     } catch (e) {
         throw new Error(`Something went wrong: It was not possible to load the file at ${snapshotLocation}`);
     }
-}
+};
 
 const validateSnapshot = async (url, token, domain, environment, snapshotLocation, snapshotVersion) => {
     const { status } = await checkSnapshotVersion(url, token, snapshotVersion);
@@ -34,7 +34,7 @@ const validateSnapshot = async (url, token, domain, environment, snapshotLocatio
         return true;
     }
     return false;
-}
+};
 
 const StrategiesType = Object.freeze({
     NETWORK: 'NETWORK_VALIDATION',
@@ -70,11 +70,11 @@ const processOperation = (strategy, operation, input, values) => {
         case StrategiesType.REGEX:
             return processREGEX(operation, input, values);
     }
-}
+};
 
 function processNETWORK(operation, input, values) {
 
-    const cidrRegex = '^([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))$';
+    const cidrRegex = /^([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))$/;
     
     switch(operation) {
         case OperationsType.EXIST:
@@ -89,7 +89,7 @@ function processNETWORK(operation, input, values) {
                 }
             }
             break;
-        case OperationsType.NOT_EXIST:
+        case OperationsType.NOT_EXIST: {
             const result = values.filter(element => {
                 if (element.match(cidrRegex)) {
                     const cidr = new IPCIDR(element);
@@ -99,11 +99,12 @@ function processNETWORK(operation, input, values) {
                 } else {
                     return values.includes(input);
                 }
-            })
+            });
             return result.length === 0;
+        }
     }
 
-    return false
+    return false;
 }
 
 function processVALUE(operation, input, values) {
@@ -114,9 +115,10 @@ function processVALUE(operation, input, values) {
             return !values.includes(input);
         case OperationsType.EQUAL:
             return input === values[0];
-        case OperationsType.NOT_EQUAL:
+        case OperationsType.NOT_EQUAL: {
             const result = values.filter(element => element === input);
             return result.length === 0;
+        }
     }
 }
 
