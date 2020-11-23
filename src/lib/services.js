@@ -1,6 +1,15 @@
 const axios = require('axios');
 const DateMoment = require('./datemoment');
 
+const getHeader = (token) => {
+    return {
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        }
+    };
+};
+
 exports.getEntry = (input) => {
     if (!input) {
         return undefined;
@@ -20,21 +29,17 @@ exports.getEntry = (input) => {
     }
 
     return entry;
-}
+};
 
 exports.checkCriteria = async (url, token, key, input, showReason = false) => {
     try {
         const entry = this.getEntry(input);
-        return await axios.post(`${url}/criteria?showReason=${showReason}&key=${key}`, { entry }, {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
-        });
+        return await axios.post(`${url}/criteria?showReason=${showReason}&key=${key}`, 
+            { entry }, getHeader(token));
     } catch (e) {
         throw new CriteriaError(e.errno ? e.errno : e.message);
     }
-}
+};
 
 exports.auth = async (url, apiKey, domain, component, environment, options) => {
     try {
@@ -65,21 +70,16 @@ exports.auth = async (url, apiKey, domain, component, environment, options) => {
 
         throw new AuthError(e.errno ? e.errno : e.message);
     }
-}
+};
 
 exports.checkSnapshotVersion = async (url, token, version) => {
     try {
-        const response = await axios.get(`${url}/criteria/snapshot_check/${version}`, {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
-        })
+        const response = await axios.get(`${url}/criteria/snapshot_check/${version}`, getHeader(token));
         return response.data;
     } catch (e) {
         throw new SnapshotServiceError(e.errno ? e.errno : e.message);
     }
-}
+};
 
 exports.resolveSnapshot = async (url, token, domain, environment) => {
     var data = { 
@@ -98,17 +98,12 @@ exports.resolveSnapshot = async (url, token, domain, environment) => {
         };
 
     try {
-        const response = await axios.post(`${url}/graphql`, data, {
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            }
-        });
+        const response = await axios.post(`${url}/graphql`, data, getHeader(token));
         return JSON.stringify(response.data, null, 4);
     } catch (e) {
         throw new SnapshotServiceError(e.errno ? e.errno : e.message);
     }
-}
+};
 
 class AuthError extends Error {
     constructor(message) {

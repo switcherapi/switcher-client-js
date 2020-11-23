@@ -11,7 +11,7 @@ class ExecutionLogger {
     }
 
     static getByKey(key) {
-        return ExecutionLogger.logger.filter(value => value.key === key)
+        return ExecutionLogger.logger.filter(value => value.key === key);
     }
 }
 
