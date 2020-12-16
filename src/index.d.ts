@@ -2,6 +2,8 @@ import Key from "./lib/key";
 
 declare class Switcher {
 
+  static testEnabled: boolean;
+
   constructor(
     url: string, 
     apiKey: string, 
@@ -78,6 +80,13 @@ declare class Switcher {
    * @param key 
    */
   static getLogger(key: string): any[];
+
+    /**
+   * Activate testing mode
+   * It prevents from watching Snapshots that may hold process
+   */
+  static setTestEnabled() : void;
+  
 }
 
 declare interface SwitcherOptions {

@@ -14,6 +14,8 @@ const DEFAULT_LOGGER = false;
 
 class Switcher {
 
+  static testEnabled = false;
+
   constructor(url, apiKey, domain, component, environment, options) {
     this.url = url;
     this.apiKey = apiKey;
@@ -168,7 +170,7 @@ class Switcher {
 
       if (this.snapshot.data.domain.version == 0 && !this.offline) {
         await this.checkSnapshot();
-      } else {
+      } else if (!Switcher.testEnabled) {
         fs.unwatchFile(snapshotFile);
         fs.watchFile(snapshotFile, () => {
           this.snapshot = loadDomain(this.snapshotLocation, this.environment, this.snapshotAutoload);
@@ -178,7 +180,7 @@ class Switcher {
   }
 
   unloadSnapshot() {
-    if (this.snapshotLocation) {
+    if (!Switcher.testEnabled && this.snapshotLocation) {
       const snapshotFile = `${this.snapshotLocation}${this.environment}.json`;
       this.snapshot = undefined;
       fs.unwatchFile(snapshotFile);
