@@ -9,7 +9,7 @@
 ![Switcher API: JavaScript Client: Cloud-based Feature Flag API](https://github.com/switcherapi/switcherapi-assets/blob/master/logo/switcherapi_js_client.png)
 
 # About  
-Client JavaScript for working with Switcher-API.
+JavaScript SDK for working with Switcher-API.
 https://github.com/switcherapi/switcher-api
 
 - Flexible and robust functions that will keep your code clean and maintainable.
