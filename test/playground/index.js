@@ -1,13 +1,16 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-console */
+
 const Switcher = require('../../src/index');
 
 let switcher;
 
 function setupSwitcher(offline) {
-    const apiKey = '$2b$08$DYcg9NUcJouQkTtB6XxqeOQJ3DCprslij6Te.8aTF1Ds7y2sAvTjm'
-    const domain = 'My Domain'
-    const component = 'CustomerAPI'
-    const environment = 'default'
-    const url = 'http://localhost:3000'
+    const apiKey = '$2b$08$DYcg9NUcJouQkTtB6XxqeOQJ3DCprslij6Te.8aTF1Ds7y2sAvTjm';
+    const domain = 'My Domain';
+    const component = 'CustomerAPI';
+    const environment = 'default';
+    const url = 'http://localhost:3000';
 
     switcher = new Switcher(url, apiKey, domain, component, environment, {
         offline, logger: true
@@ -24,7 +27,7 @@ const testSimpleAPICall = async () => {
     console.log(Switcher.getLogger('FEATURE01'));
 
     switcher.unloadSnapshot();
-}
+};
 
 // Requires online API
 const testSnapshotUpdate = async () => {
@@ -40,7 +43,7 @@ const testSnapshotUpdate = async () => {
     console.log(result);
 
     switcher.unloadSnapshot();
-}
+};
 
 const testAsyncCall = async () => {
     setupSwitcher(true);
@@ -57,7 +60,7 @@ const testAsyncCall = async () => {
     console.log('Value changed:', result);
 
     switcher.unloadSnapshot();
-}
+};
 
 const testBypasser = async () => {
     setupSwitcher(true);
@@ -74,15 +77,15 @@ const testBypasser = async () => {
     console.log(result);
 
     switcher.unloadSnapshot();
-}
+};
 
 // Requires online API
 const testSnapshotAutoload = async () => {
-    const apiKey = '$2b$08$DYcg9NUcJouQkTtB6XxqeOQJ3DCprslij6Te.8aTF1Ds7y2sAvTjm'
-    const domain = 'My Domain'
-    const component = 'CustomerAPI'
-    const environment = 'generated'
-    const url = 'http://localhost:3000'
+    const apiKey = '$2b$08$DYcg9NUcJouQkTtB6XxqeOQJ3DCprslij6Te.8aTF1Ds7y2sAvTjm';
+    const domain = 'My Domain';
+    const component = 'CustomerAPI';
+    const environment = 'generated';
+    const url = 'http://localhost:3000';
 
     switcher = new Switcher(url, apiKey, domain, component, environment, {
         snapshotAutoload: true
@@ -94,6 +97,6 @@ const testSnapshotAutoload = async () => {
     console.log(result);
 
     switcher.unloadSnapshot();
-}
+};
 
-testSimpleAPICall();
+testSnapshotAutoload();

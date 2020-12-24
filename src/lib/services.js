@@ -1,6 +1,8 @@
 const axios = require('axios');
 const DateMoment = require('./datemoment');
 
+const getConnectivityError = (code) => `Connection has been refused - ${code}`;
+
 const getHeader = (token) => {
     return {
         headers: {
@@ -37,7 +39,7 @@ exports.checkCriteria = async (url, token, key, input, showReason = false) => {
         return await axios.post(`${url}/criteria?showReason=${showReason}&key=${key}`, 
             { entry }, getHeader(token));
     } catch (e) {
-        throw new CriteriaError(e.errno ? e.errno : e.message);
+        throw new CriteriaError(e.errno ? getConnectivityError(e.errno) : e.message);
     }
 };
 
@@ -68,7 +70,7 @@ exports.auth = async (url, apiKey, domain, component, environment, options) => {
             }
         }
 
-        throw new AuthError(e.errno ? e.errno : e.message);
+        throw new AuthError(e.errno ? getConnectivityError(e.errno) : e.message);
     }
 };
 
@@ -77,7 +79,7 @@ exports.checkSnapshotVersion = async (url, token, version) => {
         const response = await axios.get(`${url}/criteria/snapshot_check/${version}`, getHeader(token));
         return response.data;
     } catch (e) {
-        throw new SnapshotServiceError(e.errno ? e.errno : e.message);
+        throw new SnapshotServiceError(e.errno ? getConnectivityError(e.errno) : e.message);
     }
 };
 
@@ -101,7 +103,7 @@ exports.resolveSnapshot = async (url, token, domain, environment) => {
         const response = await axios.post(`${url}/graphql`, data, getHeader(token));
         return JSON.stringify(response.data, null, 4);
     } catch (e) {
-        throw new SnapshotServiceError(e.errno ? e.errno : e.message);
+        throw new SnapshotServiceError(e.errno ? getConnectivityError(e.errno) : e.message);
     }
 };
 
