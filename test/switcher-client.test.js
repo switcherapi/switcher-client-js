@@ -85,6 +85,15 @@ describe('E2E test - Switcher offline:', function () {
     });
   });
 
+  it.only('should enable test mode which does not need load a snapshot', async function () {
+    Switcher.setTestEnabled();
+    
+    Switcher.assume('FF2FOR2020').false();
+    assert.isFalse(await switcher.isItOn('FF2FOR2020'));
+    Switcher.assume('FF2FOR2020').true();
+    assert.isTrue(await switcher.isItOn('FF2FOR2020'));
+  });
+
   it('should be invalid - Offline mode did not found a snapshot file', async function () {
     try {
       const switcher = new Switcher(url, apiKey, domain, component, environment, {

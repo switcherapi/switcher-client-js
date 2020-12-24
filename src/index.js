@@ -202,6 +202,10 @@ class Switcher {
   static getLogger(key) {
     return ExecutionLogger.getByKey(key);
   }
+
+  static setTestEnabled() {
+    Switcher.testEnabled = true;
+  }
   
 }
 
