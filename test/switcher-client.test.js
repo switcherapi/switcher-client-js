@@ -1,4 +1,4 @@
-const assert = require('chai').assert
+const assert = require('chai').assert;
 const sinon = require('sinon');
 const Switcher = require('../src/index');
 const axios = require('axios');
@@ -30,7 +30,7 @@ describe('E2E test - Switcher offline:', function () {
       assert.isTrue(result);
       assert.isNotEmpty(Switcher.getLogger('FF2FOR2020'));
     }, function (error) {
-      console.log('Rejected:', error);
+      assert.isUndefined(error);
     });
   });
 
@@ -38,7 +38,7 @@ describe('E2E test - Switcher offline:', function () {
     switcher.isItOn('FF2FOR2020', [Switcher.StrategiesType.VALUE, 'Japan', Switcher.StrategiesType.NETWORK, '10.0.0.3']).then(function (result) {
       assert.isTrue(result);
     }, function (error) {
-      console.log('Rejected:', error);
+      assert.isUndefined(error);
     });
   });
 
@@ -46,7 +46,7 @@ describe('E2E test - Switcher offline:', function () {
     switcher.isItOn('FF2FOR2030').then(function (result) {
       assert.isTrue(result);
     }, function (error) {
-      console.log('Rejected:', error);
+      assert.isUndefined(error);
     });
   });
 
@@ -55,7 +55,7 @@ describe('E2E test - Switcher offline:', function () {
     switcher.isItOn().then(function (result) {
       assert.isFalse(result);
     }, function (error) {
-      console.log('Rejected:', error);
+      assert.isUndefined(error);
     });
   });
 
@@ -122,7 +122,7 @@ describe('Unit test - Switcher:', function () {
 
   this.afterAll(function() {
     fs.unwatchFile('./snapshot/default.json');
-  })
+  });
 
   describe('check criteria:', function () {
 
@@ -132,12 +132,12 @@ describe('Unit test - Switcher:', function () {
     beforeEach(function() {
       requestStub = sinon.stub(axios, 'post');
       clientAuth = sinon.stub(services, 'auth');
-    })
+    });
   
     afterEach(function() {
       requestStub.restore();
       clientAuth.restore();
-    })
+    });
 
     it('should be valid', async function () {
       requestStub.returns(Promise.resolve({ data: { result: true } }));
@@ -247,7 +247,7 @@ describe('Unit test - Switcher:', function () {
       requestStub.returns(Promise.resolve({ data: { result: undefined } }));
       clientAuth.returns(Promise.resolve({ data: { token: undefined, exp: (Date.now()+5000)/1000 } }));
 
-      let switcher = new Switcher('url', 'apiKey', 'domain', 'component', 'default')
+      let switcher = new Switcher('url', 'apiKey', 'domain', 'component', 'default');
       switcher.isItOn('MY_FLAG', [Switcher.StrategiesType.VALUE, 'User 1', Switcher.StrategiesType.NETWORK, '192.168.0.1']).then(function (result) {
         assert.isUndefined(result);
       }, function (error) {
@@ -330,7 +330,7 @@ describe('Unit test - Switcher:', function () {
       await switcher.isItOn('FF2FOR2030').then(function (result) {
         assert.isUndefined(result);
       }, function (error) {
-        assert.equal('Something went wrong: ECONNREFUSED', error.message);
+        assert.equal('Something went wrong: Connection has been refused - ECONNREFUSED', error.message);
       });
     });
 
@@ -366,7 +366,7 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
 
     if (fsStub != undefined)
       fsStub.restore();
-  })
+  });
 
   beforeEach(function() {
     switcher = new Switcher(url, apiKey, domain, component, environment, {
@@ -386,7 +386,7 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
 
     clientAuth.returns(Promise.resolve({ data: { token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 } }));
     requestGetStub.returns(Promise.resolve({ data: { status: false } })); // Snapshot outdated
-    requestPostStub.returns(Promise.resolve(JSON.stringify(JSON.parse(dataJSON), null, 4)));
+    requestPostStub.returns(Promise.resolve(JSON.parse(dataJSON)));
     // Mock finishes
 
     switcher = new Switcher(url, apiKey, domain, component, environment, {
@@ -420,6 +420,7 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
 
     // Mocking starts
     clientAuth = sinon.stub(services, 'auth');
+    requestGetStub = sinon.stub(axios, 'get');
 
     clientAuth.returns(Promise.resolve({ data: { token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 } }));
     requestGetStub.throws({
@@ -431,7 +432,7 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
     await switcher.checkSnapshot().then(function (result) {
       assert.isUndefined(result);
     }, function (error) {
-      assert.equal('Something went wrong: ECONNREFUSED', error.message);
+      assert.equal('Something went wrong: Connection has been refused - ECONNREFUSED', error.message);
     });
   });
 
@@ -452,7 +453,7 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
     await switcher.checkSnapshot().then(function (result) {
       assert.isUndefined(result);
     }, function (error) {
-      assert.equal('Something went wrong: ECONNREFUSED', error.message);
+      assert.equal('Something went wrong: Connection has been refused - ECONNREFUSED', error.message);
     });
   });
 
@@ -464,7 +465,10 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
 
     clientAuth.returns(Promise.resolve({ data: { token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 } }));
     requestGetStub.returns(Promise.resolve({ data: { status: false } })); // Snapshot outdated
-    requestPostStub.returns(Promise.resolve(JSON.stringify(JSON.parse(dataJSON), null, 4)));
+    requestPostStub.returns(Promise.resolve(JSON.parse(dataJSON)));
+    
+    // stringfy is not necessary as we use the object data afterwards
+    // requestPostStub.returns(Promise.resolve(JSON.stringify(JSON.parse(dataJSON), null, 4)));
     // Mocking finishes
 
     try {
