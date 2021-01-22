@@ -1,9 +1,15 @@
-import Key from "./lib/key";
-
 declare class Switcher {
 
   static testEnabled: boolean;
 
+  /**
+   * @param url Swither-API endpoint 
+   * @param apiKey Switcher-API key generated to your component.
+   * @param domain Domain name
+   * @param component Application name
+   * @param environment Environment name. Production environment is named as 'default'
+   * @param options offline: boolean - logger: boolean - snapshotLocation: string - snapshotAutoload: string- silentMode: boolean - retryAfter: string;
+   */
   constructor(
     url: string, 
     apiKey: string, 
@@ -98,4 +104,4 @@ declare interface SwitcherOptions {
   retryAfter: string;
 }
 
-export = Switcher;
+export default Switcher;
