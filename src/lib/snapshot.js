@@ -24,11 +24,11 @@ const loadDomain = (snapshotLocation, environment, snapshotAutoload) => {
     }
 };
 
-const validateSnapshot = async (url, token, domain, environment, snapshotLocation, snapshotVersion) => {
+const validateSnapshot = async (url, token, domain, environment, component, snapshotLocation, snapshotVersion) => {
     const { status } = await checkSnapshotVersion(url, token, snapshotVersion);
 
     if (!status) {
-        const snapshot = await resolveSnapshot(url, token, domain, environment);
+        const snapshot = await resolveSnapshot(url, token, domain, environment, component);
         
         fs.writeFileSync(`${snapshotLocation}${environment}.json`, snapshot);
         return true;

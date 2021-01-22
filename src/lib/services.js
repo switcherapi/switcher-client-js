@@ -83,11 +83,11 @@ exports.checkSnapshotVersion = async (url, token, version) => {
     }
 };
 
-exports.resolveSnapshot = async (url, token, domain, environment) => {
+exports.resolveSnapshot = async (url, token, domain, environment, component) => {
     var data = { 
         query: `
             query domain {
-                domain(name: "${domain}", environment: "${environment}") {
+                domain(name: "${domain}", environment: "${environment}", _component: "${component}") {
                     name version activated
                     group { name activated
                         config { key activated

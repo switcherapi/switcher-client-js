@@ -153,7 +153,7 @@ class Switcher {
       this.exp = response.data.exp;
 
       const result = await validateSnapshot(
-        this.url, this.token, this.domain, this.environment, this.snapshotLocation, this.snapshot.data.domain.version);
+        this.url, this.token, this.domain, this.environment, this.component, this.snapshotLocation, this.snapshot.data.domain.version);
       
       if (result) {
         this.loadSnapshot();
