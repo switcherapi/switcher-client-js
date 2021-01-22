@@ -36,7 +36,7 @@ const component = 'MyApp';
 const url = 'https://switcher-load-balance.herokuapp.com';
 ```
 
-- **apiKey**: Switcher-API key generated after creating a domain..
+- **apiKey**: Switcher-API key generated to your component.
 - **environment**: Environment name. Production environment is named as 'default'.
 - **domain**: Domain name.
 - **component**: Application name.

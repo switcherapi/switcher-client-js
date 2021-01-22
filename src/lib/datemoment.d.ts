@@ -1,4 +1,4 @@
-export declare class DateMoment {
+declare class DateMoment {
   
   constructor(date: Date, time: string);
   date: Date;
@@ -34,5 +34,6 @@ export declare class DateMoment {
    * Add time to the configured date based on the unit
    */
   add(amount: string | number, unit: string): DateMoment
-
 }
+
+export default DateMoment;

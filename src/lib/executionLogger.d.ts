@@ -1,4 +1,4 @@
-export declare class ExecutionLogger {
+declare class ExecutionLogger {
     
   static logger: any[];
 
@@ -17,3 +17,5 @@ export declare class ExecutionLogger {
    */
   static getByKey(key: string): any[];
 }
+
+export default ExecutionLogger;
