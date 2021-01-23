@@ -1,6 +1,4 @@
 declare class Bypasser {
-    
-  static bypassedKeys: Key;
 
   /**
    * Force a switcher value to return a given value by calling one of both methods - true() false()
@@ -24,4 +22,4 @@ declare class Bypasser {
   static searchBypassed(key: string): Key;
 }
 
-export default Bypasser;
+export = Bypasser;

@@ -1,9 +1,12 @@
 dist: trusty
-sudo: false
 
 language: node_js
 node_js:
 - '12'
+
+branches:
+  only:
+  - master
 
 addons:
   sonarcloud:
@@ -12,16 +15,13 @@ addons:
 
 jobs:
   include:
-    - stage: compile
+    - stage: compile and test
       script:
         - npm install
-    - stage: test
-      script:
         - npm test
-        - sonar-scanner   
+        - sonar-scanner
 
 stages:
-  - compile
-  - test
+  - compile and test
 
 after_success: npm run coverage

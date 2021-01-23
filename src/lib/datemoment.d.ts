@@ -1,6 +1,7 @@
 declare class DateMoment {
   
   constructor(date: Date, time: string);
+  
   date: Date;
   time: string;
 
@@ -36,4 +37,4 @@ declare class DateMoment {
   add(amount: string | number, unit: string): DateMoment
 }
 
-export default DateMoment;
+export = DateMoment;

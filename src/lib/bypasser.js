@@ -1,29 +1,29 @@
 'use strict';
 
 const Key = require('./key');
+var bypassedKeys = new Array();
 
 class Bypasser {
-    static bypassedKeys = new Array();
 
     static assume(key) {
-        const existentKey = this.searchBypassed(key, Bypasser.bypassedKeys);
+        const existentKey = this.searchBypassed(key, bypassedKeys);
         if (existentKey) {
             return existentKey;
         }
 
         const keyBypassed = new Key(key);
-        Bypasser.bypassedKeys.push(keyBypassed);
+        bypassedKeys.push(keyBypassed);
         return keyBypassed;
     }
 
     static forget(key) {
-        Bypasser.bypassedKeys.splice(
-            Bypasser.bypassedKeys.indexOf(this.searchBypassed(key, Bypasser.bypassedKeys)), 1);
+        bypassedKeys.splice(
+            bypassedKeys.indexOf(this.searchBypassed(key, bypassedKeys)), 1);
     }
 
     static searchBypassed(key) {
         let existentKey;
-        Bypasser.bypassedKeys.forEach(async bk => {
+        bypassedKeys.forEach(async bk => {
             if (bk.getKey() === key) {
                 return existentKey = bk;
             }
