@@ -29,4 +29,4 @@ declare class Key {
   getValue(): boolean;
 }
 
-export default Key;
+export = Key;
