@@ -1,7 +1,5 @@
 declare class Switcher {
 
-  static testEnabled: boolean;
-
   /**
    * @param url Swither-API endpoint 
    * @param apiKey Switcher-API key generated to your component.
@@ -104,4 +102,4 @@ declare interface SwitcherOptions {
   retryAfter: string;
 }
 
-export default Switcher;
+export = Switcher;

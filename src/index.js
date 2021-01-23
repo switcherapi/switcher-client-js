@@ -11,10 +11,9 @@ const DEFAULT_SNAPSHOT_LOCATION = './snapshot/';
 const DEFAULT_RETRY_TIME = '5m';
 const DEFAULT_OFFLINE = false;
 const DEFAULT_LOGGER = false;
+var testEnabled = false;
 
 class Switcher {
-
-  static testEnabled = false;
 
   constructor(url, apiKey, domain, component, environment, options) {
     this.url = url;
@@ -170,7 +169,7 @@ class Switcher {
 
       if (this.snapshot.data.domain.version == 0 && !this.offline) {
         await this.checkSnapshot();
-      } else if (!Switcher.testEnabled) {
+      } else if (!testEnabled) {
         fs.unwatchFile(snapshotFile);
         fs.watchFile(snapshotFile, () => {
           this.snapshot = loadDomain(this.snapshotLocation, this.environment, this.snapshotAutoload);
@@ -180,7 +179,7 @@ class Switcher {
   }
 
   unloadSnapshot() {
-    if (!Switcher.testEnabled && this.snapshotLocation) {
+    if (!testEnabled && this.snapshotLocation) {
       const snapshotFile = `${this.snapshotLocation}${this.environment}.json`;
       this.snapshot = undefined;
       fs.unwatchFile(snapshotFile);
@@ -204,7 +203,7 @@ class Switcher {
   }
 
   static setTestEnabled() {
-    Switcher.testEnabled = true;
+    testEnabled = true;
   }
   
 }
