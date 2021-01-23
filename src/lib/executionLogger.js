@@ -6,7 +6,8 @@ class ExecutionLogger {
 
     static add(key, reasponse) {
         let keyIndex = undefined;
-        logger.map((value, index) => value.key === key ? keyIndex = index : undefined);
+        logger.forEach((value, index) => 
+            value.key === key ? keyIndex = index : undefined);
 
         if (keyIndex != undefined)
             logger.splice(keyIndex, 1);
