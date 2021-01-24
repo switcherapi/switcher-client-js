@@ -12,41 +12,42 @@ function setupSwitcher(offline) {
     const environment = 'default';
     const url = 'http://localhost:3000';
 
-    switcher = new Switcher(url, apiKey, domain, component, environment, {
-        offline, logger: true
-    });
-    switcher.loadSnapshot();
+    Switcher.buildContext({ url, apiKey, domain, component, environment }, { offline, logger: true });
+    Switcher.loadSnapshot();
 }
 
 // Requires online API
 const testSimpleAPICall = async () => {
     setupSwitcher(false);
 
+    const switcher = Switcher.factory();
     await switcher.isItOn('FEATURE01', null, true);
     await switcher.isItOn('FEATURE02', null, true);
     console.log(Switcher.getLogger('FEATURE01'));
 
-    switcher.unloadSnapshot();
+    Switcher.unloadSnapshot();
 };
 
 // Requires online API
 const testSnapshotUpdate = async () => {
     setupSwitcher(false);
 
+    const switcher = Switcher.factory();
     let result = await switcher.isItOn('FEATURE2020');
     console.log(result);
     
-    await switcher.checkSnapshot();
+    await Switcher.checkSnapshot();
     await new Promise(resolve => setTimeout(resolve, 1000));
 
     result = await switcher.isItOn('FEATURE2020');
     console.log(result);
 
-    switcher.unloadSnapshot();
+    Switcher.unloadSnapshot();
 };
 
 const testAsyncCall = async () => {
     setupSwitcher(true);
+    const switcher = Switcher.factory();
 
     let result = await switcher.isItOn('FEATURE2020');
     console.log(result);
@@ -59,11 +60,12 @@ const testAsyncCall = async () => {
     result = await switcher.isItOn('FEATURE2020');
     console.log('Value changed:', result);
 
-    switcher.unloadSnapshot();
+    Switcher.unloadSnapshot();
 };
 
 const testBypasser = async () => {
     setupSwitcher(true);
+    const switcher = Switcher.factory();
 
     let result = await switcher.isItOn('FEATURE2020');
     console.log(result);
@@ -76,7 +78,7 @@ const testBypasser = async () => {
     result = await switcher.isItOn('FEATURE2020');
     console.log(result);
 
-    switcher.unloadSnapshot();
+    Switcher.unloadSnapshot();
 };
 
 // Requires online API
@@ -87,16 +89,14 @@ const testSnapshotAutoload = async () => {
     const environment = 'generated';
     const url = 'http://localhost:3000';
 
-    switcher = new Switcher(url, apiKey, domain, component, environment, {
-        snapshotAutoload: true
-    });
+    Switcher.buildContext({ url, apiKey, domain, component, environment });
+    await Switcher.loadSnapshot();
 
-    await switcher.loadSnapshot();
-
+    const switcher = Switcher.factory();
     let result = await switcher.isItOn('FEATURE2020');
     console.log(result);
 
-    switcher.unloadSnapshot();
+    Switcher.unloadSnapshot();
 };
 
 testSnapshotAutoload();
