@@ -33,7 +33,7 @@ exports.getEntry = (input) => {
     return entry;
 };
 
-exports.checkCriteria = async (url, token, key, input, showReason = false) => {
+exports.checkCriteria = async ({ url, token }, key, input, showReason = false) => {
     try {
         const entry = this.getEntry(input);
         return await axios.post(`${url}/criteria?showReason=${showReason}&key=${key}`, 
@@ -43,7 +43,7 @@ exports.checkCriteria = async (url, token, key, input, showReason = false) => {
     }
 };
 
-exports.auth = async (url, apiKey, domain, component, environment, options) => {
+exports.auth = async ({ url, apiKey, domain, component, environment }, options) => {
     try {
         return await axios.post(`${url}/criteria/auth`, {
             domain,
@@ -111,7 +111,6 @@ class AuthError extends Error {
     constructor(message) {
         super(`Something went wrong: ${message}`);
         this.name = this.constructor.name;
-        Error.captureStackTrace(this, this.constructor);
     }
 }
 
@@ -119,7 +118,6 @@ class CriteriaError extends Error {
     constructor(message) {
         super(`Something went wrong: ${message}`);
         this.name = this.constructor.name;
-        Error.captureStackTrace(this, this.constructor);
     }
 }
 
@@ -127,6 +125,5 @@ class SnapshotServiceError extends Error {
     constructor(message) {
         super(`Something went wrong: ${message}`);
         this.name = this.constructor.name;
-        Error.captureStackTrace(this, this.constructor);
     }
 }

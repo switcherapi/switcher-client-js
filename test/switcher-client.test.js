@@ -13,15 +13,17 @@ describe('E2E test - Switcher offline:', function () {
   const environment = 'default';
   const url = 'http://localhost:3000';
 
-  this.beforeAll(function() {
-    switcher = new Switcher(url, apiKey, domain, component, environment, {
+  this.beforeAll(async function() {
+    Switcher.buildContext({ url, apiKey, domain, component, environment }, {
       offline: true, logger: true
     });
-    switcher.loadSnapshot();
+
+    await Switcher.loadSnapshot();
+    switcher = Switcher.factory();
   });
 
   this.afterAll(function() {
-    fs.unwatchFile('./snapshot/default.json');
+    Switcher.unloadSnapshot();
   });
 
   it('should be valid - isItOn', async function () {
@@ -60,7 +62,7 @@ describe('E2E test - Switcher offline:', function () {
   });
 
   it('should be valid assuming key to be false and then forgetting it', async function () {
-    await switcher.loadSnapshot();
+    await Switcher.loadSnapshot();
     await switcher.prepare('FF2FOR2020', [Switcher.StrategiesType.VALUE, 'Japan', Switcher.StrategiesType.NETWORK, '10.0.0.3']);
     
     assert.isTrue(await switcher.isItOn());
@@ -85,13 +87,13 @@ describe('E2E test - Switcher offline:', function () {
     });
   });
 
-  it('should enable test mode which does not need load a snapshot', async function () {
+  it('should enable test mode which will prevent a snapshot to be watchable', async function () {
     //given
-    switcher = new Switcher(url, apiKey, domain, component, environment, {
+    Switcher.buildContext({ url, apiKey, domain, component, environment }, {
       offline: true, logger: true
     });
 
-    Switcher.setTestEnabled();
+    switcher = Switcher.factory();
     
     //test
     Switcher.assume('FF2FOR2020').false();
@@ -100,33 +102,33 @@ describe('E2E test - Switcher offline:', function () {
     assert.isTrue(await switcher.isItOn('FF2FOR2020'));
   });
 
-  it('should be invalid - Offline mode did not found a snapshot file', async function () {
-    try {
-      const switcher = new Switcher(url, apiKey, domain, component, environment, {
-        offline: true,
-        snapshotLocation: 'somewhere/'
-      });
-      await switcher.loadSnapshot();
-      assert.isNotNull(switcher.snapshot);
-    } catch (error) {
-      assert.equal('Something went wrong: It was not possible to load the file at somewhere/', error.message);
-    }
-  });
-
-  it('should be valid - Offline mode w/ autoload snapshot', async function () {
+  it('should be invalid - Offline mode cannot load snapshot from an invalid path', async function () {
     this.timeout(3000);
 
     try {
-      const switcher = new Switcher(url, apiKey, domain, component, environment, {
+      Switcher.buildContext({ url, apiKey, domain, component, environment }, {
         offline: true,
-        snapshotLocation: 'generated-snapshots/',
-        snapshotAutoload: true
+        snapshotLocation: '//somewhere/'
       });
-      await switcher.loadSnapshot();
-      assert.isNotNull(switcher.snapshot);
 
-      switcher.unloadSnapshot();
-      fs.unlinkSync(`generated-snapshots/${environment}.json`);
+      Switcher.setTestEnabled();
+      await Switcher.loadSnapshot();
+    } catch (error) {
+      assert.equal('Something went wrong: It was not possible to load the file at //somewhere/', error.message);
+    }
+  });
+
+  it('should be valid - Offline mode', async function () {
+    this.timeout(3000);
+
+    try {
+      Switcher.buildContext({ url, apiKey, domain, component, environment }, {
+        offline: true,
+        snapshotLocation: 'generated-snapshots/'
+      });
+
+      await Switcher.loadSnapshot();
+      assert.isNotNull(Switcher.snapshot);
     } catch (error) {
       assert.equal('Something went wrong: It was not possible to load the file at generated-snapshots/', error.message);
     }
@@ -137,6 +139,10 @@ describe('Unit test - Switcher:', function () {
 
   this.afterAll(function() {
     fs.unwatchFile('./snapshot/default.json');
+  });
+
+  this.beforeEach(function() {
+    Switcher.setTestEnabled();
   });
 
   describe('check criteria:', function () {
@@ -158,7 +164,8 @@ describe('Unit test - Switcher:', function () {
       requestStub.returns(Promise.resolve({ data: { result: true } }));
       clientAuth.returns(Promise.resolve({ data: { token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 } }));
 
-      let switcher = new Switcher('url', 'apiKey', 'domain', 'component', 'default');
+      Switcher.buildContext({ url: 'url', apiKey: 'apiKey', domain: 'domain', component: 'component', environment: 'default' });
+      let switcher = Switcher.factory();
       
       await switcher.prepare('FLAG_1', [Switcher.StrategiesType.VALUE, 'User 1', Switcher.StrategiesType.NETWORK, '192.168.0.1']);
       assert.isTrue(await switcher.isItOn());
@@ -169,7 +176,9 @@ describe('Unit test - Switcher:', function () {
 
       requestStub.returns(Promise.resolve({ data: { result: true } }));
       clientAuth.returns(Promise.resolve({ data: { token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+1000)/1000 } }));
-      let switcher = new Switcher('url', 'apiKey', 'domain', 'component', 'default');
+
+      Switcher.buildContext({ url: 'url', apiKey: 'apiKey', domain: 'domain', component: 'component', environment: 'default' });
+      let switcher = Switcher.factory();
       const spyPrepare = sinon.spy(switcher, 'prepare');
 
       // Prepare the call generating the token
@@ -195,7 +204,8 @@ describe('Unit test - Switcher:', function () {
       requestStub.returns(Promise.resolve({ data: { result: true } }));
       clientAuth.returns(Promise.resolve({ data: { token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 } }));
 
-      let switcher = new Switcher('url', 'apiKey', 'domain', 'component', 'default');
+      Switcher.buildContext({ url: 'url', apiKey: 'apiKey', domain: 'domain', component: 'component', environment: 'default' });
+      let switcher = Switcher.factory();
       assert.isTrue(await switcher.isItOn('MY_FLAG', [Switcher.StrategiesType.VALUE, 'User 1', Switcher.StrategiesType.NETWORK, '192.168.0.1']));
     });
 
@@ -203,13 +213,15 @@ describe('Unit test - Switcher:', function () {
       requestStub.returns(Promise.resolve({ data: { result: true } }));
       clientAuth.returns(Promise.resolve({ data: { token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 } }));
 
-      let switcher = new Switcher('url', 'apiKey', 'domain', 'component', 'default');
+      Switcher.buildContext({ url: 'url', apiKey: 'apiKey', domain: 'domain', component: 'component', environment: 'default' });
+      let switcher = Switcher.factory();
       await switcher.prepare('MY_FLAG');
       assert.isTrue(await switcher.isItOn(undefined, [Switcher.StrategiesType.VALUE, 'User 1', Switcher.StrategiesType.NETWORK, '192.168.0.1']));
     });
 
     it('should be invalid - Missing url field', async function () {
-      let switcher = new Switcher(undefined, 'apiKey', 'domain', 'component', 'default');
+      Switcher.buildContext({ url: 'url', apiKey: 'apiKey', domain: 'domain', component: 'component', environment: 'default' });
+      let switcher = Switcher.factory();
       clientAuth.returns(Promise.resolve({ data: { token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 } }));
 
       await switcher.prepare('MY_FLAG', [Switcher.StrategiesType.VALUE, 'User 1', Switcher.StrategiesType.NETWORK, '192.168.0.1']);
@@ -221,7 +233,8 @@ describe('Unit test - Switcher:', function () {
     });
 
     it('should be invalid - Missing API Key field', async function () {
-      let switcher = new Switcher('url', undefined, 'domain', 'component', 'default');
+      Switcher.buildContext({ url: 'url', apiKey: undefined, domain: 'domain', component: 'component', environment: 'default' });
+      let switcher = Switcher.factory();
       clientAuth.returns(Promise.resolve({ data: { token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 } }));
 
       await switcher.prepare('MY_FLAG', [Switcher.StrategiesType.VALUE, 'User 1', Switcher.StrategiesType.NETWORK, '192.168.0.1']);
@@ -236,7 +249,8 @@ describe('Unit test - Switcher:', function () {
       requestStub.returns(Promise.resolve({ data: { result: undefined } }));
       clientAuth.returns(Promise.resolve({ data: { token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 } }));
 
-      let switcher = new Switcher('url', 'apiKey', 'domain', 'component', 'default');
+      Switcher.buildContext({ url: 'url', apiKey: 'apiKey', domain: 'domain', component: 'component', environment: 'default' });
+      let switcher = Switcher.factory();
       await switcher.prepare(undefined, [Switcher.StrategiesType.VALUE, 'User 1', Switcher.StrategiesType.NETWORK, '192.168.0.1']);
       
       switcher.isItOn().then(function (result) {
@@ -250,7 +264,8 @@ describe('Unit test - Switcher:', function () {
       requestStub.returns(Promise.resolve({ data: { result: undefined } }));
       clientAuth.returns(Promise.resolve({ data: { token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 } }));
 
-      let switcher = new Switcher('url', 'apiKey', 'domain', undefined, 'default');
+      Switcher.buildContext({ url: 'url', apiKey: 'apiKey', domain: 'domain', component: undefined, environment: 'default' });
+      let switcher = Switcher.factory();
       switcher.isItOn('MY_FLAG', [Switcher.StrategiesType.VALUE, 'User 1', Switcher.StrategiesType.NETWORK, '192.168.0.1']).then(function (result) {
         assert.isUndefined(result);
       }, function (error) {
@@ -262,7 +277,8 @@ describe('Unit test - Switcher:', function () {
       requestStub.returns(Promise.resolve({ data: { result: undefined } }));
       clientAuth.returns(Promise.resolve({ data: { token: undefined, exp: (Date.now()+5000)/1000 } }));
 
-      let switcher = new Switcher('url', 'apiKey', 'domain', 'component', 'default');
+      Switcher.buildContext({ url: 'url', apiKey: 'apiKey', domain: 'domain', component: 'component', environment: 'default' });
+      let switcher = Switcher.factory();
       switcher.isItOn('MY_FLAG', [Switcher.StrategiesType.VALUE, 'User 1', Switcher.StrategiesType.NETWORK, '192.168.0.1']).then(function (result) {
         assert.isUndefined(result);
       }, function (error) {
@@ -274,7 +290,8 @@ describe('Unit test - Switcher:', function () {
       requestStub.returns(Promise.resolve({ result: undefined }));
       clientAuth.returns(Promise.resolve({ data: { token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 } }));
 
-      let switcher = new Switcher('url', 'apiKey', 'domain', 'component', 'default');
+      Switcher.buildContext({ url: 'url', apiKey: 'apiKey', domain: 'domain', component: 'component', environment: 'default' });
+      let switcher = Switcher.factory();
       await switcher.prepare('MY_WRONG_FLAG', ['THIS IS WRONG']);
       switcher.isItOn().then(function (result) {
         assert.isUndefined(result);
@@ -293,11 +310,14 @@ describe('Unit test - Switcher:', function () {
         errno: 'ECONNREFUSED'
       });
 
-      let switcher = new Switcher('url', 'apiKey', 'domain', 'component', 'default', {
+      Switcher.buildContext({ url: 'url', apiKey: 'apiKey', domain: 'domain', component: 'component', environment: 'default' }, {
         silentMode: true,
         retryAfter: '1s'
       });
-      await switcher.loadSnapshot();
+      
+      Switcher.setTestEnabled();
+      await Switcher.loadSnapshot();
+      let switcher = Switcher.factory();
       const spyPrepare = sinon.spy(switcher, 'prepare');
 
       // First attempt to reach the online API - Since it's configured to use silent mode, it should return true (according to the snapshot)
@@ -340,7 +360,8 @@ describe('Unit test - Switcher:', function () {
         errno: 'ECONNREFUSED'
       });
 
-      let switcher = new Switcher('url', 'apiKey', 'domain', 'component', 'default');
+      Switcher.buildContext({ url: 'url', apiKey: 'apiKey', domain: 'domain', component: 'component', environment: 'default' });
+      let switcher = Switcher.factory();
 
       await switcher.isItOn('FF2FOR2030').then(function (result) {
         assert.isUndefined(result);
@@ -354,7 +375,6 @@ describe('Unit test - Switcher:', function () {
 });
 
 describe('E2E test - Switcher offline - Snapshot:', function () {
-  let switcher;
   const apiKey = '$2b$08$S2Wj/wG/Rfs3ij0xFbtgveDtyUAjML1/TOOhocDg5dhOaU73CEXfK';
   const domain = 'currency-api';
   const component = 'Android';
@@ -384,13 +404,14 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
   });
 
   beforeEach(function() {
-    switcher = new Switcher(url, apiKey, domain, component, environment, {
+    Switcher.buildContext({ url, apiKey, domain, component, environment }, {
       offline: true
     });
+    Switcher.setTestEnabled();
   });
 
   this.afterAll(function() {
-    switcher.unloadSnapshot();
+    Switcher.unloadSnapshot();
   });
 
   it('should update snapshot', async function () {
@@ -404,16 +425,15 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
     requestPostStub.returns(Promise.resolve(JSON.parse(dataJSON)));
     // Mock finishes
 
-    switcher = new Switcher(url, apiKey, domain, component, environment, {
+    Switcher.buildContext({ url, apiKey, domain, component, environment }, {
       snapshotLocation: 'generated-snapshots/',
-      snapshotAutoload: true,
       offline: true
     });
     
-    await switcher.loadSnapshot();
-    assert.isTrue(await switcher.checkSnapshot());
+    await Switcher.loadSnapshot();
+    assert.isTrue(await Switcher.checkSnapshot());
 
-    switcher.unloadSnapshot();
+    Switcher.unloadSnapshot();
     fs.unlinkSync(`generated-snapshots/${environment}.json`);
   });
 
@@ -426,8 +446,8 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
     requestGetStub.returns(Promise.resolve({ data: { status: true } })); // No available update
     // Mocking finishes
     
-    await switcher.loadSnapshot();
-    assert.isFalse(await switcher.checkSnapshot());
+    await Switcher.loadSnapshot();
+    assert.isFalse(await Switcher.checkSnapshot());
   });
 
   it('should NOT update snapshot - check Snapshot Error', async function () {
@@ -443,8 +463,9 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
     });
     // Mocking finishes
     
-    await switcher.loadSnapshot();
-    await switcher.checkSnapshot().then(function (result) {
+    Switcher.setTestEnabled();
+    await Switcher.loadSnapshot();
+    await Switcher.checkSnapshot().then(function (result) {
       assert.isUndefined(result);
     }, function (error) {
       assert.equal('Something went wrong: Connection has been refused - ECONNREFUSED', error.message);
@@ -464,15 +485,16 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
     });
     // Mocking finishes
     
-    await switcher.loadSnapshot();
-    await switcher.checkSnapshot().then(function (result) {
+    Switcher.setTestEnabled();
+    await Switcher.loadSnapshot();
+    await Switcher.checkSnapshot().then(function (result) {
       assert.isUndefined(result);
     }, function (error) {
       assert.equal('Something went wrong: Connection has been refused - ECONNREFUSED', error.message);
     });
   });
 
-  it('should update snapshot - snapshot autoload activated', async function () {
+  it('should update snapshot', async function () {
     // Mocking starts
     clientAuth = sinon.stub(services, 'auth');
     requestGetStub = sinon.stub(axios, 'get');
@@ -487,14 +509,14 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
     // Mocking finishes
 
     try {
-      const switcher = new Switcher(url, apiKey, domain, component, environment, {
-        snapshotLocation: 'generated-snapshots/',
-        snapshotAutoload: true
+      Switcher.buildContext({ url, apiKey, domain, component, environment }, {
+        snapshotLocation: 'generated-snapshots/'
       });
-      await switcher.loadSnapshot();
-      assert.isNotNull(switcher.snapshot);
 
-      switcher.unloadSnapshot();
+      await Switcher.loadSnapshot();
+      assert.isNotNull(Switcher.snapshot);
+
+      Switcher.unloadSnapshot();
       fs.unlinkSync(`generated-snapshots/${environment}.json`);
     } catch (error) {
       assert.equal('Something went wrong: It was not possible to load the file at generated-snapshots/', error.message);
