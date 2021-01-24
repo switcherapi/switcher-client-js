@@ -24,20 +24,20 @@ https://github.com/switcherapi/switcher-api
 `npm install switcher-client`
 
 ## Module initialization
-The context properties stores all information regarding connectivity and strategy settings.
+The context properties stores all information regarding connectivity.
 
 ```js
-const Switcher = require("switcher-client");
+const Switcher = require('switcher-client');
 
-const apiKey = 'API Key';
-const environment = 'default'; // Production = default
+const apiKey = '[API_KEY]';
+const environment = 'default';
 const domain = 'My Domain';
 const component = 'MyApp';
 const url = 'https://switcher-load-balance.herokuapp.com';
 ```
 
 - **apiKey**: Switcher-API key generated to your component.
-- **environment**: Environment name. Production environment is named as 'default'.
+- **environment**: (optional) Environment name. Production environment is named as 'default'.
 - **domain**: Domain name.
 - **component**: Application name.
 - **url**: Swither-API endpoint.
@@ -48,31 +48,22 @@ You can also activate features such as offline and silent mode:
 ```js
 const offline = true;
 const logger = true;
-const snapshotAutoload = true;
 const snapshotLocation = './snapshot/';
 const silentMode = true;
 const retryAfter = '5m';
 
-let switcher = new Switcher(url, apiKey, domain, component, environment, {
-      offline, logger, snapshotLocation, snapshotAutoload, silentMode, retryAfter
+Switcher.buildContext({ url, apiKey, domain, component, environment }, {
+    offline, logger, snapshotLocation, silentMode, retryAfter
 });
+
+let switcher = Switcher.factory();
 ```
 
 - **offline**: If activated, the client will only fetch the configuration inside your snapshot file. The default value is 'false'.
 - **logger**: If activated, it is possible to retrieve the last results from a given Switcher key using Switcher.getLogger('KEY')
 - **snapshotLocation**: Location of snapshot files. The default value is './snapshot/'.
-- **snapshotAutload**: If activated, snapshot folder and files are going to be created automatically.
 - **silentMode**: If activated, all connectivity issues will be ignored and the client will automatically fetch the configuration into your snapshot file.
 - **retryAfter** : Time given to the module to re-establish connectivity with the API - e.g. 5s (s: seconds - m: minutes - h: hours).
-
-## Pre-execution
-Before you call the API, there is one single step you need to execute to complete the configuration.
-If you are not running the API expecting to use the offline features, you can ignore this step. 
-
-After instantiating the Switcher, you need to load the snapshot engine to watch for changes in your Domain structure.
-```js
-await switcher.loadSnapshot();
-```
 
 ## Executing
 There are a few different ways to call the API using the JavaScript module.
@@ -82,7 +73,7 @@ Here are some examples:
 Invoking the API can be done by instantiating the switcher and calling *isItOn* passing its key as a parameter.
 
 ```js
-const switcher = new Switcher(url, apiKey, domain, component, environment);
+const switcher = Switcher.factory();
 await switcher.isItOn('FEATURE01');
 ```
 
@@ -133,9 +124,16 @@ To enable this feature, it is recommended to place the following on your test se
 Switcher.setTestEnabled();
 ```
 
+## Loading Snapshot from the API
+This step is optional if you want to load a copy of the configuration that can be used to eliminate latency when offline mode is activated.
+
+```js
+Switcher.loadSnapshot();
+```
+
 ## Snapshot version check
 For convenience, an implementation of a domain version checker is available if you have external processes that manage snapshot files.
 
 ```js
-switcher.checkSnapshot();
+Switcher.checkSnapshot();
 ```

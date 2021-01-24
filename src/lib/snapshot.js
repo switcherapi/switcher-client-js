@@ -3,18 +3,16 @@ const IPCIDR = require('ip-cidr');
 const DateMoment = require('./datemoment');
 const { resolveSnapshot, checkSnapshotVersion } = require('./services');
 
-const loadDomain = (snapshotLocation, environment, snapshotAutoload) => {
+const loadDomain = (snapshotLocation, environment) => {
     try {
         let dataBuffer;
         const snapshotFile = `${snapshotLocation}${environment}.json`;
         if (fs.existsSync(snapshotFile)) {
             dataBuffer = fs.readFileSync(snapshotFile);
-        } else if (snapshotAutoload) {
+        } else {
             dataBuffer = JSON.stringify({ data: { domain: { version: 0 } } }, null, 4);
             fs.mkdir(snapshotLocation, { recursive: true }, () => {});
             fs.writeFileSync(snapshotFile, dataBuffer);
-        } else {
-            throw new Error();
         }
 
         const dataJSON = dataBuffer.toString();
@@ -24,7 +22,7 @@ const loadDomain = (snapshotLocation, environment, snapshotAutoload) => {
     }
 };
 
-const validateSnapshot = async (url, token, domain, environment, component, snapshotLocation, snapshotVersion) => {
+const validateSnapshot = async ({ url, token, domain, environment, component }, snapshotLocation, snapshotVersion) => {
     const { status } = await checkSnapshotVersion(url, token, snapshotVersion);
 
     if (!status) {
