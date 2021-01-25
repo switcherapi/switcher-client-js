@@ -1,7 +1,7 @@
 {
   "name": "switcher-client",
   "version": "2.1.0",
-  "description": "Module for working with Switcher-API",
+  "description": "SDK for working with Switcher-API",
   "main": "./src/index.js",
   "types": "./src/index.d.ts",
   "author": {

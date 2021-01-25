@@ -1,6 +1,6 @@
 const fs = require('fs');
 const IPCIDR = require('ip-cidr');
-const DateMoment = require('./datemoment');
+const DateMoment = require('./utils/datemoment');
 const { resolveSnapshot, checkSnapshotVersion } = require('./services');
 
 const loadDomain = (snapshotLocation, environment) => {

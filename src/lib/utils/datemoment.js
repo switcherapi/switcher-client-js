@@ -6,6 +6,10 @@ class DateMoment {
         this.setTime(time);
     }
 
+    /**
+     * Updates current date with the given time. 
+     * Use hh:mm format
+     */
     setTime(time) {
         if (time) {
             const timeArr = time.split(':');
@@ -14,25 +18,43 @@ class DateMoment {
         }
     }
 
+    /**
+     * Current date configured
+     */
     getDate() {
         return this.date;
     }
 
+    /**
+     * It verifies if the configured date is before the given date/time
+     */
     isSameOrBefore(date, time) {
         return this.date.getTime() <= 
             new DateMoment(date, time || undefined).getDate().getTime();
     }
 
+    /**
+     * It verifies if the configured date is after the given date/time
+     */
     isSameOrAfter(date, time) {
         return this.date.getTime() >= 
             new DateMoment(date, time || undefined).getDate().getTime();
     }
 
+    /**
+     * It verifies if the configured date is in between the given date/time (A/B)
+     */
     isBetween(dateA, dateB, timeA, timeB) {
         return this.isSameOrAfter(dateA, timeA || undefined) && 
             this.isSameOrBefore(dateB, timeB || undefined);
     }
 
+    /**
+     * Add time to the configured date based on the unit
+     * 
+     * @param {*} amount 
+     * @param {*} unit 
+     */
     add(amount, unit) {
         switch (unit.toLowerCase()) {
             case 's':
