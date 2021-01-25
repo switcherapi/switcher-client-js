@@ -1,7 +1,7 @@
 'use strict';
 
 const Bypasser = require('./lib/bypasser');
-const ExecutionLogger = require('./lib/executionLogger');
+const ExecutionLogger = require('./lib/utils/executionLogger');
 const { loadDomain, validateSnapshot, StrategiesType } = require('./lib/snapshot');
 const services = require('./lib/services');
 const checkCriteriaOffline = require('./lib/resolver');
