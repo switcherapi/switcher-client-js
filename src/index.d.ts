@@ -1,3 +1,5 @@
+import Key from "./lib/key";
+
 /**
  * Quick start with the following 3 steps.
  * 
@@ -7,13 +9,15 @@
  */
 declare class Switcher {
 
+  constructor();
+
   /**
    * Create the necessary configuration to communicate with the API
    * 
    * @param context Necessary arguments
    * @param options 
    */
- static buildContext(context: SwitcherContext, options: SwitcherOptions): void;
+ static buildContext(context: Switcher.SwitcherContext, options: Switcher.SwitcherOptions): void;
 
  /**
   * Creates a new instance of Switcher
@@ -39,7 +43,7 @@ declare class Switcher {
   /**
   * Strategies available to use as Switcher input
   */
- static get StrategiesType(): StrategiesType;
+ static get StrategiesType(): Switcher.StrategiesType;
 
  /**
   * Force a switcher value to return a given value by calling one of both methods - true() false()
@@ -97,32 +101,35 @@ declare class Switcher {
  
 }
 
-declare interface SwitcherContext {
- url: string;
- apiKey: string;
- domain: string;
- component: string;
- environment: string;
- token?: string;
- exp?: number;
-}
+declare namespace Switcher {
 
-declare interface SwitcherOptions {
- offline: boolean;
- logger: boolean;
- snapshotLocation: string;
- snapshotAutoload: string;
- silentMode: boolean;
- retryAfter: string;
-}
-
-declare interface StrategiesType {
- NETWORK: string;
- VALUE: string;
- NUMERIC: string;
- TIME: string;
- DATE: string;
- REGEX: string;
+  interface SwitcherContext {
+    url: string;
+    apiKey: string;
+    domain: string;
+    component: string;
+    environment: string;
+    token?: string;
+    exp?: number;
+   }
+   
+   interface SwitcherOptions {
+    offline: boolean;
+    logger: boolean;
+    snapshotLocation: string;
+    snapshotAutoload: string;
+    silentMode: boolean;
+    retryAfter: string;
+   }
+   
+   interface StrategiesType {
+    NETWORK: string;
+    VALUE: string;
+    NUMERIC: string;
+    TIME: string;
+    DATE: string;
+    REGEX: string;
+   }
 }
 
 export = Switcher;

@@ -1,5 +1,5 @@
 const axios = require('axios');
-const DateMoment = require('./datemoment');
+const DateMoment = require('./utils/datemoment');
 
 const getConnectivityError = (code) => `Connection has been refused - ${code}`;
 
