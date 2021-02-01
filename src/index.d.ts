@@ -117,7 +117,6 @@ declare namespace Switcher {
     offline: boolean;
     logger: boolean;
     snapshotLocation: string;
-    snapshotAutoload: string;
     silentMode: boolean;
     retryAfter: string;
    }
