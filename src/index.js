@@ -40,6 +40,7 @@ class Switcher {
 
       if ('silentMode' in options) {
         this.options.silentMode = options.silentMode;
+        this.loadSnapshot();
       }
 
       if ('logger' in options) {
@@ -100,14 +101,25 @@ class Switcher {
   }
 
   static async _auth() {
-    const response = await services.auth(Switcher.context, {
+    const response = await services.auth(Switcher.context);
+    Switcher.context.token = response.data.token;
+    Switcher.context.exp = response.data.exp;
+  }
+
+  static async _checkHealth() {
+    const response = await services.checkAPIHealth(Switcher.context.url, {
       silentMode: Switcher.options.silentMode,
       retryTime: Switcher.options.retryTime,
       retryDurationIn: Switcher.options.retryDurationIn
     });
-    
-    Switcher.context.token = response.data.token;
-    Switcher.context.exp = response.data.exp;
+
+    if (response && response.data) {
+      Switcher.context.token = response.data.token;
+      Switcher.context.exp = response.data.exp;
+      return false;
+    }
+
+    return true;
   }
 
   static get StrategiesType() {
@@ -166,8 +178,10 @@ class Switcher {
       errors.push('Missing key field');
     }
 
-    if (!Switcher.context.exp || Date.now() > (Switcher.context.exp*1000)) {
-      await this.prepare(this.key, this.input);
+    if (await Switcher._checkHealth()) {
+      if (!Switcher.context.exp || Date.now() > (Switcher.context.exp*1000)) {
+        await this.prepare(this.key, this.input);
+      }
     }
 
     if (!Switcher.context.token) {
@@ -190,7 +204,7 @@ class Switcher {
     if (Switcher.options.offline) {
       const result = checkCriteriaOffline(
         this.key ? this.key : key, this.input ? this.input : input, Switcher.snapshot);
-
+      
       ExecutionLogger.add(this.key, result);
       return result;
     }
