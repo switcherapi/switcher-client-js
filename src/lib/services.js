@@ -33,30 +33,13 @@ exports.getEntry = (input) => {
     return entry;
 };
 
-exports.checkCriteria = async ({ url, token }, key, input, showReason = false) => {
+exports.checkAPIHealth = async (url, options) => {
     try {
-        const entry = this.getEntry(input);
-        return await axios.post(`${url}/criteria?showReason=${showReason}&key=${key}`, 
-            { entry }, getHeader(token));
+        const response = await axios.get(`${url}/check`);
+        if (response.data.code != 200)
+            throw new ApiConnectionError('API is offline');
     } catch (e) {
-        throw new CriteriaError(e.errno ? getConnectivityError(e.errno) : e.message);
-    }
-};
-
-exports.auth = async ({ url, apiKey, domain, component, environment }, options) => {
-    try {
-        return await axios.post(`${url}/criteria/auth`, {
-            domain,
-            component,
-            environment
-        }, {
-            headers: {
-                'switcher-api-key': apiKey,
-                'Content-Type': 'application/json'
-            }
-        });
-    } catch (e) {
-        if (e.errno === 'ECONNREFUSED' && options && 'silentMode' in options) {
+        if (options && 'silentMode' in options) {
             if (options.silentMode) {
                 const expirationTime = new DateMoment(new Date())
                     .add(options.retryTime, options.retryDurationIn).getDate();
@@ -69,7 +52,32 @@ exports.auth = async ({ url, apiKey, domain, component, environment }, options) 
                 };
             }
         }
+    }
+};
 
+exports.checkCriteria = async ({ url, token }, key, input, showReason = false) => {
+    try {
+        const entry = this.getEntry(input);
+        return await axios.post(`${url}/criteria?showReason=${showReason}&key=${key}`, 
+            { entry }, getHeader(token));
+    } catch (e) {
+        throw new CriteriaError(e.errno ? getConnectivityError(e.errno) : e.message);
+    }
+};
+
+exports.auth = async ({ url, apiKey, domain, component, environment }) => {
+    try {
+        return await axios.post(`${url}/criteria/auth`, {
+            domain,
+            component,
+            environment
+        }, {
+            headers: {
+                'switcher-api-key': apiKey,
+                'Content-Type': 'application/json'
+            }
+        });
+    } catch (e) {
         throw new AuthError(e.errno ? getConnectivityError(e.errno) : e.message);
     }
 };
@@ -106,6 +114,13 @@ exports.resolveSnapshot = async (url, token, domain, environment, component) => 
         throw new SnapshotServiceError(e.errno ? getConnectivityError(e.errno) : e.message);
     }
 };
+
+class ApiConnectionError extends Error {
+    constructor(message) {
+        super(`Something went wrong: ${message}`);
+        this.name = this.constructor.name;
+    }
+}
 
 class AuthError extends Error {
     constructor(message) {
