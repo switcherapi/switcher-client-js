@@ -53,6 +53,10 @@ function resolveCriteria(key, input, {
 }
 
 function checkCriteriaOffline(key, input, snapshot) {
+    if (!snapshot) {
+        throw new Error('Snapshot not loaded. Try to use \'Switcher.loadSnapshot()\'');
+    }
+    
     const {  data } = snapshot;
     return resolveCriteria(key, input, data);
 }

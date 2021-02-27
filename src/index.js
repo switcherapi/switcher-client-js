@@ -19,6 +19,7 @@ class Switcher {
   static buildContext(context, options) {
     this.testEnabled = DEFAULT_TEST_MODE;
 
+    this.snapshot = undefined;
     this.context = {};
     this.context = context;
     this.context.environment = context.environment || DEFAULT_ENVIRONMENT;
