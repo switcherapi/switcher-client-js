@@ -18,10 +18,10 @@ function setupSwitcher(offline) {
 
 // Requires online API
 const testSimpleAPICall = async () => {
-    setupSwitcher(false);
+    setupSwitcher(true);
 
     const switcher = Switcher.factory();
-    await switcher.isItOn('FEATURE01', null, true);
+    console.log(await switcher.isItOn('FEATURE01', null, true));
     await switcher.isItOn('FEATURE02', null, true);
     console.log(Switcher.getLogger('FEATURE01'));
 
@@ -99,4 +99,4 @@ const testSnapshotAutoload = async () => {
     Switcher.unloadSnapshot();
 };
 
-testSnapshotAutoload();
+testSimpleAPICall();
