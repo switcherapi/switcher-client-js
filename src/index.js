@@ -195,43 +195,48 @@ class Switcher {
   }
 
   async isItOn(key, input, showReason = false) {
+    let result, response;
+    this._validateArgs(key, input);
+
     // verify if query from Bypasser
-    const bypassKey = Bypasser.searchBypassed(this.key ? this.key : key);
+    const bypassKey = Bypasser.searchBypassed(this.key);
     if (bypassKey) {
       return bypassKey.getValue();
-    }
-
+    } 
+    
     // verify if query from snapshot
     if (Switcher.options.offline) {
-      const result = checkCriteriaOffline(
-        this.key ? this.key : key, this.input ? this.input : input, Switcher.snapshot);
-      
-      ExecutionLogger.add(this.key, result);
-      return result;
+      [ result, response ] = this._executeOfflineCriteria();
+    } else {
+      await this.validate();
+      if (Switcher.context.token === 'SILENT') {
+        [ result, response ] = this._executeOfflineCriteria();
+      } else {
+        const responseCriteria = await services.checkCriteria(
+          Switcher.context, this.key, this.input, showReason);
+          
+        result = responseCriteria.data.result;
+        response = responseCriteria.data;
+      }
     }
 
+    if (Switcher.options.logger) 
+      ExecutionLogger.add(this.key, response);
+
+    return result;
+  }
+
+  _executeOfflineCriteria() {
+    const response = checkCriteriaOffline(
+      this.key, this.input, Switcher.snapshot);
+    return [ response.result, response ];
+  }
+
+  _validateArgs(key, input) {
     if (key) { this.key = key; }
     if (input) { this.input = input; }
-    
-    await this.validate();
-    if (Switcher.context.token === 'SILENT') {
-      const result = checkCriteriaOffline(
-        this.key ? this.key : key, this.input ? this.input : input, Switcher.snapshot);
-
-      if (Switcher.options.logger) 
-        ExecutionLogger.add(this.key, result);
-
-      return result;
-    } else {
-      const response = await services.checkCriteria(Switcher.context, this.key, this.input, showReason);
-
-      if (Switcher.options.logger) 
-        ExecutionLogger.add(this.key, response.data);
-
-      return response.data.result;
-    }
   }
-  
+
 }
 
 module.exports = Switcher;

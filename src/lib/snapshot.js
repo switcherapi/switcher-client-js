@@ -11,7 +11,7 @@ const loadDomain = (snapshotLocation, environment) => {
             dataBuffer = fs.readFileSync(snapshotFile);
         } else {
             dataBuffer = JSON.stringify({ data: { domain: { version: 0 } } }, null, 4);
-            fs.mkdir(snapshotLocation, { recursive: true }, () => {});
+            fs.mkdirSync(snapshotLocation, { recursive: true });
             fs.writeFileSync(snapshotFile, dataBuffer);
         }
 
@@ -71,38 +71,42 @@ const processOperation = (strategy, operation, input, values) => {
 };
 
 function processNETWORK(operation, input, values) {
-
     const cidrRegex = /^([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))$/;
-    
     switch(operation) {
         case OperationsType.EXIST:
-            for (var i = 0; i < values.length; i++) {
-                if (values[i].match(cidrRegex)) {
-                    const cidr = new IPCIDR(values[i]);
-                    if (cidr.contains(input)) {
-                        return true;
-                    }
-                } else {
-                    return values.includes(input);
-                }
+            return processNETWORK_Exist(input, values, cidrRegex);
+        case OperationsType.NOT_EXIST:
+            return processNETWORK_NotExist(input, values, cidrRegex);
+    }
+    return false;
+}
+
+function processNETWORK_Exist(input, values, cidrRegex) {
+    for (const value of values) {
+        if (value.match(cidrRegex)) {
+            const cidr = new IPCIDR(value);
+            if (cidr.contains(input)) {
+                return true;
             }
-            break;
-        case OperationsType.NOT_EXIST: {
-            const result = values.filter(element => {
-                if (element.match(cidrRegex)) {
-                    const cidr = new IPCIDR(element);
-                    if (cidr.contains(input)) {
-                        return true;
-                    }
-                } else {
-                    return values.includes(input);
-                }
-            });
-            return result.length === 0;
+        } else {
+            return values.includes(input);
         }
     }
-
     return false;
+}
+
+function processNETWORK_NotExist(input, values, cidrRegex) {
+    const result = values.filter(element => {
+        if (element.match(cidrRegex)) {
+            const cidr = new IPCIDR(element);
+            if (cidr.contains(input)) {
+                return true;
+            }
+        } else {
+            return values.includes(input);
+        }
+    });
+    return result.length === 0;
 }
 
 function processVALUE(operation, input, values) {
@@ -167,13 +171,14 @@ function processDate(operation, input, values) {
 
 function processREGEX(operation, input, values) {
     switch(operation) {
-        case OperationsType.EXIST:
-            for (var i = 0; i < values.length; i++) {
-                if (input.match(values[i])) {
+        case OperationsType.EXIST: {
+            for (const value of values) {
+                if (input.match(value)) {
                     return true;
                 }
             }
             return false;
+        }
         case OperationsType.NOT_EXIST:
             return !processREGEX(OperationsType.EXIST, input, values);
         case OperationsType.EQUAL:

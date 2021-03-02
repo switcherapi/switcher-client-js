@@ -222,12 +222,12 @@ describe('Unit test - Switcher:', function () {
   
         // First attempt to reach the API - Since it's configured to use silent mode, it should return true (according to the snapshot)
         let result = await switcher.isItOn('FF2FOR2030');
-        assert.equal(result, true);
+        assert.isTrue(result);
   
         await new Promise(resolve => setTimeout(resolve, 500));
         // The call below is in silent mode. It is getting the configuration from the offline snapshot again
         result = await switcher.isItOn();
-        assert.equal(result, true);
+        assert.isTrue(result);
   
         // As the silent mode was configured to retry after 3 seconds, it's still in time, 
         // therefore, prepare was never called
@@ -237,7 +237,7 @@ describe('Unit test - Switcher:', function () {
   
         // Silent mode has expired. Again, the online API is still offline. Prepare cannot be invoked
         result = await switcher.isItOn();
-        assert.equal(result, true);
+        assert.isTrue(result);
         assert.equal(spyPrepare.callCount, 0);
   
         await new Promise(resolve => setTimeout(resolve, 1500));
