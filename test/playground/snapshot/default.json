@@ -14,7 +14,7 @@
                         {
                             "key": "FEATURE01",
                             "description": "Feature #1 description",
-                            "activated": false,
+                            "activated": true,
                             "strategies": [
                                 {
                                     "strategy": "VALUE_VALIDATION",

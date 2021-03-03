@@ -4,10 +4,10 @@ chai.use(chaiAsPromised);
 const assert = chai.assert;
 
 const sinon = require('sinon');
-const Switcher = require('../src/index');
 const axios = require('axios');
 const services = require('../src/lib/services');
 const fs = require('fs');
+const { Switcher, checkValue, checkNetwork, checkDate, checkTime, checkRegex, checkNumeric } = require('../src/index');
 
 describe('Unit test - Switcher:', function () {
 
@@ -47,7 +47,15 @@ describe('Unit test - Switcher:', function () {
         Switcher.buildContext({ url: 'url', apiKey: 'apiKey', domain: 'domain', component: 'component', environment: 'default' });
         let switcher = Switcher.factory();
         
-        await switcher.prepare('FLAG_1', [Switcher.StrategiesType.VALUE, 'User 1', Switcher.StrategiesType.NETWORK, '192.168.0.1']);
+        await switcher.prepare('FLAG_1', [
+          checkValue('User 1'),
+          checkNumeric('1'),
+          checkNetwork('192.168.0.1'),
+          checkDate('2019-12-01T08:30'),
+          checkTime('08:00'),
+          checkRegex('\\bUSER_[0-9]{1,2}\\b')
+        ]);
+
         assert.isTrue(await switcher.isItOn());
       });
       
@@ -91,7 +99,10 @@ describe('Unit test - Switcher:', function () {
         // test
         Switcher.buildContext({ url: 'url', apiKey: 'apiKey', domain: 'domain', component: 'component', environment: 'default' });
         let switcher = Switcher.factory();
-        assert.isTrue(await switcher.isItOn('MY_FLAG', [Switcher.StrategiesType.VALUE, 'User 1', Switcher.StrategiesType.NETWORK, '192.168.0.1']));
+        assert.isTrue(await switcher.isItOn('MY_FLAG', [
+          checkValue('User 1'),
+          checkNetwork('192.168.0.1')
+        ]));
       });
   
       it('should be valid - when preparing key and sending input strategy afterwards', async function () {
@@ -106,8 +117,8 @@ describe('Unit test - Switcher:', function () {
   
         await switcher.prepare('MY_FLAG');
         assert.isTrue(await switcher.isItOn(undefined, [
-          Switcher.StrategiesType.VALUE, 'User 1', 
-          Switcher.StrategiesType.NETWORK, '192.168.0.1'
+          checkValue('User 1'),
+          checkNetwork('192.168.0.1')
         ]));
       });
   
@@ -120,8 +131,8 @@ describe('Unit test - Switcher:', function () {
         let switcher = Switcher.factory();
   
         await switcher.prepare('MY_FLAG', [
-          Switcher.StrategiesType.VALUE, 'User 1', 
-          Switcher.StrategiesType.NETWORK, '192.168.0.1'
+          checkValue('User 1'),
+          checkNetwork('192.168.0.1')
         ]);
         await assert.isRejected(switcher.isItOn(), 
           'Something went wrong: Missing url field');
@@ -136,8 +147,8 @@ describe('Unit test - Switcher:', function () {
         let switcher = Switcher.factory();
   
         await switcher.prepare('MY_FLAG', [
-          Switcher.StrategiesType.VALUE, 'User 1', 
-          Switcher.StrategiesType.NETWORK, '192.168.0.1'
+          checkValue('User 1'),
+          checkNetwork('192.168.0.1')
         ]);
   
         await assert.isRejected(switcher.isItOn(), 
@@ -153,8 +164,8 @@ describe('Unit test - Switcher:', function () {
         Switcher.buildContext({ url: 'url', apiKey: 'apiKey', domain: 'domain', component: 'component', environment: 'default' });
         let switcher = Switcher.factory();
         await switcher.prepare(undefined, [
-          Switcher.StrategiesType.VALUE, 'User 1', 
-          Switcher.StrategiesType.NETWORK, '192.168.0.1'
+          checkValue('User 1'),
+          checkNetwork('192.168.0.1')
         ]);
   
         await assert.isRejected(switcher.isItOn(), 
@@ -171,8 +182,8 @@ describe('Unit test - Switcher:', function () {
         let switcher = Switcher.factory();
   
         await assert.isRejected(switcher.isItOn('MY_FLAG', [
-          Switcher.StrategiesType.VALUE, 'User 1', 
-          Switcher.StrategiesType.NETWORK, '192.168.0.1'
+          checkValue('User 1'),
+          checkNetwork('192.168.0.1')
         ]), 'Something went wrong: Missing component field');
       });
   
@@ -186,8 +197,8 @@ describe('Unit test - Switcher:', function () {
         let switcher = Switcher.factory();
         
         await assert.isRejected(switcher.isItOn('MY_FLAG', [
-          Switcher.StrategiesType.VALUE, 'User 1', 
-          Switcher.StrategiesType.NETWORK, '192.168.0.1'
+          checkValue('User 1'),
+          checkNetwork('192.168.0.1')
         ]), 'Something went wrong: Missing token field');
       });
   

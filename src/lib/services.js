@@ -16,17 +16,16 @@ exports.getEntry = (input) => {
     if (!input) {
         return undefined;
     }
-
-    if (input.length % 2 !== 0) {
+    
+    if (input.flat().length % 2 !== 0) {
         throw new Error(`Invalid input format for '${input}'`);
     }
 
     let entry = [];
-
-    for (var i = 0; i < input.length; i += 2) {
+    for (const inputValues of input) {
         entry.push({
-            strategy: input[i],
-            input: input[i + 1]
+            strategy: inputValues[0],
+            input: inputValues[1]
         });
     }
 
