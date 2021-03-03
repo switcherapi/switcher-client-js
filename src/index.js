@@ -2,10 +2,19 @@
 
 const Bypasser = require('./lib/bypasser');
 const ExecutionLogger = require('./lib/utils/executionLogger');
-const { loadDomain, validateSnapshot, StrategiesType } = require('./lib/snapshot');
+const { loadDomain, validateSnapshot } = require('./lib/snapshot');
 const services = require('./lib/services');
 const checkCriteriaOffline = require('./lib/resolver');
 const fs = require('fs');
+
+const {
+  checkDate,
+  checkNetwork,
+  checkNumeric,
+  checkRegex,
+  checkTime,
+  checkValue
+} = require('./lib/middlewares/check');
 
 const DEFAULT_ENVIRONMENT = 'default';
 const DEFAULT_SNAPSHOT_LOCATION = './snapshot/';
@@ -123,10 +132,6 @@ class Switcher {
     return true;
   }
 
-  static get StrategiesType() {
-    return StrategiesType;
-  }
-
   static assume(key) {
     return Bypasser.assume(key);
   }
@@ -239,4 +244,12 @@ class Switcher {
 
 }
 
-module.exports = Switcher;
+module.exports = { 
+  Switcher,
+  checkDate,
+  checkNetwork,
+  checkNumeric,
+  checkRegex,
+  checkTime,
+  checkValue
+};

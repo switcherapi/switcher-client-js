@@ -27,7 +27,7 @@ https://github.com/switcherapi/switcher-api
 The context properties stores all information regarding connectivity.
 
 ```js
-const Switcher = require('switcher-client');
+const { Switcher } = require('switcher-client');
 
 const apiKey = '[API_KEY]';
 const environment = 'default';
@@ -90,7 +90,9 @@ switcher.isItOn('KEY')
 Loading information into the switcher can be made by using *prepare*, in case you want to include input from a different place of your code. Otherwise, it is also possible to include everything in the same call.
 
 ```js
-switcher.prepare('FEATURE01', [Switcher.StrategiesType.VALUE, 'USER_1');
+const { checkValue, checkNetwork } = require('switcher-client');
+
+switcher.prepare('FEATURE01', [checkValue('USER_1')];
 switcher.isItOn();
 ```
 
@@ -98,10 +100,10 @@ switcher.isItOn();
 All-in-one method is fast and include everything you need to execute a complex call to the API.
 
 ```js
-await switcher.isItOn('FEATURE01',
-    [Switcher.StrategiesType.VALUE, 'User 1', 
-    Switcher.StrategiesType.NETWORK, '192.168.0.1']
-);
+await switcher.isItOn('FEATURE01', [
+    checkValue('User 1'),
+    checkNetwork('192.168.0.1')
+]);
 ```
 
 ## Built-in mock feature

@@ -2,7 +2,7 @@ const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
 const assert = chai.assert;
-const Switcher = require('../src/index');
+const { Switcher, checkValue, checkNetwork } = require('../src/index');
 
 describe('E2E test - Switcher offline:', function () {
   let switcher;
@@ -27,8 +27,8 @@ describe('E2E test - Switcher offline:', function () {
 
   it('should be valid - isItOn', async function () {
     await switcher.prepare('FF2FOR2020', [
-      Switcher.StrategiesType.VALUE, 'Japan', 
-      Switcher.StrategiesType.NETWORK, '10.0.0.3'
+      checkValue('Japan'),
+      checkNetwork('10.0.0.3')
     ]);
 
     const result = await switcher.isItOn('FF2FOR2020');
@@ -38,9 +38,9 @@ describe('E2E test - Switcher offline:', function () {
 
   it('should be valid - No prepare function needed', async function () {
     const result = await switcher.isItOn('FF2FOR2020', [
-      Switcher.StrategiesType.VALUE, 'Japan', 
-      Switcher.StrategiesType.NETWORK, '10.0.0.3']
-    );
+      checkValue('Japan'),
+      checkNetwork('10.0.0.3')
+    ]);
     assert.isTrue(result);
   });
 
@@ -51,8 +51,8 @@ describe('E2E test - Switcher offline:', function () {
 
   it('should be invalid - Input (IP) does not match', async function () {
     await switcher.prepare('FF2FOR2020', [
-      Switcher.StrategiesType.VALUE, 'Japan', 
-      Switcher.StrategiesType.NETWORK, '192.168.0.2'
+      checkValue('Japan'),
+      checkNetwork('192.168.0.2')
     ]);
 
     const result = await switcher.isItOn();
@@ -61,8 +61,8 @@ describe('E2E test - Switcher offline:', function () {
 
   it('should be valid assuming key to be false and then forgetting it', async function () {
     await switcher.prepare('FF2FOR2020', [
-      Switcher.StrategiesType.VALUE, 'Japan', 
-      Switcher.StrategiesType.NETWORK, '10.0.0.3'
+      checkValue('Japan'),
+      checkNetwork('10.0.0.3')
     ]);
     
     assert.isTrue(await switcher.isItOn());
@@ -75,8 +75,8 @@ describe('E2E test - Switcher offline:', function () {
 
   it('should be valid assuming unknown key to be true', async function () {
     await switcher.prepare('UNKNOWN', [
-      Switcher.StrategiesType.VALUE, 'Japan', 
-      Switcher.StrategiesType.NETWORK, '10.0.0.3'
+      checkValue('Japan'),
+      checkNetwork('10.0.0.3')
     ]);
     
     Switcher.assume('UNKNOWN').true();
