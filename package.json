@@ -1,7 +1,7 @@
 {
   "name": "switcher-client",
   "version": "3.0.0",
-  "description": "SDK for working with Switcher-API",
+  "description": "Client SDK for working with Switcher-API",
   "main": "./src/index.js",
   "types": "./src/index.d.ts",
   "author": {
@@ -16,6 +16,7 @@
   ],
   "license": "MIT",
   "scripts": {
+    "lint": "eslint ./src/ --ext .js",
     "test": "nyc --reporter=lcov --reporter=text mocha",
     "coverage": "nyc report --reporter=text-lcov | coveralls",
     "build": "browserify ./switcher-client.js > ./dist/switcher-client.js"

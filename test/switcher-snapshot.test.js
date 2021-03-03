@@ -4,7 +4,7 @@ chai.use(chaiAsPromised);
 const assert = chai.assert;
 
 const sinon = require('sinon');
-const Switcher = require('../src/index');
+const { Switcher } = require('../src/index');
 const axios = require('axios');
 const services = require('../src/lib/services');
 const fs = require('fs');

@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-console */
 
-const Switcher = require('../../src/index');
+const { Switcher, checkValue, checkNetwork } = require('../../src/index');
 
 let switcher;
 
@@ -21,8 +21,8 @@ const testSimpleAPICall = async () => {
     setupSwitcher(true);
 
     const switcher = Switcher.factory();
-    console.log(await switcher.isItOn('FEATURE01', null, true));
-    await switcher.isItOn('FEATURE02', null, true);
+    await switcher.isItOn('FEATURE01', [checkValue('TEST')], true);
+
     console.log(Switcher.getLogger('FEATURE01'));
 
     Switcher.unloadSnapshot();
