@@ -34,6 +34,14 @@ declare namespace SwitcherClient {
     static checkSnapshot(): Promise<boolean>;
 
     /**
+     * Verifies if switchers are properly configured
+     * 
+     * @param switcherKeys Switcher Keys
+     * @throws when one or more Switcher Keys were not found
+     */
+    static checkSwitchers(switcherKeys: string[]): Promise<void>;
+
+    /**
      * Remove snapshot from real-time update
      */
     static unloadSnapshot(): void;
