@@ -110,6 +110,12 @@ class Switcher {
     }
   }
 
+  static async checkSwitchers(switcherKeys) {
+    await Switcher._auth();
+    await services.checkSwitchers(
+      Switcher.context.url, Switcher.context.token, switcherKeys);
+  }
+
   static async _auth() {
     const response = await services.auth(Switcher.context);
     Switcher.context.token = response.data.token;
