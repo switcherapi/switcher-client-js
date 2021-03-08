@@ -9,7 +9,7 @@ const services = require('../src/lib/services');
 const fs = require('fs');
 const { Switcher, checkValue, checkNetwork, checkDate, checkTime, checkRegex, checkNumeric } = require('../src/index');
 
-describe('Unit test - Switcher:', function () {
+describe('Integrated test - Switcher:', function () {
 
     this.afterAll(function() {
       fs.unwatchFile('./snapshot/default.json');
@@ -57,6 +57,37 @@ describe('Unit test - Switcher:', function () {
         ]);
 
         assert.isTrue(await switcher.isItOn());
+      });
+
+      it('should not throw when switcher keys provided were configured properly', async function() {
+        //given
+        clientAuth.returns(Promise.resolve({ data: { token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 } }));
+        requestStub.returns(Promise.resolve({ data: { not_found: [] } }));
+
+        //test
+        Switcher.buildContext({ url: 'url', apiKey: 'apiKey', domain: 'domain', component: 'component', environment: 'default' });
+        await assert.isFulfilled(Switcher.checkSwitchers(['FEATURE01', 'FEATURE02']));
+      });
+
+      it('should throw when switcher keys provided were not configured properly', async function() {
+        //given
+        clientAuth.returns(Promise.resolve({ data: { token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 } }));
+        requestStub.returns(Promise.resolve({ data: { not_found: ['FEATURE02'] } }));
+
+        //test
+        Switcher.buildContext({ url: 'url', apiKey: 'apiKey', domain: 'domain', component: 'component', environment: 'default' });
+        await assert.isRejected(Switcher.checkSwitchers(['FEATURE01', 'FEATURE02']), 
+          'Something went wrong: Something went wrong: [FEATURE02] not found');
+      });
+
+      it('should throw when switcher keys provided were invalid', async function() {
+        //given
+        clientAuth.returns(Promise.resolve({ data: { token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 } }));
+        requestStub.throws({ errno: 'ERROR' });
+
+        //test
+        Switcher.buildContext({ url: 'url', apiKey: 'apiKey', domain: 'domain', component: 'component', environment: 'default' });
+        await assert.isRejected(Switcher.checkSwitchers('FEATURE02'));
       });
       
       it('should renew the token after expiration', async function () {

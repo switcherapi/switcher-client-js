@@ -126,6 +126,16 @@ To enable this feature, it is recommended to place the following on your test se
 Switcher.setTestEnabled();
 ```
 
+**Smoke Test**
+Validate Switcher Keys on your testing pipelines before deploying a change.
+Switcher Keys may not be configured correctly and can cause your code to have undesired results.
+
+This feature will validate using the context provided to check if everything is up and running.
+In case something is missing, this operation will throw an exception pointing out which Switcher Keys are not configured.
+```js
+Switcher.checkSwitchers(['FEATURE01', 'FEATURE02'])
+```
+
 ## Loading Snapshot from the API
 This step is optional if you want to load a copy of the configuration that can be used to eliminate latency when offline mode is activated.
 

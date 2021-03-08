@@ -81,6 +81,19 @@ exports.auth = async ({ url, apiKey, domain, component, environment }) => {
     }
 };
 
+exports.checkSwitchers = async (url, token, switcherKeys) => {
+    try {
+        const response = await axios.post(`${url}/criteria/switchers_check`, { 
+            switchers: switcherKeys }, getHeader(token));
+
+        if (response.data.not_found.length) {
+            throw new CheckSwitcherError(response.data.not_found);
+        }
+    } catch (e) {
+        throw new CriteriaError(e.errno ? getConnectivityError(e.errno) : e.message);
+    }
+};
+
 exports.checkSnapshotVersion = async (url, token, version) => {
     try {
         const response = await axios.get(`${url}/criteria/snapshot_check/${version}`, getHeader(token));
@@ -131,6 +144,13 @@ class AuthError extends Error {
 class CriteriaError extends Error {
     constructor(message) {
         super(`Something went wrong: ${message}`);
+        this.name = this.constructor.name;
+    }
+}
+
+class CheckSwitcherError extends Error {
+    constructor(notFound) {
+        super(`Something went wrong: [${notFound}] not found`);
         this.name = this.constructor.name;
     }
 }

@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-console */
 
+const { checkNumeric } = require('../../src');
 const { Switcher, checkValue, checkNetwork } = require('../../src/index');
 
 let switcher;
@@ -18,13 +19,14 @@ function setupSwitcher(offline) {
 
 // Requires online API
 const testSimpleAPICall = async () => {
-    setupSwitcher(true);
+    setupSwitcher(false);
+    
+    await Switcher.checkSwitchers(['FEATURE2020']);
 
     const switcher = Switcher.factory();
-    await switcher.isItOn('FEATURE01', [checkValue('TEST')], true);
+    await switcher.isItOn('FEATURE2020', [checkNumeric('1')], true);
 
-    console.log(Switcher.getLogger('FEATURE01'));
-
+    console.log(Switcher.getLogger('FEATURE2020'));
     Switcher.unloadSnapshot();
 };
 
