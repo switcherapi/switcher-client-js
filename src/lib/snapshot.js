@@ -2,6 +2,7 @@ const fs = require('fs');
 const IPCIDR = require('ip-cidr');
 const DateMoment = require('./utils/datemoment');
 const { resolveSnapshot, checkSnapshotVersion } = require('./services');
+const { CheckSwitcherError } = require('./exceptions');
 
 const loadDomain = (snapshotLocation, environment) => {
     try {
@@ -32,6 +33,31 @@ const validateSnapshot = async ({ url, token, domain, environment, component }, 
         return true;
     }
     return false;
+};
+
+const checkSwitchers = (snapshot, switcherKeys) => {
+    const { group } = snapshot.data.domain;
+    let notFound = [], found = false;
+    
+    for (const switcher of switcherKeys) {
+        for (const g of group) {
+            found = false;
+            const { config } = g;
+
+            if (config.find(c => c.key === switcher)) {
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            notFound.push(switcher);
+        }
+    }
+
+    if (notFound.length) {
+        throw new CheckSwitcherError(notFound);
+    }
 };
 
 const StrategiesType = Object.freeze({
@@ -192,6 +218,7 @@ module.exports = {
     loadDomain,
     validateSnapshot,
     processOperation,
+    checkSwitchers,
     StrategiesType,
     OperationsType
 };

@@ -2,7 +2,7 @@
 
 const Bypasser = require('./lib/bypasser');
 const ExecutionLogger = require('./lib/utils/executionLogger');
-const { loadDomain, validateSnapshot } = require('./lib/snapshot');
+const { loadDomain, validateSnapshot, checkSwitchers } = require('./lib/snapshot');
 const services = require('./lib/services');
 const checkCriteriaOffline = require('./lib/resolver');
 const fs = require('fs');
@@ -111,9 +111,13 @@ class Switcher {
   }
 
   static async checkSwitchers(switcherKeys) {
-    await Switcher._auth();
-    await services.checkSwitchers(
-      Switcher.context.url, Switcher.context.token, switcherKeys);
+    if (Switcher.options.offline) {
+      checkSwitchers(Switcher.snapshot, switcherKeys);
+    } else {
+      await Switcher._auth();
+      await services.checkSwitchers(
+        Switcher.context.url, Switcher.context.token, switcherKeys);
+    }
   }
 
   static async _auth() {

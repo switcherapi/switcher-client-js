@@ -146,6 +146,17 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
       Switcher.unloadSnapshot();
       fs.unlinkSync(`generated-snapshots/${environment}.json`);
     });
+
+    it('should not throw when switcher keys provided were configured properly', async function () {
+      await Switcher.loadSnapshot();
+      await assert.isFulfilled(Switcher.checkSwitchers(['FF2FOR2030']));
+    });
+
+    it('should throw when switcher keys provided were not configured properly', async function () {
+      await Switcher.loadSnapshot();
+      await assert.isRejected(Switcher.checkSwitchers(['FEATURE02']), 
+          'Something went wrong: [FEATURE02] not found');
+    });
   
   });
 
