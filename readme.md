@@ -33,7 +33,7 @@ const apiKey = '[API_KEY]';
 const environment = 'default';
 const domain = 'My Domain';
 const component = 'MyApp';
-const url = 'https://switcher-load-balance.herokuapp.com';
+const url = 'https://switcher-api.herokuapp.com';
 ```
 
 - **apiKey**: Switcher-API key generated to your component.
