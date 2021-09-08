@@ -2,6 +2,7 @@
 
 const Bypasser = require('./lib/bypasser');
 const ExecutionLogger = require('./lib/utils/executionLogger');
+const DateMoment = require('./lib/utils/datemoment');
 const { loadDomain, validateSnapshot, checkSwitchers } = require('./lib/snapshot');
 const services = require('./lib/services');
 const checkCriteriaOffline = require('./lib/resolver');
@@ -127,6 +128,17 @@ class Switcher {
   }
 
   static async _checkHealth() {
+    // checks if silent mode is still activated
+    if (Switcher.context.token === 'SILENT') {
+      if (!Switcher.context.exp || Date.now() < (Switcher.context.exp*1000)) {
+        const expirationTime = new DateMoment(new Date())
+          .add(Switcher.options.retryTime, Switcher.options.retryDurationIn).getDate();
+        
+        Switcher.context.exp = expirationTime.getTime() / 1000;
+        return false;
+      }
+    }
+    
     const response = await services.checkAPIHealth(Switcher.context.url, {
       silentMode: Switcher.options.silentMode,
       retryTime: Switcher.options.retryTime,
