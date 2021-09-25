@@ -1,4 +1,4 @@
-const axios = require('axios');
+const fetch = require('node-fetch');
 const DateMoment = require('./utils/datemoment');
 const {
     ApiConnectionError,
@@ -41,7 +41,7 @@ exports.getEntry = (input) => {
 
 exports.checkAPIHealth = async (url, options) => {
     try {
-        const response = await axios.get(`${url}/check`);
+        const response = await fetch({ url: `${url}/check`, method: 'get' });
         if (response.data.code != 200)
             throw new ApiConnectionError('API is offline');
     } catch (e) {
@@ -64,8 +64,12 @@ exports.checkAPIHealth = async (url, options) => {
 exports.checkCriteria = async ({ url, token }, key, input, showReason = false) => {
     try {
         const entry = this.getEntry(input);
-        return await axios.post(`${url}/criteria?showReason=${showReason}&key=${key}`, 
-            { entry }, getHeader(token));
+        const response = await fetch(`${url}/criteria?showReason=${showReason}&key=${key}`, {
+            method: 'post',
+            body: JSON.stringify({ entry }),
+            headers: getHeader(token)
+        });
+        return response;
     } catch (e) {
         throw new CriteriaError(e.errno ? getConnectivityError(e.errno) : e.message);
     }
@@ -73,16 +77,19 @@ exports.checkCriteria = async ({ url, token }, key, input, showReason = false) =
 
 exports.auth = async ({ url, apiKey, domain, component, environment }) => {
     try {
-        return await axios.post(`${url}/criteria/auth`, {
-            domain,
-            component,
-            environment
-        }, {
+        const response = await fetch(`${url}/criteria/auth`, {
+            method: 'post',
+            body: JSON.stringify({
+                domain,
+                component,
+                environment
+            }),
             headers: {
                 'switcher-api-key': apiKey,
                 'Content-Type': 'application/json'
             }
         });
+        return response;
     } catch (e) {
         throw new AuthError(e.errno ? getConnectivityError(e.errno) : e.message);
     }
@@ -90,12 +97,14 @@ exports.auth = async ({ url, apiKey, domain, component, environment }) => {
 
 exports.checkSwitchers = async (url, token, switcherKeys) => {
     try {
-        const response = await axios.post(`${url}/criteria/switchers_check`, { 
-            switchers: switcherKeys }, getHeader(token));
+        const response = await fetch(`${url}/criteria/switchers_check`, {
+            method: 'post',
+            body: JSON.stringify({ switchers: switcherKeys }),
+            headers: getHeader(token)
+        });
 
-        if (response.data.not_found.length) {
+        if (response.data.not_found.length)
             throw new CheckSwitcherError(response.data.not_found);
-        }
     } catch (e) {
         throw new CriteriaError(e.errno ? getConnectivityError(e.errno) : e.message);
     }
@@ -103,7 +112,10 @@ exports.checkSwitchers = async (url, token, switcherKeys) => {
 
 exports.checkSnapshotVersion = async (url, token, version) => {
     try {
-        const response = await axios.get(`${url}/criteria/snapshot_check/${version}`, getHeader(token));
+        const response = await fetch(`${url}/criteria/snapshot_check/${version}`, {
+            method: 'get',
+            headers: getHeader(token)
+        });
         return response.data;
     } catch (e) {
         throw new SnapshotServiceError(e.errno ? getConnectivityError(e.errno) : e.message);
@@ -127,7 +139,11 @@ exports.resolveSnapshot = async (url, token, domain, environment, component) => 
         };
 
     try {
-        const response = await axios.post(`${url}/graphql`, data, getHeader(token));
+        const response = await fetch(`${url}/graphql`, {
+            method: 'post',
+            body: data,
+            headers: getHeader(token)
+        });
         return JSON.stringify(response.data, null, 4);
     } catch (e) {
         throw new SnapshotServiceError(e.errno ? getConnectivityError(e.errno) : e.message);
