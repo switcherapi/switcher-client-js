@@ -5,7 +5,7 @@ const assert = chai.assert;
 
 const sinon = require('sinon');
 const { Switcher } = require('../src/index');
-const axios = require('axios');
+const fetch = require('node-fetch');
 const services = require('../src/lib/services');
 const fs = require('fs');
 
@@ -18,18 +18,14 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
   
     const dataBuffer = fs.readFileSync('./snapshot/dev.json');
     const dataJSON = dataBuffer.toString();
-  
-    let requestGetStub;
-    let requestPostStub;
+
+    let fetchStub;
     let clientAuth;
     let fsStub;
   
     afterEach(function() {
-      if (requestGetStub != undefined)
-        requestGetStub.restore();
-      
-      if (requestPostStub != undefined)
-        requestPostStub.restore();
+      if (fetchStub != undefined)
+        fetchStub.restore();
       
       if (clientAuth != undefined)
         clientAuth.restore();
@@ -52,12 +48,11 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
     it('should update snapshot', async function () {
       //give
       clientAuth = sinon.stub(services, 'auth');
-      requestGetStub = sinon.stub(axios, 'get');
-      requestPostStub = sinon.stub(axios, 'post');
+      fetchStub = sinon.stub(fetch, 'Promise');
   
       clientAuth.returns(Promise.resolve({ data: { token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 } }));
-      requestGetStub.returns(Promise.resolve({ data: { status: false } })); // Snapshot outdated
-      requestPostStub.returns(Promise.resolve(JSON.parse(dataJSON)));
+      fetchStub.onCall(0).returns(Promise.resolve({ data: { status: false } })); // Snapshot outdated
+      fetchStub.onCall(1).returns(Promise.resolve(JSON.parse(dataJSON)));
 
       //test
       Switcher.buildContext({ url, apiKey, domain, component, environment }, {
@@ -76,10 +71,10 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
     it('should NOT update snapshot', async function () {
       //given
       clientAuth = sinon.stub(services, 'auth');
-      requestGetStub = sinon.stub(axios, 'get');
+      fetchStub = sinon.stub(fetch, 'Promise');
   
       clientAuth.returns(Promise.resolve({ data: { token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 } }));
-      requestGetStub.returns(Promise.resolve({ data: { status: true } })); // No available update
+      fetchStub.onCall(0).returns(Promise.resolve({ data: { status: true } })); // No available update
       
       //test
       await Switcher.loadSnapshot();
@@ -91,10 +86,10 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
   
       //given
       clientAuth = sinon.stub(services, 'auth');
-      requestGetStub = sinon.stub(axios, 'get');
+      fetchStub = sinon.stub(fetch, 'Promise');
   
       clientAuth.returns(Promise.resolve({ data: { token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 } }));
-      requestGetStub.throws({
+      fetchStub.onCall(0).throws({
         errno: 'ECONNREFUSED'
       });
       
@@ -108,12 +103,11 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
     it('should NOT update snapshot - resolve Snapshot Error', async function () {
       //given
       clientAuth = sinon.stub(services, 'auth');
-      requestGetStub = sinon.stub(axios, 'get');
-      requestPostStub = sinon.stub(axios, 'post');
+      fetchStub = sinon.stub(fetch, 'Promise');
   
       clientAuth.returns(Promise.resolve({ data: { token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 } }));
-      requestGetStub.returns(Promise.resolve({ data: { status: false } })); // Snapshot outdated
-      requestPostStub.throws({
+      fetchStub.onCall(0).returns(Promise.resolve({ data: { status: false } })); // Snapshot outdated
+      fetchStub.onCall(1).throws({
         errno: 'ECONNREFUSED'
       });
       
@@ -127,12 +121,11 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
     it('should update snapshot', async function () {
       //given
       clientAuth = sinon.stub(services, 'auth');
-      requestGetStub = sinon.stub(axios, 'get');
-      requestPostStub = sinon.stub(axios, 'post');
+      fetchStub = sinon.stub(fetch, 'Promise');
   
       clientAuth.returns(Promise.resolve({ data: { token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 } }));
-      requestGetStub.returns(Promise.resolve({ data: { status: false } })); // Snapshot outdated
-      requestPostStub.returns(Promise.resolve(JSON.parse(dataJSON)));
+      fetchStub.onCall(0).returns(Promise.resolve({ data: { status: false } })); // Snapshot outdated
+      fetchStub.onCall(1).returns(Promise.resolve(JSON.parse(dataJSON)));
   
       //test
       Switcher.buildContext({ url, apiKey, domain, component, environment }, {
