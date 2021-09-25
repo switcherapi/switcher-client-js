@@ -64,12 +64,11 @@ exports.checkAPIHealth = async (url, options) => {
 exports.checkCriteria = async ({ url, token }, key, input, showReason = false) => {
     try {
         const entry = this.getEntry(input);
-        const response = await fetch(`${url}/criteria?showReason=${showReason}&key=${key}`, {
+        return fetch(`${url}/criteria?showReason=${showReason}&key=${key}`, {
             method: 'post',
             body: JSON.stringify({ entry }),
             headers: getHeader(token)
         });
-        return response;
     } catch (e) {
         throw new CriteriaError(e.errno ? getConnectivityError(e.errno) : e.message);
     }
@@ -77,7 +76,7 @@ exports.checkCriteria = async ({ url, token }, key, input, showReason = false) =
 
 exports.auth = async ({ url, apiKey, domain, component, environment }) => {
     try {
-        const response = await fetch(`${url}/criteria/auth`, {
+        return fetch(`${url}/criteria/auth`, {
             method: 'post',
             body: JSON.stringify({
                 domain,
@@ -89,7 +88,6 @@ exports.auth = async ({ url, apiKey, domain, component, environment }) => {
                 'Content-Type': 'application/json'
             }
         });
-        return response;
     } catch (e) {
         throw new AuthError(e.errno ? getConnectivityError(e.errno) : e.message);
     }
