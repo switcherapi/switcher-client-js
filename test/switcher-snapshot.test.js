@@ -9,6 +9,19 @@ const fetch = require('node-fetch');
 const services = require('../src/lib/services');
 const fs = require('fs');
 
+const generateAuth = (token, seconds) => {
+  return { 
+    token, 
+    exp: (Date.now()+(seconds*1000))/1000
+  };
+};
+
+const generateStatus = (status) => {
+  return {
+    status
+  };
+};
+
 describe('E2E test - Switcher offline - Snapshot:', function () {
     const apiKey = '$2b$08$S2Wj/wG/Rfs3ij0xFbtgveDtyUAjML1/TOOhocDg5dhOaU73CEXfK';
     const domain = 'currency-api';
@@ -50,9 +63,9 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
       clientAuth = sinon.stub(services, 'auth');
       fetchStub = sinon.stub(fetch, 'Promise');
   
-      clientAuth.returns(Promise.resolve({ data: { token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 } }));
-      fetchStub.onCall(0).returns(Promise.resolve({ data: { status: false } })); // Snapshot outdated
-      fetchStub.onCall(1).returns(Promise.resolve(JSON.parse(dataJSON)));
+      clientAuth.returns(Promise.resolve({ json: () => generateAuth('uqwu1u8qj18j28wj28', 5) }));
+      fetchStub.onCall(0).returns(Promise.resolve({ json: () => generateStatus(false) })); // Snapshot outdated
+      fetchStub.onCall(1).returns(Promise.resolve({ json: () => JSON.parse(dataJSON) }));
 
       //test
       Switcher.buildContext({ url, apiKey, domain, component, environment }, {
@@ -73,8 +86,8 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
       clientAuth = sinon.stub(services, 'auth');
       fetchStub = sinon.stub(fetch, 'Promise');
   
-      clientAuth.returns(Promise.resolve({ data: { token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 } }));
-      fetchStub.onCall(0).returns(Promise.resolve({ data: { status: true } })); // No available update
+      clientAuth.returns(Promise.resolve({ json: () => generateAuth('uqwu1u8qj18j28wj28', 5) }));
+      fetchStub.onCall(0).returns(Promise.resolve({ json: () => generateStatus(true) })); // No available update
       
       //test
       await Switcher.loadSnapshot();
@@ -88,7 +101,7 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
       clientAuth = sinon.stub(services, 'auth');
       fetchStub = sinon.stub(fetch, 'Promise');
   
-      clientAuth.returns(Promise.resolve({ data: { token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 } }));
+      clientAuth.returns(Promise.resolve({ json: () => generateAuth('uqwu1u8qj18j28wj28', 5) }));
       fetchStub.onCall(0).throws({
         errno: 'ECONNREFUSED'
       });
@@ -105,8 +118,8 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
       clientAuth = sinon.stub(services, 'auth');
       fetchStub = sinon.stub(fetch, 'Promise');
   
-      clientAuth.returns(Promise.resolve({ data: { token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 } }));
-      fetchStub.onCall(0).returns(Promise.resolve({ data: { status: false } })); // Snapshot outdated
+      clientAuth.returns(Promise.resolve({ json: () => generateAuth('uqwu1u8qj18j28wj28', 5) }));
+      fetchStub.onCall(0).returns(Promise.resolve({ json: () => generateStatus(false) })); // Snapshot outdated
       fetchStub.onCall(1).throws({
         errno: 'ECONNREFUSED'
       });
@@ -123,9 +136,9 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
       clientAuth = sinon.stub(services, 'auth');
       fetchStub = sinon.stub(fetch, 'Promise');
   
-      clientAuth.returns(Promise.resolve({ data: { token: 'uqwu1u8qj18j28wj28', exp: (Date.now()+5000)/1000 } }));
-      fetchStub.onCall(0).returns(Promise.resolve({ data: { status: false } })); // Snapshot outdated
-      fetchStub.onCall(1).returns(Promise.resolve(JSON.parse(dataJSON)));
+      clientAuth.returns(Promise.resolve({ json: () => generateAuth('uqwu1u8qj18j28wj28', 5) }));
+      fetchStub.onCall(0).returns(Promise.resolve({ json: () => generateStatus(false) })); // Snapshot outdated
+      fetchStub.onCall(1).returns(Promise.resolve({ json: () => JSON.parse(dataJSON) }));
   
       //test
       Switcher.buildContext({ url, apiKey, domain, component, environment }, {

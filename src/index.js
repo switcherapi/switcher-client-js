@@ -17,6 +17,7 @@ const {
   checkValue
 } = require('./lib/middlewares/check');
 
+const DEFAULT_URL = 'https://switcher-api.herokuapp.com';
 const DEFAULT_ENVIRONMENT = 'default';
 const DEFAULT_SNAPSHOT_LOCATION = './snapshot/';
 const DEFAULT_RETRY_TIME = '5m';
@@ -26,6 +27,9 @@ const DEFAULT_TEST_MODE = false;
 
 class Switcher {
 
+  _delay = 0;
+  _nextRun = 0;
+
   static buildContext(context, options) {
     this.testEnabled = DEFAULT_TEST_MODE;
 
@@ -33,6 +37,7 @@ class Switcher {
     this.context = {};
     this.context = context;
     this.context.environment = context.environment || DEFAULT_ENVIRONMENT;
+    this.context.url = context.url || DEFAULT_URL;
 
     // Default values
     this.options = {};
@@ -76,7 +81,7 @@ class Switcher {
     if (Switcher.snapshot) {
       if (!Switcher.context.exp || Date.now() > (Switcher.context.exp*1000)) {
         await Switcher._auth();
-
+        
         const result = await validateSnapshot(Switcher.context, Switcher.options.snapshotLocation, 
           Switcher.snapshot.data.domain.version);
         
@@ -123,8 +128,8 @@ class Switcher {
 
   static async _auth() {
     const response = await services.auth(Switcher.context);
-    Switcher.context.token = response.data.token;
-    Switcher.context.exp = response.data.exp;
+    Switcher.context.token = response.token;
+    Switcher.context.exp = response.exp;
   }
 
   static async _checkHealth() {
@@ -145,7 +150,7 @@ class Switcher {
       retryDurationIn: Switcher.options.retryDurationIn
     });
 
-    if (response && response.data) {
+    if (response) {
       Switcher.context.token = response.data.token;
       Switcher.context.exp = response.data.exp;
       return false;
@@ -198,10 +203,6 @@ class Switcher {
       errors.push('Missing component field');
     }
 
-    if (!Switcher.context.url) {
-      errors.push('Missing url field');
-    }
-
     if (!this.key) {
       errors.push('Missing key field');
     }
@@ -222,7 +223,7 @@ class Switcher {
   }
 
   async isItOn(key, input, showReason = false) {
-    let result, response;
+    let result;
     this._validateArgs(key, input);
 
     // verify if query from Bypasser
@@ -233,30 +234,58 @@ class Switcher {
     
     // verify if query from snapshot
     if (Switcher.options.offline) {
-      [ result, response ] = this._executeOfflineCriteria();
+      result = this._executeOfflineCriteria();
     } else {
       await this.validate();
-      if (Switcher.context.token === 'SILENT') {
-        [ result, response ] = this._executeOfflineCriteria();
-      } else {
-        const responseCriteria = await services.checkCriteria(
-          Switcher.context, this.key, this.input, showReason);
-          
-        result = responseCriteria.data.result;
-        response = responseCriteria.data;
-      }
+      if (Switcher.context.token === 'SILENT')
+        result = this._executeOfflineCriteria();
+      else
+        result = await this._executeOnlineCriteria(showReason);
     }
 
-    if (Switcher.options.logger) 
-      ExecutionLogger.add(this.key, response);
-
     return result;
+  }
+
+  throttle(delay) {
+    this._delay = delay;
+
+    if (delay > 0)
+      Switcher.options.logger = true;
+
+    return this;
+  }
+
+  async _executeOnlineCriteria(showReason) {
+    if (this._delay > 0 && ExecutionLogger.getByKey(this.key).length)
+      return this._executeAsyncOnlineCriteria(showReason);
+
+    const responseCriteria = await services.checkCriteria(
+      Switcher.context, this.key, this.input, showReason);
+    
+    if (Switcher.options.logger) 
+      ExecutionLogger.add(this.key, responseCriteria);
+
+    return responseCriteria.result;
+  }
+
+  async _executeAsyncOnlineCriteria(showReason) {
+    if (this._nextRun < Date.now()) {
+      this._nextRun = Date.now() + this._delay;
+      services.checkCriteria(Switcher.context, this.key, this.input, showReason)
+        .then(response => ExecutionLogger.add(this.key, response));
+    }
+
+    return ExecutionLogger.getByKey(this.key, true).response.result;
   }
 
   _executeOfflineCriteria() {
     const response = checkCriteriaOffline(
       this.key, this.input, Switcher.snapshot);
-    return [ response.result, response ];
+
+    if (Switcher.options.logger) 
+      ExecutionLogger.add(this.key, response);
+
+    return response.result;
   }
 
   _validateArgs(key, input) {

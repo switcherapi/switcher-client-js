@@ -40,7 +40,7 @@ const url = 'https://switcher-api.herokuapp.com';
 - **environment**: (optional) Environment name. Production environment is named as 'default'.
 - **domain**: Domain name.
 - **component**: Application name.
-- **url**: Swither-API endpoint.
+- **url**: (optional) Swither-API endpoint.
 
 ## Options
 You can also activate features such as offline and silent mode:
@@ -104,6 +104,17 @@ await switcher.isItOn('FEATURE01', [
     checkValue('User 1'),
     checkNetwork('192.168.0.1')
 ]);
+```
+
+5. **Throttle**
+Throttling is useful when placing Feature Flags at critical code blocks require zero-latency without having to switch to offline.
+API calls will happen asynchronously and the result returned is based on the last API response.
+
+```js
+const switcher = Switcher.factory();
+await switcher
+    .throttle(1000)
+    .isItOn('FEATURE01');
 ```
 
 ## Built-in mock feature

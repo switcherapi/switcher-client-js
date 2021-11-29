@@ -25,7 +25,7 @@ const loadDomain = (snapshotLocation, environment) => {
 
 const validateSnapshot = async ({ url, token, domain, environment, component }, snapshotLocation, snapshotVersion) => {
     const { status } = await checkSnapshotVersion(url, token, snapshotVersion);
-
+    
     if (!status) {
         const snapshot = await resolveSnapshot(url, token, domain, environment, component);
         
