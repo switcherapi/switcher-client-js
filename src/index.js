@@ -257,7 +257,7 @@ class Switcher {
 
   async _executeOnlineCriteria(showReason) {
     if (this._delay > 0 && ExecutionLogger.getByKey(this.key).length)
-      return await this._executeAsyncOnlineCriteria(showReason);
+      return this._executeAsyncOnlineCriteria(showReason);
 
     const responseCriteria = await services.checkCriteria(
       Switcher.context, this.key, this.input, showReason);
