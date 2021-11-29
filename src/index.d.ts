@@ -100,6 +100,14 @@ declare namespace SwitcherClient {
      */
     isItOn(key?: string, input?: string[], showReason?: boolean): Promise<boolean>;
 
+    /**
+     * Configure the time elapsed between each call to the API.
+     * Activating this option will enable loggers.
+     * 
+     * @param delay in milliseconds
+     */
+    throttle(delay: number): Switcher;
+
   }
 
   interface SwitcherContext {

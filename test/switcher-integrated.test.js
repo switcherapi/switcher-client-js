@@ -17,8 +17,18 @@ const {
   checkNumeric 
 } = require('../src/index');
 
-const generateAuth = (token, seconds) =>
-  Promise.resolve({ data: { token, exp: (Date.now()+(seconds*1000))/1000 } });
+const generateAuth = (token, seconds) => {
+  return { 
+    token, 
+    exp: (Date.now()+(seconds*1000))/1000
+  };
+};
+
+const generateResult = (result) => {
+  return {
+    result
+  };
+};
 
 describe('Integrated test - Switcher:', function () {
 
@@ -44,9 +54,9 @@ describe('Integrated test - Switcher:', function () {
 
     it('should be valid', async function () {
       // given API responding properly
-      fetchStub.onCall(0).returns(generateAuth('uqwu1u8qj18j28wj28', 5));
-      fetchStub.onCall(1).returns(Promise.resolve({ data: { code: 200 } }));
-      fetchStub.onCall(2).returns(Promise.resolve({ data: { result: true } }));
+      fetchStub.onCall(0).returns(Promise.resolve({ json: () => generateAuth('uqwu1u8qj18j28wj28', 5) }));
+      fetchStub.onCall(1).returns(Promise.resolve({ status: 200 }));
+      fetchStub.onCall(2).returns(Promise.resolve({ json: () => generateResult(true) }));
 
       // test
       Switcher.buildContext({ url: 'url', apiKey: 'apiKey', domain: 'domain', component: 'component', environment: 'default' });
@@ -54,6 +64,41 @@ describe('Integrated test - Switcher:', function () {
       
       await switcher.prepare('FLAG_1');
       assert.isTrue(await switcher.isItOn());
+    });
+
+    it('should be valid - throttle', async function () {
+      this.timeout(3000);
+
+      // given API responding properly
+      // first API call
+      fetchStub.onCall(0).returns(Promise.resolve({ status: 200 }));
+      fetchStub.onCall(1).returns(Promise.resolve({ json: () => generateAuth('uqwu1u8qj18j28wj28', 5) }));
+      fetchStub.onCall(2).returns(Promise.resolve({ json: () => generateResult(true), status: 200 }));
+
+      // first async API call
+      fetchStub.onCall(3).returns(Promise.resolve({ status: 200 }));
+      fetchStub.onCall(4).returns(Promise.resolve({ json: () => generateResult(true), status: 200 }));
+
+      // after throttle value has expired
+      fetchStub.onCall(5).returns(Promise.resolve({ status: 200 }));
+      fetchStub.onCall(6).returns(Promise.resolve({ json: () => generateResult(true), status: 200 }));
+
+      // test
+      Switcher.buildContext({ url: 'url', apiKey: 'apiKey', domain: 'domain', component: 'component', environment: 'default' });
+      let switcher = Switcher.factory();
+      switcher.throttle(1000);
+
+      const spyPrepare = sinon.spy(switcher, '_executeAsyncOnlineCriteria');
+      for (let index = 0; index < 10; index++) {
+        assert.isTrue(await switcher.isItOn('FLAG_1'));
+      }
+
+      assert.equal(spyPrepare.callCount, 9);
+
+      // Next call should call the API again as the throttle has expired
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      assert.isTrue(await switcher.isItOn('FLAG_1'));
+      assert.equal(spyPrepare.callCount, 10);
     });
   });
 
@@ -74,8 +119,8 @@ describe('Integrated test - Switcher:', function () {
 
     it('should be valid', async function () {
       // given API responding properly
-      fetchStub.onCall(0).returns(Promise.resolve({ data: { code: 200 } }));
-      fetchStub.onCall(1).returns(Promise.resolve({ data: { result: true } }));
+      fetchStub.onCall(0).returns(Promise.resolve({ status: 200 }));
+      fetchStub.onCall(1).returns(Promise.resolve({ json: () => generateResult(true) }));
       clientAuth.returns(generateAuth('uqwu1u8qj18j28wj28', 5));
 
       // test
@@ -97,7 +142,8 @@ describe('Integrated test - Switcher:', function () {
     it('should not throw when switcher keys provided were configured properly', async function() {
       //given
       clientAuth.returns(generateAuth('uqwu1u8qj18j28wj28', 5));
-      fetchStub.onCall(0).returns(Promise.resolve({ data: { not_found: [] } }));
+      const response = { not_found: [] };
+      fetchStub.onCall(0).returns(Promise.resolve({ json: () => response, status: 200 }));
 
       //test
       Switcher.buildContext({ url: 'url', apiKey: 'apiKey', domain: 'domain', component: 'component', environment: 'default' });
@@ -107,12 +153,25 @@ describe('Integrated test - Switcher:', function () {
     it('should throw when switcher keys provided were not configured properly', async function() {
       //given
       clientAuth.returns(generateAuth('uqwu1u8qj18j28wj28', 5));
-      fetchStub.onCall(0).returns(Promise.resolve({ data: { not_found: ['FEATURE02'] } }));
+      const response = { not_found: ['FEATURE02'] };
+      fetchStub.onCall(0).returns(Promise.resolve({ json: () => response, status: 200 }));
 
       //test
       Switcher.buildContext({ url: 'url', apiKey: 'apiKey', domain: 'domain', component: 'component', environment: 'default' });
       await assert.isRejected(Switcher.checkSwitchers(['FEATURE01', 'FEATURE02']), 
         'Something went wrong: Something went wrong: [FEATURE02] not found');
+    });
+
+    it('should throw when no switcher keys were provided', async function() {
+      //given
+      clientAuth.returns(generateAuth('uqwu1u8qj18j28wj28', 5));
+      const response = { errors: [ { msg: 'Switcher Key is required' } ] };
+      fetchStub.onCall(0).returns(Promise.resolve({ json: () => response, status: 422 }));
+
+      //test
+      Switcher.buildContext({ url: 'url', apiKey: 'apiKey', domain: 'domain', component: 'component', environment: 'default' });
+      await assert.isRejected(Switcher.checkSwitchers([]), 
+        'Something went wrong: Switcher Key is required');
     });
 
     it('should throw when switcher keys provided were invalid', async function() {
@@ -136,8 +195,8 @@ describe('Integrated test - Switcher:', function () {
       const spyPrepare = sinon.spy(switcher, 'prepare');
 
       // Prepare the call generating the token
-      fetchStub.onCall(0).returns(Promise.resolve({ data: { code: 200 } }));
-      fetchStub.onCall(1).returns(Promise.resolve({ data: { result: true } }));
+      fetchStub.onCall(0).returns(Promise.resolve({ status: 200 }));
+      fetchStub.onCall(1).returns(Promise.resolve({ json: () => generateResult(true) }));
       await switcher.prepare('MY_FLAG');
       assert.equal(await switcher.isItOn(), true);
 
@@ -148,20 +207,20 @@ describe('Integrated test - Switcher:', function () {
       clientAuth.returns(generateAuth('asdad12d2232d2323f', 1));
 
       // In this time period the expiration time has reached, it should call prepare once again to renew the token
-      fetchStub.onCall(3).returns(Promise.resolve({ data: { result: false } }));
+      fetchStub.onCall(3).returns(Promise.resolve({ json: () => generateResult(false) }));
       assert.equal(await switcher.isItOn(), false);
       assert.equal(spyPrepare.callCount, 2);
 
       // // In the meantime another call is made by the time the token is still not expired, so there is no need to call prepare again
-      fetchStub.onCall(5).returns(Promise.resolve({ data: { result: false } }));
+      fetchStub.onCall(5).returns(Promise.resolve({ json: () => generateResult(false) }));
       assert.equal(await switcher.isItOn(), false);
       assert.equal(spyPrepare.callCount, 2);
     });
 
     it('should be valid - when sending key without calling prepare', async function () {
       // given API responding properly
-      fetchStub.onCall(0).returns(Promise.resolve({ data: { code: 200 } }));
-      fetchStub.onCall(1).returns(Promise.resolve({ data: { result: true } }));
+      fetchStub.onCall(0).returns(Promise.resolve({ status: 200 }));
+      fetchStub.onCall(1).returns(Promise.resolve({ json: () => generateResult(true) }));
       clientAuth.returns(generateAuth('uqwu1u8qj18j28wj28', 5));
 
       // test
@@ -175,8 +234,8 @@ describe('Integrated test - Switcher:', function () {
 
     it('should be valid - when preparing key and sending input strategy afterwards', async function () {
       // given API responding properly
-      fetchStub.onCall(0).returns(Promise.resolve({ data: { code: 200 } }));
-      fetchStub.onCall(1).returns(Promise.resolve({ data: { result: true } }));
+      fetchStub.onCall(0).returns(Promise.resolve({ status: 200 }));
+      fetchStub.onCall(1).returns(Promise.resolve({ json: () => generateResult(true) }));
       clientAuth.returns(generateAuth('uqwu1u8qj18j28wj28', 5));
 
       // test
@@ -188,22 +247,6 @@ describe('Integrated test - Switcher:', function () {
         checkValue('User 1'),
         checkNetwork('192.168.0.1')
       ]));
-    });
-
-    it('should be invalid - Missing url field', async function () {
-      // given
-      clientAuth.returns(generateAuth('uqwu1u8qj18j28wj28', 5));
-
-      // test
-      Switcher.buildContext({ apiKey: 'apiKey', domain: 'domain', component: 'component', environment: 'default' });
-      let switcher = Switcher.factory();
-
-      await switcher.prepare('MY_FLAG', [
-        checkValue('User 1'),
-        checkNetwork('192.168.0.1')
-      ]);
-      await assert.isRejected(switcher.isItOn(), 
-        'Something went wrong: Missing url field');
     });
 
     it('should be invalid - Missing API Key field', async function () {
@@ -225,7 +268,7 @@ describe('Integrated test - Switcher:', function () {
 
     it('should be invalid - Missing key field', async function () {
       // given
-      fetchStub.onCall(0).returns(Promise.resolve({ data: { result: undefined } }));
+      fetchStub.onCall(0).returns(Promise.resolve({ json: () => generateResult(undefined) }));
       clientAuth.returns(generateAuth('uqwu1u8qj18j28wj28', 5));
 
       // test
@@ -242,7 +285,7 @@ describe('Integrated test - Switcher:', function () {
 
     it('should be invalid - Missing component field', async function () {
       // given
-      fetchStub.onCall(0).returns(Promise.resolve({ data: { result: undefined } }));
+      fetchStub.onCall(0).returns(Promise.resolve({ json: () => generateResult(undefined) }));
       clientAuth.returns(generateAuth('uqwu1u8qj18j28wj28', 5));
 
       // test
@@ -257,7 +300,7 @@ describe('Integrated test - Switcher:', function () {
 
     it('should be invalid - Missing token field', async function () {
       // given
-      fetchStub.onCall(0).returns(Promise.resolve({ data: { result: undefined } }));
+      fetchStub.onCall(0).returns(Promise.resolve({ json: () => generateResult(undefined) }));
       clientAuth.returns(generateAuth(undefined, 1));
 
       // test
@@ -272,7 +315,7 @@ describe('Integrated test - Switcher:', function () {
 
     it('should be invalid - bad strategy input', async function () {
       // given
-      fetchStub.onCall(0).returns(Promise.resolve({ result: undefined }));
+      fetchStub.onCall(0).returns(Promise.resolve({ json: () => generateResult(undefined) }));
       clientAuth.returns(generateAuth('uqwu1u8qj18j28wj28', 5));
 
       // test
@@ -322,8 +365,8 @@ describe('Integrated test - Switcher:', function () {
       await new Promise(resolve => setTimeout(resolve, 2000));
       
       // Setup the online mocked response and made it to return false just to make sure it's not fetching into the snapshot
-      fetchStub.onCall(1).returns(Promise.resolve({ data: { code: 200 } }));
-      fetchStub.onCall(2).returns(Promise.resolve({ data: { result: false } }));
+      fetchStub.onCall(1).returns(Promise.resolve({ status: 200 }));
+      fetchStub.onCall(2).returns(Promise.resolve({ json: () => generateResult(false) }));
       clientAuth.returns(generateAuth('uqwu1u8qj18j28wj28', 5));
 
       result = await switcher.isItOn();
@@ -350,7 +393,7 @@ describe('Integrated test - Switcher:', function () {
 
     it('should run in silent mode when API is unavailable', async function () {
       // given: API unavailable
-      fetchStub.onCall(0).returns(Promise.resolve({ data: { code: 503 } }));
+      fetchStub.onCall(0).returns(Promise.resolve({ status: 503 }));
 
       // test
       Switcher.buildContext({ url: 'url', apiKey: 'apiKey', domain: 'domain', component: 'component', environment: 'default' }, {
