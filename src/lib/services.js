@@ -12,10 +12,8 @@ const getConnectivityError = (code) => `Connection has been refused - ${code}`;
 
 const getHeader = (token) => {
     return {
-        headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-        }
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
     };
 };
 
@@ -41,8 +39,8 @@ exports.getEntry = (input) => {
 
 exports.checkAPIHealth = async (url, options) => {
     try {
-        const response = await fetch({ url: `${url}/check`, method: 'get' });
-        if (response.data.code != 200)
+        const response = await fetch(`${url}/check`, { method: 'get' });
+        if (response.status != 200)
             throw new ApiConnectionError('API is offline');
     } catch (e) {
         if (options && 'silentMode' in options) {
@@ -64,11 +62,13 @@ exports.checkAPIHealth = async (url, options) => {
 exports.checkCriteria = async ({ url, token }, key, input, showReason = false) => {
     try {
         const entry = this.getEntry(input);
-        return fetch(`${url}/criteria?showReason=${showReason}&key=${key}`, {
+        const response = await fetch(`${url}/criteria?showReason=${showReason}&key=${key}`, {
             method: 'post',
             body: JSON.stringify({ entry }),
             headers: getHeader(token)
         });
+
+        return response.json();
     } catch (e) {
         throw new CriteriaError(e.errno ? getConnectivityError(e.errno) : e.message);
     }
@@ -76,7 +76,7 @@ exports.checkCriteria = async ({ url, token }, key, input, showReason = false) =
 
 exports.auth = async ({ url, apiKey, domain, component, environment }) => {
     try {
-        return fetch(`${url}/criteria/auth`, {
+        const response = await fetch(`${url}/criteria/auth`, {
             method: 'post',
             body: JSON.stringify({
                 domain,
@@ -88,6 +88,8 @@ exports.auth = async ({ url, apiKey, domain, component, environment }) => {
                 'Content-Type': 'application/json'
             }
         });
+
+        return response.json();
     } catch (e) {
         throw new AuthError(e.errno ? getConnectivityError(e.errno) : e.message);
     }
@@ -101,8 +103,12 @@ exports.checkSwitchers = async (url, token, switcherKeys) => {
             headers: getHeader(token)
         });
 
-        if (response.data.not_found.length)
-            throw new CheckSwitcherError(response.data.not_found);
+        const json = await response.json();
+        if (response.status != 200)
+            throw new CriteriaError(json.errors[0].msg);
+
+        if (json.not_found.length)
+            throw new CheckSwitcherError(json.not_found);
     } catch (e) {
         throw new CriteriaError(e.errno ? getConnectivityError(e.errno) : e.message);
     }
@@ -114,7 +120,8 @@ exports.checkSnapshotVersion = async (url, token, version) => {
             method: 'get',
             headers: getHeader(token)
         });
-        return response.data;
+
+        return response.json();
     } catch (e) {
         throw new SnapshotServiceError(e.errno ? getConnectivityError(e.errno) : e.message);
     }
@@ -139,10 +146,11 @@ exports.resolveSnapshot = async (url, token, domain, environment, component) => 
     try {
         const response = await fetch(`${url}/graphql`, {
             method: 'post',
-            body: data,
+            body: JSON.stringify(data),
             headers: getHeader(token)
         });
-        return JSON.stringify(response.data, null, 4);
+        
+        return JSON.stringify(await response.json(), null, 4);
     } catch (e) {
         throw new SnapshotServiceError(e.errno ? getConnectivityError(e.errno) : e.message);
     }
