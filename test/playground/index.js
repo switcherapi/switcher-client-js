@@ -25,7 +25,7 @@ const testSimpleAPICall = async () => {
     await Switcher.checkSwitchers([SWITCHER_KEY]);
 
     const switcher = Switcher.factory();
-    await switcher.isItOn(SWITCHER_KEY, [checkNumeric('1')], true);
+    await switcher.isItOn(SWITCHER_KEY, [checkNumeric('1')]);
 
     console.log(Switcher.getLogger(SWITCHER_KEY));
     Switcher.unloadSnapshot();

@@ -256,14 +256,14 @@ class Switcher {
   }
 
   async _executeOnlineCriteria(showReason) {
-    if (this._delay > 0 && ExecutionLogger.getByKey(this.key).length)
+    if (this._delay > 0 && ExecutionLogger.getExecution(this.key, this.input))
       return this._executeAsyncOnlineCriteria(showReason);
 
     const responseCriteria = await services.checkCriteria(
       Switcher.context, this.key, this.input, showReason);
     
     if (Switcher.options.logger) 
-      ExecutionLogger.add(this.key, responseCriteria);
+      ExecutionLogger.add(this.key, this.input, responseCriteria);
 
     return responseCriteria.result;
   }
@@ -272,10 +272,10 @@ class Switcher {
     if (this._nextRun < Date.now()) {
       this._nextRun = Date.now() + this._delay;
       services.checkCriteria(Switcher.context, this.key, this.input, showReason)
-        .then(response => ExecutionLogger.add(this.key, response));
+        .then(response => ExecutionLogger.add(this.key, this.input, response));
     }
 
-    return ExecutionLogger.getByKey(this.key, true).response.result;
+    return ExecutionLogger.getExecution(this.key, this.input).response.result;
   }
 
   _executeOfflineCriteria() {
