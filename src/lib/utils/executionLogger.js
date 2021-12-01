@@ -12,15 +12,14 @@ class ExecutionLogger {
      * @param response
      */
     static add(key, input, response) {
-        let keyIndex = undefined;
-        logger.forEach((value, index) => 
-            value.key === key && 
-            JSON.stringify(value.input) === JSON.stringify(input) ? 
-            keyIndex = index : undefined);
-
-        if (keyIndex != undefined)
-            logger.splice(keyIndex, 1);
-
+        for (let index = 0; index < logger.length; index++) {
+            const log = logger[index];
+            if (log.key === key && JSON.stringify(log.input) === JSON.stringify(input)) {
+                logger.splice(index, 1);
+                break;
+            }
+        }
+        
         logger.push({ key, input, response });
     }
 
