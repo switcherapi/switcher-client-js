@@ -189,9 +189,6 @@ class Switcher {
     }
   }
 
-  /**
-   * Validate context before querying the API
-   */
   async validate() {
     let errors = [];
 
@@ -207,12 +204,7 @@ class Switcher {
       errors.push('Missing key field');
     }
 
-    if (await Switcher._checkHealth()) {
-      if (!Switcher.context.exp || Date.now() > (Switcher.context.exp*1000)) {
-        await this.prepare(this.key, this.input);
-      }
-    }
-
+    await this._executeApiValidation();
     if (!Switcher.context.token) {
       errors.push('Missing token field');
     }
@@ -256,7 +248,7 @@ class Switcher {
   }
 
   async _executeOnlineCriteria(showReason) {
-    if (this._delay > 0 && ExecutionLogger.getExecution(this.key, this.input))
+    if (!this._useSync())
       return this._executeAsyncOnlineCriteria(showReason);
 
     const responseCriteria = await services.checkCriteria(
@@ -278,6 +270,15 @@ class Switcher {
     return ExecutionLogger.getExecution(this.key, this.input).response.result;
   }
 
+  async _executeApiValidation() {
+    if (this._useSync()) {
+      if (await Switcher._checkHealth() && 
+        (!Switcher.context.exp || Date.now() > (Switcher.context.exp * 1000))) {
+          await this.prepare(this.key, this.input);
+      }
+    }
+  }
+
   _executeOfflineCriteria() {
     const response = checkCriteriaOffline(
       this.key, this.input, Switcher.snapshot);
@@ -291,6 +292,10 @@ class Switcher {
   _validateArgs(key, input) {
     if (key) { this.key = key; }
     if (input) { this.input = input; }
+  }
+
+  _useSync() {
+    return this._delay == 0 || !ExecutionLogger.getExecution(this.key, this.input);
   }
 
 }
