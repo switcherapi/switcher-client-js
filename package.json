@@ -1,6 +1,6 @@
 {
   "name": "switcher-client",
-  "version": "3.0.1",
+  "version": "3.1.0",
   "description": "Client SDK for working with Switcher-API",
   "main": "./src/index.js",
   "types": "./src/index.d.ts",
