@@ -37,9 +37,9 @@ class Bypasser {
      * @param key 
     */
     static searchBypassed(key) {
-        for (let i = 0; i < bypassedKeys.length; i++) {
-            if (bypassedKeys[i].key === key) {
-                return bypassedKeys[i];
+        for (const bypassed of bypassedKeys) {
+            if (bypassed.key === key) {
+                return bypassed;
             }
         }
     }
