@@ -37,13 +37,11 @@ class Bypasser {
      * @param key 
     */
     static searchBypassed(key) {
-        let existentKey;
-        bypassedKeys.forEach(async bk => {
-            if (bk.getKey() === key) {
-                return existentKey = bk;
+        for (let i = 0; i < bypassedKeys.length; i++) {
+            if (bypassedKeys[i].key === key) {
+                return bypassedKeys[i];
             }
-        });
-        return existentKey;
+        }
     }
 }
 
