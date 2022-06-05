@@ -27,8 +27,10 @@ const DEFAULT_TEST_MODE = false;
 
 class Switcher {
 
-  _delay = 0;
-  _nextRun = 0;
+  constructor() {
+    this._delay = 0;
+    this._nextRun = 0;
+  }
 
   static buildContext(context, options) {
     this.testEnabled = DEFAULT_TEST_MODE;

@@ -20,12 +20,11 @@
             "always"
         ]
     },
-    "parser": "babel-eslint",
     "parserOptions": {
-        "ecmaVersion": 6,
+        "ecmaVersion": 12,
         "sourceType": "module",
         "ecmaFeatures": {
-        "experimentalObjectRestSpread": true
+            "experimentalObjectRestSpread": true
         }
     }
 }
