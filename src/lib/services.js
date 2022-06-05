@@ -128,7 +128,7 @@ exports.checkSnapshotVersion = async (url, token, version) => {
 };
 
 exports.resolveSnapshot = async (url, token, domain, environment, component) => {
-    var data = { 
+    const data = { 
         query: `
             query domain {
                 domain(name: "${domain}", environment: "${environment}", _component: "${component}") {
