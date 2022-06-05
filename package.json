@@ -18,8 +18,7 @@
   "scripts": {
     "lint": "eslint ./src/ --ext .js",
     "test": "nyc --reporter=lcov --reporter=text mocha",
-    "coverage": "nyc report --reporter=text-lcov | coveralls",
-    "build": "browserify ./switcher-client.js > ./dist/switcher-client.js"
+    "coverage": "nyc report --reporter=text-lcov"
   },
   "files": [
     "LICENSE",
@@ -27,17 +26,15 @@
     "src/"
   ],
   "dependencies": {
-    "ip-cidr": "^3.0.7",
+    "ip-cidr": "^3.0.10",
     "node-fetch": "^2.6.7"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.23.0",
     "@typescript-eslint/parser": "^5.23.0",
     "babel-eslint": "^10.1.0",
-    "browserify": "^17.0.0",
     "chai": "^4.3.6",
     "chai-as-promised": "^7.1.1",
-    "coveralls": "^3.1.1",
     "eslint": "^8.15.0",
     "mocha": "^10.0.0",
     "mocha-sonarqube-reporter": "^1.0.2",
