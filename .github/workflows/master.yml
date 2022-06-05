@@ -31,6 +31,12 @@ jobs:
       - run: npm run lint
       - run: npm test
 
+  scan:
+    name: SonarCloud Scan
+    needs: [ build-test ]
+    runs-on: ubuntu-latest
+
+    steps:
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
         env:
