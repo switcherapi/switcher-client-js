@@ -1,7 +1,7 @@
 'use strict';
 
 const Key = require('./key');
-var bypassedKeys = new Array();
+const bypassedKeys = new Array();
 
 class Bypasser {
 

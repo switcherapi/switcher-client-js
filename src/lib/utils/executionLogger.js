@@ -1,6 +1,6 @@
 'use strict';
 
-var logger = new Array();
+const logger = new Array();
 
 class ExecutionLogger {
 
