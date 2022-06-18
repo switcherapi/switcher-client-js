@@ -8,6 +8,7 @@ const { Switcher } = require('../src/index');
 const fetch = require('node-fetch');
 const services = require('../src/lib/services');
 const fs = require('fs');
+const { given, givenError } = require('./fixture/utils');
 
 const generateAuth = (token, seconds) => {
   return { 
@@ -23,9 +24,9 @@ const generateStatus = (status) => {
 };
 
 describe('E2E test - Switcher offline - Snapshot:', function () {
-    const apiKey = '$2b$08$S2Wj/wG/Rfs3ij0xFbtgveDtyUAjML1/TOOhocDg5dhOaU73CEXfK';
-    const domain = 'currency-api';
-    const component = 'Android';
+    const apiKey = '[api_key]';
+    const domain = 'Business';
+    const component = 'business-service';
     const environment = 'dev';
     const url = 'http://localhost:3000';
   
@@ -64,8 +65,8 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
       fetchStub = sinon.stub(fetch, 'Promise');
   
       clientAuth.returns(Promise.resolve({ json: () => generateAuth('uqwu1u8qj18j28wj28', 5) }));
-      fetchStub.onCall(0).returns(Promise.resolve({ json: () => generateStatus(false) })); // Snapshot outdated
-      fetchStub.onCall(1).returns(Promise.resolve({ json: () => JSON.parse(dataJSON) }));
+      given(fetchStub, 0, { json: () => generateStatus(false) }); // Snapshot outdated
+      given(fetchStub, 1, { json: () => JSON.parse(dataJSON) });
 
       //test
       Switcher.buildContext({ url, apiKey, domain, component, environment }, {
@@ -87,7 +88,7 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
       fetchStub = sinon.stub(fetch, 'Promise');
   
       clientAuth.returns(Promise.resolve({ json: () => generateAuth('uqwu1u8qj18j28wj28', 5) }));
-      fetchStub.onCall(0).returns(Promise.resolve({ json: () => generateStatus(true) })); // No available update
+      given(fetchStub, 0, { json: () => generateStatus(true) }); // No available update
       
       //test
       await Switcher.loadSnapshot();
@@ -102,9 +103,7 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
       fetchStub = sinon.stub(fetch, 'Promise');
   
       clientAuth.returns(Promise.resolve({ json: () => generateAuth('uqwu1u8qj18j28wj28', 5) }));
-      fetchStub.onCall(0).throws({
-        errno: 'ECONNREFUSED'
-      });
+      givenError(fetchStub, 0, { errno: 'ECONNREFUSED' });
       
       //test
       Switcher.setTestEnabled();
@@ -119,10 +118,8 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
       fetchStub = sinon.stub(fetch, 'Promise');
   
       clientAuth.returns(Promise.resolve({ json: () => generateAuth('uqwu1u8qj18j28wj28', 5) }));
-      fetchStub.onCall(0).returns(Promise.resolve({ json: () => generateStatus(false) })); // Snapshot outdated
-      fetchStub.onCall(1).throws({
-        errno: 'ECONNREFUSED'
-      });
+      given(fetchStub, 0, { json: () => generateStatus(false) }); // Snapshot outdated
+      givenError(fetchStub, 1, { errno: 'ECONNREFUSED' });
       
       //test
       Switcher.setTestEnabled();
@@ -137,8 +134,8 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
       fetchStub = sinon.stub(fetch, 'Promise');
   
       clientAuth.returns(Promise.resolve({ json: () => generateAuth('uqwu1u8qj18j28wj28', 5) }));
-      fetchStub.onCall(0).returns(Promise.resolve({ json: () => generateStatus(false) })); // Snapshot outdated
-      fetchStub.onCall(1).returns(Promise.resolve({ json: () => JSON.parse(dataJSON) }));
+      given(fetchStub, 0, { json: () => generateStatus(false) }); // Snapshot outdated
+      given(fetchStub, 1, { json: () => JSON.parse(dataJSON) });
   
       //test
       Switcher.buildContext({ url, apiKey, domain, component, environment }, {
@@ -167,9 +164,9 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
   });
 
   describe('Error Scenarios - Snapshot', function() {
-    const apiKey = '$2b$08$S2Wj/wG/Rfs3ij0xFbtgveDtyUAjML1/TOOhocDg5dhOaU73CEXfK';
-    const domain = 'currency-api';
-    const component = 'Android';
+    const apiKey = '[api_key]';
+    const domain = 'Business';
+    const component = 'business-service';
     const environment = 'dev';
     const url = 'http://localhost:3000';
 

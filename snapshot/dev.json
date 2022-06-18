@@ -1,8 +1,8 @@
 {
     "data": {
         "domain": {
-            "name": "currency-api",
-            "description": "Currency API",
+            "name": "Business",
+            "description": "Business description",
             "version": 1588557288037,
             "activated": true,
             "group": [

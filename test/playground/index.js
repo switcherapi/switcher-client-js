@@ -4,16 +4,19 @@
 const { checkNumeric } = require('../../src');
 const { Switcher, checkValue, checkNetwork } = require('../../src/index');
 
-const SWITCHER_KEY = 'FEATURE2020';
+const SWITCHER_KEY = 'MY_SWITCHER';
+const apiKey = 'JDJiJDA4JEFweTZjSTR2bE9pUjNJOUYvRy9raC4vRS80Q2tzUnk1d3o1aXFmS2o5eWJmVW11cjR0ODNT';
+const domain = 'Playground';
+const component = 'switcher-playground';
+const environment = 'default';
+const url = 'https://switcher-api.herokuapp.com';
+
 let switcher;
 
+/**
+ * Playground environment for showcasing the API
+ */
 function setupSwitcher(offline) {
-    const apiKey = '$2b$08$DYcg9NUcJouQkTtB6XxqeOQJ3DCprslij6Te.8aTF1Ds7y2sAvTjm';
-    const domain = 'My Domain';
-    const component = 'CustomerAPI';
-    const environment = 'default';
-    const url = 'http://localhost:3000';
-
     Switcher.buildContext({ url, apiKey, domain, component, environment }, { offline, logger: true });
     Switcher.loadSnapshot();
 }
@@ -24,7 +27,7 @@ const testSimpleAPICall = async () => {
     
     await Switcher.checkSwitchers([SWITCHER_KEY]);
 
-    const switcher = Switcher.factory();
+    switcher = Switcher.factory();
     await switcher.isItOn(SWITCHER_KEY, [checkNumeric('1')]);
 
     console.log(Switcher.getLogger(SWITCHER_KEY));
@@ -37,7 +40,7 @@ const testThrottledAPICall = async () => {
     
     await Switcher.checkSwitchers([SWITCHER_KEY]);
 
-    const switcher = Switcher.factory();
+    switcher = Switcher.factory();
     switcher.throttle(1000);
 
     for (let index = 0; index < 10; index++)
@@ -50,7 +53,7 @@ const testThrottledAPICall = async () => {
 const testSnapshotUpdate = async () => {
     setupSwitcher(false);
 
-    const switcher = Switcher.factory();
+    switcher = Switcher.factory();
     let result = await switcher.isItOn(SWITCHER_KEY);
     console.log(result);
     
@@ -65,13 +68,13 @@ const testSnapshotUpdate = async () => {
 
 const testAsyncCall = async () => {
     setupSwitcher(true);
-    const switcher = Switcher.factory();
+    switcher = Switcher.factory();
 
     let result = await switcher.isItOn(SWITCHER_KEY);
     console.log(result);
 
     switcher.isItOn(SWITCHER_KEY)
-        .then(result => console.log('Promise result:', result))
+        .then(res => console.log('Promise result:', res))
         .catch(error => console.log(error));
 
     Switcher.assume(SWITCHER_KEY).false();
@@ -83,7 +86,7 @@ const testAsyncCall = async () => {
 
 const testBypasser = async () => {
     setupSwitcher(true);
-    const switcher = Switcher.factory();
+    switcher = Switcher.factory();
 
     let result = await switcher.isItOn(SWITCHER_KEY);
     console.log(result);
@@ -101,16 +104,10 @@ const testBypasser = async () => {
 
 // Requires online API
 const testSnapshotAutoload = async () => {
-    const apiKey = '$2b$08$DYcg9NUcJouQkTtB6XxqeOQJ3DCprslij6Te.8aTF1Ds7y2sAvTjm';
-    const domain = 'My Domain';
-    const component = 'CustomerAPI';
-    const environment = 'generated';
-    const url = 'http://localhost:3000';
-
-    Switcher.buildContext({ url, apiKey, domain, component, environment });
+    Switcher.buildContext({ url, apiKey, domain, component, environment: 'generated' });
     await Switcher.loadSnapshot();
 
-    const switcher = Switcher.factory();
+    switcher = Switcher.factory();
     let result = await switcher.isItOn(SWITCHER_KEY);
     console.log(result);
 

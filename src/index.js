@@ -14,7 +14,8 @@ const {
   checkNumeric,
   checkRegex,
   checkTime,
-  checkValue
+  checkValue,
+  checkPayload
 } = require('./lib/middlewares/check');
 
 const DEFAULT_URL = 'https://switcher-api.herokuapp.com';
@@ -30,6 +31,8 @@ class Switcher {
   constructor() {
     this._delay = 0;
     this._nextRun = 0;
+    this._input = undefined;
+    this._key = '';
   }
 
   static buildContext(context, options) {
@@ -173,6 +176,10 @@ class Switcher {
     return ExecutionLogger.getByKey(key);
   }
 
+  static clearLogger() {
+    ExecutionLogger.clearLogger();
+  }
+
   static setTestEnabled() {
     Switcher.testEnabled = true;
   }
@@ -182,9 +189,9 @@ class Switcher {
   }
 
   async prepare(key, input) {
-    this.key = key;
+    this._key = key;
 
-    if (input) { this.input = input; }
+    if (input) { this._input = input; }
 
     if (!Switcher.options.offline) {
       await Switcher._auth();
@@ -202,7 +209,7 @@ class Switcher {
       errors.push('Missing component field');
     }
 
-    if (!this.key) {
+    if (!this._key) {
       errors.push('Missing key field');
     }
 
@@ -221,7 +228,7 @@ class Switcher {
     this._validateArgs(key, input);
 
     // verify if query from Bypasser
-    const bypassKey = Bypasser.searchBypassed(this.key);
+    const bypassKey = Bypasser.searchBypassed(this._key);
     if (bypassKey) {
       return bypassKey.getValue();
     } 
@@ -254,10 +261,10 @@ class Switcher {
       return this._executeAsyncOnlineCriteria(showReason);
 
     const responseCriteria = await services.checkCriteria(
-      Switcher.context, this.key, this.input, showReason);
+      Switcher.context, this._key, this._input, showReason);
     
     if (Switcher.options.logger) 
-      ExecutionLogger.add(this.key, this.input, responseCriteria);
+      ExecutionLogger.add(this._key, this._input, responseCriteria);
 
     return responseCriteria.result;
   }
@@ -265,39 +272,39 @@ class Switcher {
   async _executeAsyncOnlineCriteria(showReason) {
     if (this._nextRun < Date.now()) {
       this._nextRun = Date.now() + this._delay;
-      services.checkCriteria(Switcher.context, this.key, this.input, showReason)
-        .then(response => ExecutionLogger.add(this.key, this.input, response));
+      services.checkCriteria(Switcher.context, this._key, this._input, showReason)
+        .then(response => ExecutionLogger.add(this._key, this._input, response));
     }
 
-    return ExecutionLogger.getExecution(this.key, this.input).response.result;
+    return ExecutionLogger.getExecution(this._key, this._input).response.result;
   }
 
   async _executeApiValidation() {
     if (this._useSync()) {
       if (await Switcher._checkHealth() && 
         (!Switcher.context.exp || Date.now() > (Switcher.context.exp * 1000))) {
-          await this.prepare(this.key, this.input);
+          await this.prepare(this._key, this._input);
       }
     }
   }
 
   _executeOfflineCriteria() {
     const response = checkCriteriaOffline(
-      this.key, this.input, Switcher.snapshot);
+      this._key, this._input, Switcher.snapshot);
 
     if (Switcher.options.logger) 
-      ExecutionLogger.add(this.key, response);
+      ExecutionLogger.add(this._key, response);
 
     return response.result;
   }
 
   _validateArgs(key, input) {
-    if (key) { this.key = key; }
-    if (input) { this.input = input; }
+    if (key) { this._key = key; }
+    if (input) { this._input = input; }
   }
 
   _useSync() {
-    return this._delay == 0 || !ExecutionLogger.getExecution(this.key, this.input);
+    return this._delay == 0 || !ExecutionLogger.getExecution(this._key, this._input);
   }
 
 }
@@ -309,5 +316,6 @@ module.exports = {
   checkNumeric,
   checkRegex,
   checkTime,
-  checkValue
+  checkValue,
+  checkPayload
 };

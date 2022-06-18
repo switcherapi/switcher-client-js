@@ -68,6 +68,11 @@ declare namespace SwitcherClient {
     static getLogger(key: string): any[];
 
     /**
+     * Clear all results from the execution log
+     */
+    static clearLogger(): void;
+
+    /**
     * Enable testing mode
     * It prevents from watching Snapshots that may hold process
     */
@@ -157,6 +162,12 @@ declare namespace SwitcherClient {
    * Regular expression based validation. No format required.
    */
   function checkRegex(input: string): string[];
+
+  /**
+   * Validates JSON keys from a given payload
+   */
+  function checkPayload(input: string): string[];
+
 }
 
 declare class Key {

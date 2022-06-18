@@ -6,9 +6,9 @@ const { Switcher, checkValue, checkNetwork } = require('../src/index');
 
 describe('E2E test - Switcher offline:', function () {
   let switcher;
-  const apiKey = '$2b$08$S2Wj/wG/Rfs3ij0xFbtgveDtyUAjML1/TOOhocDg5dhOaU73CEXfK';
-  const domain = 'currency-api';
-  const component = 'Android';
+  const apiKey = '[api_key]';
+  const domain = 'Business';
+  const component = 'business-service';
   const environment = 'default';
   const url = 'http://localhost:3000';
 
@@ -23,6 +23,11 @@ describe('E2E test - Switcher offline:', function () {
 
   this.afterAll(function() {
     Switcher.unloadSnapshot();
+  });
+
+  this.beforeEach(function() {
+    Switcher.clearLogger();
+    switcher = Switcher.factory();
   });
 
   it('should be valid - isItOn', async function () {
@@ -57,6 +62,29 @@ describe('E2E test - Switcher offline:', function () {
 
     const result = await switcher.isItOn();
     assert.isFalse(result);
+    assert.equal(Switcher.getLogger('FF2FOR2020')[0].input.reason, 
+      'Strategy \'NETWORK_VALIDATION\' does not agree');
+  });
+
+  it('should be invalid - Input not provided', async function () {
+    const result = await switcher.isItOn('FF2FOR2020');
+    assert.isFalse(result);
+    assert.equal(Switcher.getLogger('FF2FOR2020')[0].input.reason, 
+      'Strategy \'NETWORK_VALIDATION\' did not receive any input');
+  });
+
+  it('should be invalid - Switcher config disabled', async function () {
+    const result = await switcher.isItOn('FF2FOR2031');
+    assert.isFalse(result);
+    assert.equal(Switcher.getLogger('FF2FOR2031')[0].input.reason, 
+      'Config disabled');
+  });
+
+  it('should be invalid - Switcher group disabled', async function () {
+    const result = await switcher.isItOn('FF2FOR2040');
+    assert.isFalse(result);
+    assert.equal(Switcher.getLogger('FF2FOR2040')[0].input.reason, 
+      'Group disabled');
   });
 
   it('should be valid assuming key to be false and then forgetting it', async function () {

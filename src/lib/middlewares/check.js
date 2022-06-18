@@ -24,11 +24,16 @@ function checkRegex(input) {
     return [StrategiesType.REGEX, input];
 }
 
+function checkPayload(input) {
+    return [StrategiesType.PAYLOAD, input];
+}
+
 module.exports = {
     checkValue,
     checkNumeric,
     checkNetwork,
     checkDate,
     checkTime,
-    checkRegex 
+    checkRegex,
+    checkPayload
 };
