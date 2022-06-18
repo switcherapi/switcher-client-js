@@ -32,14 +32,18 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-  build-test-matrix:
-    name: Build & Test
-    needs: [ build-scan ]
-    runs-on: ubuntu-latest
-
+  build-test:
+    name: Build & Test - Node ${{ matrix.node-version }} on ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         node-version: [12.x, 14.x, 16.x, 17.x]
+        os: [ ubuntu-latest, windows-latest ]
+        exclude:
+          - os:  windows-latest
+            node-version: 12.x
+    runs-on: ${{ matrix.os }}
+    if: "! contains(toJSON(github.event.commits.*.message), '[skip ci]')"
 
     steps:
       - name: Git checkout
