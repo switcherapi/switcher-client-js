@@ -42,8 +42,15 @@ class ExecutionLogger {
      * 
      * @param key 
      */
-      static getByKey(key) {
+    static getByKey(key) {
         return logger.filter(value => value.key === key);
+    }
+
+    /**
+     * Clear all results
+     */
+    static clearLogger() {
+        logger.splice(0, logger.length);
     }
     
 }

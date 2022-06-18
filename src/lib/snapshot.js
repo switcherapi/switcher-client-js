@@ -66,7 +66,8 @@ const StrategiesType = Object.freeze({
     NUMERIC: 'NUMERIC_VALIDATION',
     TIME: 'TIME_VALIDATION',
     DATE: 'DATE_VALIDATION',
-    REGEX: 'REGEX_VALIDATION'
+    REGEX: 'REGEX_VALIDATION',
+    PAYLOAD: 'PAYLOAD_VALIDATION'
 });
 
 const OperationsType = Object.freeze({

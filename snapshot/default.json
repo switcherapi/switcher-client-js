@@ -1,8 +1,8 @@
 {
     "data": {
         "domain": {
-            "name": "currency-api",
-            "description": "Currency API",
+            "name": "Business",
+            "description": "Business description",
             "activated": true,
             "group": [
                 {
@@ -46,6 +46,27 @@
                     "config": [
                         {
                             "key": "FF2FOR2030",
+                            "description": "Feature Flag",
+                            "activated": true,
+                            "strategies": [],
+                            "components": []
+                        },
+                        {
+                            "key": "FF2FOR2031",
+                            "description": "Feature Flag disabled",
+                            "activated": false,
+                            "strategies": [],
+                            "components": []
+                        }
+                    ]
+                },
+                {
+                    "name": "Rollout 2040",
+                    "description": "Project is disabled",
+                    "activated": false,
+                    "config": [
+                        {
+                            "key": "FF2FOR2040",
                             "description": "Feature Flag",
                             "activated": true,
                             "strategies": [],
