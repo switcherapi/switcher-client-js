@@ -152,21 +152,22 @@ function processVALUE(operation, input, values) {
 }
 
 function processNUMERIC(operation, input, values) {
+    const inputStr = String(input);
     switch(operation) {
         case OperationsType.EXIST:
-            return values.includes(input);
+            return values.includes(inputStr);
         case OperationsType.NOT_EXIST:
-            return !values.includes(input);
+            return !values.includes(inputStr);
         case OperationsType.EQUAL:
-            return input === values[0];
+            return inputStr === values[0];
         case OperationsType.NOT_EQUAL:
-            return values.filter(element => element === input).length === 0;
+            return values.filter(element => element === inputStr).length === 0;
         case OperationsType.LOWER:
-            return input < values[0];
+            return inputStr < values[0];
         case OperationsType.GREATER:
-            return input > values[0];
+            return inputStr > values[0];
         case OperationsType.BETWEEN:
-            return input >= values[0] && input <= values[1];
+            return inputStr >= values[0] && inputStr <= values[1];
     }
 }
 
