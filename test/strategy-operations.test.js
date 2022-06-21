@@ -137,9 +137,15 @@ describe('Processing strategy: NUMERIC', () => {
         '1.5'
     ];
 
-    it('Should agree when input EXIST in values', () => {
+    it('Should agree when input EXIST in values - String type', () => {
         const result = processOperation(
             StrategiesType.NUMERIC, OperationsType.EXIST, '3', mock_values2);
+        assert.isTrue(result);
+    });
+
+    it('Should agree when input EXIST in values - Number type', () => {
+        const result = processOperation(
+            StrategiesType.NUMERIC, OperationsType.EXIST, 3, mock_values2);
         assert.isTrue(result);
     });
 
