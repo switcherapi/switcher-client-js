@@ -22,13 +22,13 @@ function setupSwitcher(offline) {
 }
 
 // Requires online API
-const testSimpleAPICall = async () => {
-    setupSwitcher(false);
+const testSimpleAPICall = async (offline) => {
+    setupSwitcher(offline);
     
     await Switcher.checkSwitchers([SWITCHER_KEY]);
 
     switcher = Switcher.factory();
-    await switcher.isItOn(SWITCHER_KEY, [checkNumeric('1')]);
+    await switcher.isItOn(SWITCHER_KEY, [checkValue('user_1')]);
 
     console.log(Switcher.getLogger(SWITCHER_KEY));
     Switcher.unloadSnapshot();
@@ -114,4 +114,4 @@ const testSnapshotAutoload = async () => {
     Switcher.unloadSnapshot();
 };
 
-testSimpleAPICall();
+testSimpleAPICall(false);

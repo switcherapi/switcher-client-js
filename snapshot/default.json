@@ -36,6 +36,28 @@
                                 }
                             ],
                             "components": []
+                        },
+                        {
+                            "key": "FF2FOR2021",
+                            "description": "Strategy disabled",
+                            "activated": true,
+                            "strategies": [
+                                {
+                                    "strategy": "NETWORK_VALIDATION",
+                                    "activated": false,
+                                    "operation": "EXIST",
+                                    "values": [
+                                        "10.0.0.3/24"
+                                    ]
+                                }
+                            ],
+                            "components": []
+                        },
+                        {
+                            "key": "FF2FOR2022",
+                            "description": "No strategies",
+                            "activated": true,
+                            "components": []
                         }
                     ]
                 },

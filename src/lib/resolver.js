@@ -42,7 +42,8 @@ function checkGroup(groups, key, input) {
             const { config } = group;
             const configFound = config.filter(c => c.key === key);
 
-            if (checkConfig(group, configFound, input)) {
+            // Switcher Configs are always supplied as the snapshot is loaded from components linked to the Switcher.
+            if (checkConfig(group, configFound[0], input)) {
                 return true;
             }
         }
@@ -57,41 +58,46 @@ function checkGroup(groups, key, input) {
  * @return true if Switcher found
  */
 function checkConfig(group, config, input) {
-    if (config[0]) {
-        if (!group.activated) {
-            throw new CriteriaFailed('Group disabled');
-        }
+    if (!config)
+        return false;
 
-        if (!config[0].activated) {
-            throw new CriteriaFailed('Config disabled');
-        }
-
-        return checkStrategies(config, input);
+    if (!group.activated) {
+        throw new CriteriaFailed('Group disabled');
     }
 
-    return false;
-}
+    if (!config.activated) {
+        throw new CriteriaFailed('Config disabled');
+    }
 
-function checkStrategies(config, input) {
-    const { strategies } = config[0];
-    for (const strategy of strategies) {
-        checkStrategyInput(strategy, input);
+    if (config.strategies) {
+        return checkStrategy(config, input);
     }
 
     return true;
 }
 
-function checkStrategyInput(strategy, input) {
-    if (strategy.activated) {
-        if (!input) {
-            throw new CriteriaFailed(`Strategy '${strategy.strategy}' did not receive any input`);
-        }
+function checkStrategy(config, input) {
+    const { strategies } = config;
+    const entry = services.getEntry(input);
 
-        const entry = services.getEntry(input);
-        const entryInput = entry.filter(e => e.strategy === strategy.strategy);
-        if (!processOperation(strategy.strategy, strategy.operation, entryInput[0].input, strategy.values)) {
-            throw new CriteriaFailed(`Strategy '${strategy.strategy}' does not agree`);
+    for (const strategy of strategies) {
+        if (!strategy.activated) 
+            continue;
+
+        checkStrategyInput(entry, strategy);
+    }
+
+    return true;
+}
+
+function checkStrategyInput(entry, { strategy, operation, values }) {
+    if (entry && entry.length) {
+        const strategyEntry = entry.filter(e => e.strategy === strategy);
+        if (strategyEntry.length == 0 || !processOperation(strategy, operation, strategyEntry[0].input, values)) {
+            throw new CriteriaFailed(`Strategy '${strategy}' does not agree`);
         }
+    } else {
+        throw new CriteriaFailed(`Strategy '${strategy}' did not receive any input`);
     }
 }
 
