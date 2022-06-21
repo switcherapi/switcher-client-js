@@ -54,6 +54,16 @@ describe('E2E test - Switcher offline:', function () {
     assert.isTrue(result);
   });
 
+  it('should be valid - Switcher strategy disabled', async function () {
+    const result = await switcher.isItOn('FF2FOR2021', [checkNetwork('192.168.0.1')]);
+    assert.isTrue(result);
+  });
+
+  it('should be valid - No Switcher strategy', async function () {
+    const result = await switcher.isItOn('FF2FOR2022');
+    assert.isTrue(result);
+  });
+
   it('should be invalid - Input (IP) does not match', async function () {
     await switcher.prepare('FF2FOR2020', [
       checkValue('Japan'),
