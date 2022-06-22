@@ -58,6 +58,22 @@
                             "description": "No strategies",
                             "activated": true,
                             "components": []
+                        },
+                        {
+                            "key": "FF2FOR2023",
+                            "description": "Feature Flag - Payload Strategy",
+                            "activated": true,
+                            "strategies": [
+                                {
+                                    "strategy": "PAYLOAD_VALIDATION",
+                                    "activated": true,
+                                    "operation": "HAS_ALL",
+                                    "values": [
+                                        "id", "user", "user.login", "user.role"
+                                    ]
+                                }
+                            ],
+                            "components": []
                         }
                     ]
                 },
