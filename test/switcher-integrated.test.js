@@ -337,7 +337,7 @@ describe('Integrated test - Switcher:', function () {
     it('should run in silent mode', async function () {
       this.timeout(5000);
 
-      // setup context to read the snapshot in case the API not respond
+      // setup context to read the snapshot in case the API does not respond
       Switcher.buildContext({ url: 'url', apiKey: 'apiKey', domain: 'domain', component: 'component', environment: 'default' }, {
         silentMode: true,
         retryAfter: '2s'
@@ -351,7 +351,7 @@ describe('Integrated test - Switcher:', function () {
       let result = await switcher.isItOn('FF2FOR2030');
       assert.isTrue(result);
 
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 500));
       // The call below is in silent mode. It is getting the configuration from the offline snapshot again
       result = await switcher.isItOn();
       assert.isTrue(result);
@@ -362,7 +362,7 @@ describe('Integrated test - Switcher:', function () {
 
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // Silent mode has expired. Again, the online API is still offline. Prepare cannot be invoked
+      // Silent mode has expired. Again, the online API is still offline. Prepare still not be invoked
 
       result = await switcher.isItOn();
       assert.isTrue(result);
@@ -370,14 +370,14 @@ describe('Integrated test - Switcher:', function () {
 
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Setup the online mocked response and made it to return false just to make sure it's not fetching into the snapshot
+      // Setup the online mocked response and made it to return false just to make sure it's not fetching from the snapshot
       given(fetchStub, 1, { status: 200 });
       given(fetchStub, 2, { json: () => generateResult(false) });
 
       clientAuth.returns(generateAuth('[auth_token]', 5));
 
       result = await switcher.isItOn();
-      assert.equal(result, false);
+      assert.isFalse(result);
     });
 
     it('should throw error if not in silent mode', async function () {
