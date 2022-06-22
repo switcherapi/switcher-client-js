@@ -1,8 +1,10 @@
+const fs = require('fs');
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
 const assert = chai.assert;
-const { Switcher, checkValue, checkNetwork } = require('../src/index');
+const { Switcher, checkValue, checkNetwork, checkPayload } = require('../src/index');
+const { StrategiesType } = require('../src/lib/snapshot');
 
 describe('E2E test - Switcher offline:', function () {
   let switcher;
@@ -23,6 +25,9 @@ describe('E2E test - Switcher offline:', function () {
 
   this.afterAll(function() {
     Switcher.unloadSnapshot();
+    fs.rmdir('//somewhere/', () => {
+      return;
+    });
   });
 
   this.beforeEach(function() {
@@ -64,6 +69,37 @@ describe('E2E test - Switcher offline:', function () {
     assert.isTrue(result);
   });
 
+  it('should be valid - JSON Payload matches all keys', async function () {
+    await switcher.prepare('FF2FOR2023', [
+      checkPayload(JSON.stringify({
+        id: 1,
+        user: {
+          login: 'USER_LOGIN',
+          role: 'ADMIN'
+        }
+      }))
+    ]);
+
+    const result = await switcher.isItOn();
+    assert.isTrue(result);
+  });
+
+  it('should be invalid - JSON Payload does NOT match all keys', async function () {
+    await switcher.prepare('FF2FOR2023', [
+      checkPayload(JSON.stringify({
+        id: 1,
+        user: {
+          login: 'USER_LOGIN'
+        }
+      }))
+    ]);
+
+    const result = await switcher.isItOn();
+    assert.isFalse(result);
+    assert.equal(Switcher.getLogger('FF2FOR2023')[0].input.reason, 
+      `Strategy '${StrategiesType.PAYLOAD}' does not agree`);
+  });
+
   it('should be invalid - Input (IP) does not match', async function () {
     await switcher.prepare('FF2FOR2020', [
       checkValue('Japan'),
@@ -73,14 +109,14 @@ describe('E2E test - Switcher offline:', function () {
     const result = await switcher.isItOn();
     assert.isFalse(result);
     assert.equal(Switcher.getLogger('FF2FOR2020')[0].input.reason, 
-      'Strategy \'NETWORK_VALIDATION\' does not agree');
+      `Strategy '${StrategiesType.NETWORK}' does not agree`);
   });
 
   it('should be invalid - Input not provided', async function () {
     const result = await switcher.isItOn('FF2FOR2020');
     assert.isFalse(result);
     assert.equal(Switcher.getLogger('FF2FOR2020')[0].input.reason, 
-      'Strategy \'NETWORK_VALIDATION\' did not receive any input');
+      `Strategy '${StrategiesType.NETWORK}' did not receive any input`);
   });
 
   it('should be invalid - Switcher config disabled', async function () {

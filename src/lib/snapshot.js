@@ -3,6 +3,7 @@ const IPCIDR = require('ip-cidr');
 const DateMoment = require('./utils/datemoment');
 const { resolveSnapshot, checkSnapshotVersion } = require('./services');
 const { CheckSwitcherError } = require('./exceptions');
+const { parseJSON, payloadReader } = require('./utils/payloadReader');
 
 const loadDomain = (snapshotLocation, environment) => {
     try {
@@ -77,7 +78,9 @@ const OperationsType = Object.freeze({
     NOT_EXIST: 'NOT_EXIST',
     GREATER: 'GREATER',
     LOWER: 'LOWER',
-    BETWEEN: 'BETWEEN'
+    BETWEEN: 'BETWEEN',
+    HAS_ONE: 'HAS_ONE',
+    HAS_ALL: 'HAS_ALL'
 });
 
 const processOperation = (strategy, operation, input, values) => {
@@ -89,11 +92,13 @@ const processOperation = (strategy, operation, input, values) => {
         case StrategiesType.NUMERIC:
             return processNUMERIC(operation, input, values);
         case StrategiesType.TIME:
-            return processTime(operation, input, values);
+            return processTIME(operation, input, values);
         case StrategiesType.DATE:
-            return processDate(operation, input, values);
+            return processDATE(operation, input, values);
         case StrategiesType.REGEX:
             return processREGEX(operation, input, values);
+        case StrategiesType.PAYLOAD:
+            return processPAYLOAD(operation, input, values);
     }
 };
 
@@ -171,7 +176,7 @@ function processNUMERIC(operation, input, values) {
     }
 }
 
-function processTime(operation, input, values) {
+function processTIME(operation, input, values) {
     const dateMoment = new DateMoment(new Date(), input);
 
     switch(operation) {
@@ -184,7 +189,7 @@ function processTime(operation, input, values) {
     }
 }
 
-function processDate(operation, input, values) {
+function processDATE(operation, input, values) {
     const dateMoment = new DateMoment(input);
 
     switch(operation) {
@@ -213,6 +218,20 @@ function processREGEX(operation, input, values) {
             return input.match(`\\b${values[0]}\\b`) != null;
         case OperationsType.NOT_EQUAL:
             return !processREGEX(OperationsType.EQUAL, input, values);
+    }
+}
+
+function processPAYLOAD(operation, input, values) {
+    const inputJson = parseJSON(input);
+    if (!inputJson)
+        return false;
+
+    const keys = payloadReader(inputJson);
+    switch(operation) {
+        case OperationsType.HAS_ONE:
+            return keys.filter(key => values.includes(key)).length > 0;
+        case OperationsType.HAS_ALL:
+            return values.every(element => keys.includes(element));
     }
 }
 

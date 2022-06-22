@@ -351,7 +351,7 @@ describe('Integrated test - Switcher:', function () {
       let result = await switcher.isItOn('FF2FOR2030');
       assert.isTrue(result);
 
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 1000));
       // The call below is in silent mode. It is getting the configuration from the offline snapshot again
       result = await switcher.isItOn();
       assert.isTrue(result);
