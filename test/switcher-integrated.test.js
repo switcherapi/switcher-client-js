@@ -5,7 +5,7 @@ const assert = chai.assert;
 
 const sinon = require('sinon');
 const fetch = require('node-fetch');
-const services = require('../src/lib/services');
+const services = require('../src/lib/remote');
 const fs = require('fs');
 const { 
   Switcher, 

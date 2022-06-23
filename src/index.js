@@ -4,7 +4,7 @@ const Bypasser = require('./lib/bypasser');
 const ExecutionLogger = require('./lib/utils/executionLogger');
 const DateMoment = require('./lib/utils/datemoment');
 const { loadDomain, validateSnapshot, checkSwitchers } = require('./lib/snapshot');
-const services = require('./lib/services');
+const services = require('./lib/remote');
 const checkCriteriaOffline = require('./lib/resolver');
 const fs = require('fs');
 
@@ -99,26 +99,40 @@ class Switcher {
     }
   }
 
-  static async loadSnapshot() {
-    const snapshotFile = `${Switcher.options.snapshotLocation}${Switcher.context.environment}.json`;
+  static async loadSnapshot(watchSnapshot) {
     Switcher.snapshot = loadDomain(Switcher.options.snapshotLocation, Switcher.context.environment);
-
     if (Switcher.snapshot.data.domain.version == 0 && !Switcher.options.offline) {
       await Switcher.checkSnapshot();
-    } else if (!Switcher.testEnabled) {
-      fs.unwatchFile(snapshotFile);
-      fs.watchFile(snapshotFile, () => {
-        Switcher.snapshot = loadDomain(Switcher.options.snapshotLocation, Switcher.context.environment);
-      });
     }
+
+    if (watchSnapshot)
+      Switcher.watchSnapshot();
+  }
+
+  static watchSnapshot(success, error) {
+    if (Switcher.testEnabled)
+      return;
+
+    const snapshotFile = `${Switcher.options.snapshotLocation}${Switcher.context.environment}.json`;
+    fs.watchFile(snapshotFile, () => {
+      try {
+        Switcher.snapshot = loadDomain(Switcher.options.snapshotLocation, Switcher.context.environment);
+        if (success)
+          success();
+      } catch (e) {
+        if (error)
+          error(e);
+      }
+    });
   }
 
   static unloadSnapshot() {
-    if (!Switcher.testEnabled) {
-      const snapshotFile = `${Switcher.options.snapshotLocation}${Switcher.context.environment}.json`;
-      Switcher.snapshot = undefined;
-      fs.unwatchFile(snapshotFile);
-    }
+    if (Switcher.testEnabled)
+      return;
+
+    const snapshotFile = `${Switcher.options.snapshotLocation}${Switcher.context.environment}.json`;
+    Switcher.snapshot = undefined;
+    fs.unwatchFile(snapshotFile);
   }
 
   static async checkSwitchers(switcherKeys) {

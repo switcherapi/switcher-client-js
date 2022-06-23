@@ -1,5 +1,5 @@
 const { processOperation } = require('./snapshot');
-const services = require('../lib/services');
+const services = require('../lib/remote');
 
 function resolveCriteria(key, input, { domain }) {
     let result = true, reason = '';

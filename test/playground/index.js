@@ -114,4 +114,14 @@ const testSnapshotAutoload = async () => {
     Switcher.unloadSnapshot();
 };
 
-testSimpleAPICall(false);
+// Requires online API
+const testWatchSnapshot = async () => {
+    setupSwitcher(true);
+    switcher = Switcher.factory();
+
+    Switcher.watchSnapshot(
+        () =>  console.log('In-memory snapshot updated'), 
+        (err) => console.log(err));
+};
+
+testWatchSnapshot();

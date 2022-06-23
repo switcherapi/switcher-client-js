@@ -160,10 +160,20 @@ Switcher.checkSwitchers(['FEATURE01', 'FEATURE02'])
 ```
 
 ## Loading Snapshot from the API
-This step is optional if you want to load a copy of the configuration that can be used to eliminate latency when offline mode is activated.
+This step is optional if you want to load a copy of the configuration that can be used to eliminate latency when offline mode is activated.<br>
+Activate watchSnapshot optionally passing true in the arguments.
 
 ```js
 Switcher.loadSnapshot();
+```
+
+## Watch for Snapshot file changes
+Activate and monitor snapshot changes using this feature. Optionally, you can implement any action based on the callback response.
+
+```js
+Switcher.watchSnapshot(
+    () =>  console.log('In-memory snapshot updated'), 
+    (err) => console.log(err));
 ```
 
 ## Snapshot version check
