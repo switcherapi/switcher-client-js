@@ -335,7 +335,7 @@ describe('Integrated test - Switcher:', function () {
     });
 
     it('should run in silent mode', async function () {
-      this.timeout(5000);
+      this.timeout(6000);
 
       // setup context to read the snapshot in case the API does not respond
       Switcher.buildContext({ url: 'url', apiKey: 'apiKey', domain: 'domain', component: 'component', environment: 'default' }, {
@@ -368,13 +368,13 @@ describe('Integrated test - Switcher:', function () {
       assert.isTrue(result);
       assert.equal(spyPrepare.callCount, 0);
 
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise(resolve => setTimeout(resolve, 3000));
       
       // Setup the online mocked response and made it to return false just to make sure it's not fetching from the snapshot
       given(fetchStub, 1, { status: 200 });
       given(fetchStub, 2, { json: () => generateResult(false) });
 
-      clientAuth.returns(generateAuth('[auth_token]', 5));
+      clientAuth.returns(generateAuth('[auth_token]', 10));
 
       result = await switcher.isItOn();
       assert.isFalse(result);
