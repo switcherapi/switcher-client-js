@@ -38,7 +38,7 @@ describe('Manipulate date and time', () => {
         const beforeAdding = todayMoment.getDate().getSeconds();
         const afterAdding = todayMoment.add(1, 's').getDate().getSeconds();
         const diff = afterAdding - beforeAdding;
-        assert.isTrue(diff > 0.9 && diff < 1.1);
+        assert.isTrue(diff == 1);
     });
 
     it('Should add 1 minute to date', async () => {
