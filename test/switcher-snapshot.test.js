@@ -6,7 +6,7 @@ const assert = chai.assert;
 const sinon = require('sinon');
 const { Switcher } = require('../src/index');
 const fetch = require('node-fetch');
-const services = require('../src/lib/services');
+const services = require('../src/lib/remote');
 const fs = require('fs');
 const { given, givenError } = require('./fixture/utils');
 
@@ -74,7 +74,7 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
       offline: true
     });
     
-    await Switcher.loadSnapshot();
+    await Switcher.loadSnapshot(true);
     assert.isTrue(await Switcher.checkSnapshot());
 
     //restore state to avoid process leakage

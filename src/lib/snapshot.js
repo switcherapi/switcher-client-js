@@ -1,7 +1,7 @@
 const fs = require('fs');
 const IPCIDR = require('ip-cidr');
 const DateMoment = require('./utils/datemoment');
-const { resolveSnapshot, checkSnapshotVersion } = require('./services');
+const { resolveSnapshot, checkSnapshotVersion } = require('./remote');
 const { CheckSwitcherError } = require('./exceptions');
 const { parseJSON, payloadReader } = require('./utils/payloadReader');
 

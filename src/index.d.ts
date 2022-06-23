@@ -25,7 +25,7 @@ declare namespace SwitcherClient {
     /**
      * Read snapshot file locally and store in a parsed JSON object
      */
-    static loadSnapshot(): Promise<void>;
+    static loadSnapshot(watchSnapshot?: boolean): Promise<void>;
 
     /**
      * Verifies if the current snapshot file is updated.
@@ -40,6 +40,14 @@ declare namespace SwitcherClient {
      * @throws when one or more Switcher Keys were not found
      */
     static checkSwitchers(switcherKeys: string[]): Promise<void>;
+
+    /**
+     * Start watching snapshot files for modifications
+     * 
+     * @param success when snapshot has successfully updated
+     * @param error when any error has thrown when attempting to load snapshot
+     */
+    static watchSnapshot(success?: () => void, error?: (err: any) => void): void;
 
     /**
      * Remove snapshot from real-time update
