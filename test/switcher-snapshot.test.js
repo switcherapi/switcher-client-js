@@ -8,20 +8,7 @@ const { Switcher } = require('../src/index');
 const fetch = require('node-fetch');
 const services = require('../src/lib/remote');
 const fs = require('fs');
-const { given, givenError } = require('./fixture/utils');
-
-const generateAuth = (token, seconds) => {
-  return { 
-    token, 
-    exp: (Date.now()+(seconds*1000))/1000
-  };
-};
-
-const generateStatus = (status) => {
-  return {
-    status
-  };
-};
+const { given, givenError, generateAuth, generateStatus } = require('./helper/utils');
 
 describe('E2E test - Switcher offline - Snapshot:', function () {
   const apiKey = '[api_key]';

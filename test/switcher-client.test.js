@@ -8,14 +8,17 @@ const { StrategiesType } = require('../src/lib/snapshot');
 
 describe('E2E test - Switcher offline:', function () {
   let switcher;
-  const apiKey = '[api_key]';
-  const domain = 'Business';
-  const component = 'business-service';
-  const environment = 'default';
-  const url = 'http://localhost:3000';
+
+  const contextSettings = {
+    apiKey: '[api_key]',
+    domain: 'Business',
+    component: 'business-service',
+    environment: 'default',
+    url: 'http://localhost:3000'
+  };
 
   this.beforeAll(async function() {
-    Switcher.buildContext({ url, apiKey, domain, component, environment }, {
+    Switcher.buildContext(contextSettings, {
       offline: true, logger: true
     });
 
@@ -96,7 +99,7 @@ describe('E2E test - Switcher offline:', function () {
 
     const result = await switcher.isItOn();
     assert.isFalse(result);
-    assert.equal(Switcher.getLogger('FF2FOR2023')[0].input.reason, 
+    assert.equal(Switcher.getLogger('FF2FOR2023')[0].response.reason, 
       `Strategy '${StrategiesType.PAYLOAD}' does not agree`);
   });
 
@@ -108,28 +111,28 @@ describe('E2E test - Switcher offline:', function () {
 
     const result = await switcher.isItOn();
     assert.isFalse(result);
-    assert.equal(Switcher.getLogger('FF2FOR2020')[0].input.reason, 
+    assert.equal(Switcher.getLogger('FF2FOR2020')[0].response.reason, 
       `Strategy '${StrategiesType.NETWORK}' does not agree`);
   });
 
   it('should be invalid - Input not provided', async function () {
     const result = await switcher.isItOn('FF2FOR2020');
     assert.isFalse(result);
-    assert.equal(Switcher.getLogger('FF2FOR2020')[0].input.reason, 
+    assert.equal(Switcher.getLogger('FF2FOR2020')[0].response.reason, 
       `Strategy '${StrategiesType.NETWORK}' did not receive any input`);
   });
 
   it('should be invalid - Switcher config disabled', async function () {
     const result = await switcher.isItOn('FF2FOR2031');
     assert.isFalse(result);
-    assert.equal(Switcher.getLogger('FF2FOR2031')[0].input.reason, 
+    assert.equal(Switcher.getLogger('FF2FOR2031')[0].response.reason, 
       'Config disabled');
   });
 
   it('should be invalid - Switcher group disabled', async function () {
     const result = await switcher.isItOn('FF2FOR2040');
     assert.isFalse(result);
-    assert.equal(Switcher.getLogger('FF2FOR2040')[0].input.reason, 
+    assert.equal(Switcher.getLogger('FF2FOR2040')[0].response.reason, 
       'Group disabled');
   });
 
@@ -163,7 +166,7 @@ describe('E2E test - Switcher offline:', function () {
 
   it('should enable test mode which will prevent a snapshot to be watchable', async function () {
     //given
-    Switcher.buildContext({ url, apiKey, domain, component, environment }, {
+    Switcher.buildContext(contextSettings, {
       offline: true, logger: true
     });
 
@@ -179,7 +182,7 @@ describe('E2E test - Switcher offline:', function () {
   it('should be invalid - Offline mode cannot load snapshot from an invalid path', async function () {
     this.timeout(3000);
 
-    Switcher.buildContext({ url, apiKey, domain, component, environment }, {
+    Switcher.buildContext(contextSettings, {
       offline: true,
       snapshotLocation: '//somewhere/'
     });
@@ -192,7 +195,7 @@ describe('E2E test - Switcher offline:', function () {
   it('should be valid - Offline mode', async function () {
     this.timeout(3000);
 
-    Switcher.buildContext({ url, apiKey, domain, component, environment }, {
+    Switcher.buildContext(contextSettings, {
       offline: true,
       snapshotLocation: 'generated-snapshots/'
     });

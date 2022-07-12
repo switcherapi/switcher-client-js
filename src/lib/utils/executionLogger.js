@@ -11,7 +11,7 @@ class ExecutionLogger {
      * @param input
      * @param response
      */
-    static add(key, input, response) {
+    static add(response, key, input) {
         for (let index = 0; index < logger.length; index++) {
             const log = logger[index];
             if (log.key === key && JSON.stringify(log.input) === JSON.stringify(input)) {
