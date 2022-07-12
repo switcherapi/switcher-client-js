@@ -124,4 +124,4 @@ const testWatchSnapshot = async () => {
         (err) => console.log(err));
 };
 
-testWatchSnapshot();
+testSimpleAPICall(true);

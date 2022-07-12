@@ -20,23 +20,14 @@ const {
 const { 
   given, 
   givenError, 
-  throws 
-} = require('./fixture/utils');
-
-const generateAuth = (token, seconds) => {
-  return { 
-    token, 
-    exp: (Date.now()+(seconds*1000))/1000
-  };
-};
-
-const generateResult = (result) => {
-  return {
-    result
-  };
-};
+  throws,
+  generateAuth,
+  generateResult
+} = require('./helper/utils');
 
 describe('Integrated test - Switcher:', function () {
+
+  let contextSettings;
 
   this.afterAll(function() {
     fs.unwatchFile('./snapshot/default.json');
@@ -44,6 +35,14 @@ describe('Integrated test - Switcher:', function () {
 
   this.beforeEach(function() {
     Switcher.setTestEnabled();
+
+    contextSettings = {
+      apiKey: '[api_key]',
+      domain: 'Business',
+      component: 'business-service',
+      environment: 'default',
+      url: 'http://localhost:3000'
+    };
   });
 
   describe('check criteria (e2e):', function () {
@@ -65,7 +64,7 @@ describe('Integrated test - Switcher:', function () {
       given(fetchStub, 2, { json: () => generateResult(true) });
 
       // test
-      Switcher.buildContext({ url: 'url', apiKey: 'apiKey', domain: 'domain', component: 'component', environment: 'default' });
+      Switcher.buildContext(contextSettings);
       let switcher = Switcher.factory();
       
       await switcher.prepare('FLAG_1');
@@ -90,7 +89,7 @@ describe('Integrated test - Switcher:', function () {
       given(fetchStub, 6, { json: () => generateResult(true), status: 200 });
 
       // test
-      Switcher.buildContext({ url: 'url', apiKey: 'apiKey', domain: 'domain', component: 'component', environment: 'default' });
+      Switcher.buildContext(contextSettings);
       let switcher = Switcher.factory();
       switcher.throttle(1000);
 
@@ -130,7 +129,7 @@ describe('Integrated test - Switcher:', function () {
       clientAuth.returns(generateAuth('[auth_token]', 5));
 
       // test
-      Switcher.buildContext({ url: 'url', apiKey: 'apiKey', domain: 'domain', component: 'component', environment: 'default' });
+      Switcher.buildContext(contextSettings);
       let switcher = Switcher.factory();
       
       await switcher.prepare('FLAG_1', [
@@ -143,6 +142,15 @@ describe('Integrated test - Switcher:', function () {
         checkPayload(JSON.stringify({ name: 'User 1' }))
       ]);
 
+      assert.sameDeepMembers(switcher._input, [
+        [ 'VALUE_VALIDATION', 'User 1' ],
+        [ 'NUMERIC_VALIDATION', '1' ],
+        [ 'NETWORK_VALIDATION', '192.168.0.1' ],  
+        [ 'DATE_VALIDATION', '2019-12-01T08:30' ],
+        [ 'TIME_VALIDATION', '08:00' ],
+        [ 'REGEX_VALIDATION', '\\bUSER_[0-9]{1,2}\\b' ],
+        [ 'PAYLOAD_VALIDATION', '{"name":"User 1"}' ]
+      ]);
       assert.isTrue(await switcher.isItOn());
     });
 
@@ -153,7 +161,7 @@ describe('Integrated test - Switcher:', function () {
       given(fetchStub, 0, { json: () => response, status: 200 });
 
       //test
-      Switcher.buildContext({ url: 'url', apiKey: 'apiKey', domain: 'domain', component: 'component', environment: 'default' });
+      Switcher.buildContext(contextSettings);
       await assert.isFulfilled(Switcher.checkSwitchers(['FEATURE01', 'FEATURE02']));
     });
 
@@ -164,7 +172,7 @@ describe('Integrated test - Switcher:', function () {
       given(fetchStub, 0, { json: () => response, status: 200 });
 
       //test
-      Switcher.buildContext({ url: 'url', apiKey: 'apiKey', domain: 'domain', component: 'component', environment: 'default' });
+      Switcher.buildContext(contextSettings);
       await assert.isRejected(Switcher.checkSwitchers(['FEATURE01', 'FEATURE02']), 
         'Something went wrong: Something went wrong: [FEATURE02] not found');
     });
@@ -176,7 +184,7 @@ describe('Integrated test - Switcher:', function () {
       given(fetchStub, 0, { json: () => response, status: 422 });
 
       //test
-      Switcher.buildContext({ url: 'url', apiKey: 'apiKey', domain: 'domain', component: 'component', environment: 'default' });
+      Switcher.buildContext(contextSettings);
       await assert.isRejected(Switcher.checkSwitchers([]), 
         'Something went wrong: Switcher Key is required');
     });
@@ -187,7 +195,7 @@ describe('Integrated test - Switcher:', function () {
       given(fetchStub, 0, { errno: 'ERROR' });
 
       //test
-      Switcher.buildContext({ url: 'url', apiKey: 'apiKey', domain: 'domain', component: 'component', environment: 'default' });
+      Switcher.buildContext(contextSettings);
       await assert.isRejected(Switcher.checkSwitchers('FEATURE02'));
     });
     
@@ -197,7 +205,7 @@ describe('Integrated test - Switcher:', function () {
       // given API responding properly
       clientAuth.returns(generateAuth('[auth_token]', 1));
 
-      Switcher.buildContext({ url: 'url', apiKey: 'apiKey', domain: 'domain', component: 'component', environment: 'default' });
+      Switcher.buildContext(contextSettings);
       let switcher = Switcher.factory();
       const spyPrepare = sinon.spy(switcher, 'prepare');
 
@@ -231,7 +239,7 @@ describe('Integrated test - Switcher:', function () {
       clientAuth.returns(generateAuth('[auth_token]', 5));
 
       // test
-      Switcher.buildContext({ url: 'url', apiKey: 'apiKey', domain: 'domain', component: 'component', environment: 'default' });
+      Switcher.buildContext(contextSettings);
       let switcher = Switcher.factory();
       assert.isTrue(await switcher.isItOn('MY_FLAG', [
         checkValue('User 1'),
@@ -246,7 +254,7 @@ describe('Integrated test - Switcher:', function () {
       clientAuth.returns(generateAuth('[auth_token]', 5));
 
       // test
-      Switcher.buildContext({ url: 'url', apiKey: 'apiKey', domain: 'domain', component: 'component', environment: 'default' });
+      Switcher.buildContext(contextSettings);
       let switcher = Switcher.factory();
 
       await switcher.prepare('MY_FLAG');
@@ -279,7 +287,7 @@ describe('Integrated test - Switcher:', function () {
       clientAuth.returns(generateAuth('[auth_token]', 5));
 
       // test
-      Switcher.buildContext({ url: 'url', apiKey: 'apiKey', domain: 'domain', component: 'component', environment: 'default' });
+      Switcher.buildContext(contextSettings);
       let switcher = Switcher.factory();
       await switcher.prepare(undefined, [
         checkValue('User 1'),
@@ -311,7 +319,7 @@ describe('Integrated test - Switcher:', function () {
       clientAuth.returns(generateAuth(undefined, 1));
 
       // test
-      Switcher.buildContext({ url: 'url', apiKey: 'apiKey', domain: 'domain', component: 'component', environment: 'default' });
+      Switcher.buildContext(contextSettings);
       let switcher = Switcher.factory();
       
       await assert.isRejected(switcher.isItOn('MY_FLAG', [
@@ -326,7 +334,7 @@ describe('Integrated test - Switcher:', function () {
       clientAuth.returns(generateAuth('[auth_token]', 5));
 
       // test
-      Switcher.buildContext({ url: 'url', apiKey: 'apiKey', domain: 'domain', component: 'component', environment: 'default' });
+      Switcher.buildContext(contextSettings);
       let switcher = Switcher.factory();
       await switcher.prepare('MY_WRONG_FLAG', ['THIS IS WRONG']);
 
@@ -338,7 +346,7 @@ describe('Integrated test - Switcher:', function () {
       this.timeout(6000);
 
       // setup context to read the snapshot in case the API does not respond
-      Switcher.buildContext({ url: 'url', apiKey: 'apiKey', domain: 'domain', component: 'component', environment: 'default' }, {
+      Switcher.buildContext(contextSettings, {
         silentMode: true,
         retryAfter: '2s'
       });
@@ -388,7 +396,7 @@ describe('Integrated test - Switcher:', function () {
       throws(fetchStub, { errno: 'ECONNREFUSED' });
 
       // test
-      Switcher.buildContext({ url: 'url', apiKey: 'apiKey', domain: 'domain', component: 'component', environment: 'default' });
+      Switcher.buildContext(contextSettings);
       let switcher = Switcher.factory();
 
       await assert.isRejected(switcher.isItOn('FF2FOR2030'), 
@@ -400,7 +408,7 @@ describe('Integrated test - Switcher:', function () {
       given(fetchStub, 0, { status: 503 });
 
       // test
-      Switcher.buildContext({ url: 'url', apiKey: 'apiKey', domain: 'domain', component: 'component', environment: 'default' }, {
+      Switcher.buildContext(contextSettings, {
         silentMode: true
       });
 

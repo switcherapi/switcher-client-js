@@ -278,7 +278,7 @@ class Switcher {
       Switcher.context, this._key, this._input, showReason);
     
     if (Switcher.options.logger) 
-      ExecutionLogger.add(this._key, this._input, responseCriteria);
+      ExecutionLogger.add(responseCriteria, this._key, this._input);
 
     return responseCriteria.result;
   }
@@ -287,7 +287,7 @@ class Switcher {
     if (this._nextRun < Date.now()) {
       this._nextRun = Date.now() + this._delay;
       services.checkCriteria(Switcher.context, this._key, this._input, showReason)
-        .then(response => ExecutionLogger.add(this._key, this._input, response));
+        .then(response => ExecutionLogger.add(response, this._key, this._input));
     }
 
     return ExecutionLogger.getExecution(this._key, this._input).response.result;
@@ -307,7 +307,7 @@ class Switcher {
       this._key, this._input, Switcher.snapshot);
 
     if (Switcher.options.logger) 
-      ExecutionLogger.add(this._key, response);
+      ExecutionLogger.add(response, this._key, this._input);
 
     return response.result;
   }
