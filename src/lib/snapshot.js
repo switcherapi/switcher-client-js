@@ -1,5 +1,5 @@
 const fs = require('fs');
-const IPCIDR = require('ip-cidr');
+const IPCIDR = require('./utils/ipcidr');
 const DateMoment = require('./utils/datemoment');
 const { resolveSnapshot, checkSnapshotVersion } = require('./remote');
 const { CheckSwitcherError } = require('./exceptions');
@@ -103,7 +103,7 @@ const processOperation = (strategy, operation, input, values) => {
 };
 
 function processNETWORK(operation, input, values) {
-    const cidrRegex = /^([\d]{1,3}\.){3}[\d]{1,3}(\/([\d]|[1-2][\d]|3[0-2]))$/;
+    const cidrRegex = /^(\d{1,3}\.){3}\d{1,3}(\/(\d|[1-2]\d|3[0-2]))$/;
     switch(operation) {
         case OperationsType.EXIST:
             return processNETWORK_Exist(input, values, cidrRegex);
@@ -117,7 +117,7 @@ function processNETWORK_Exist(input, values, cidrRegex) {
     for (const value of values) {
         if (value.match(cidrRegex)) {
             const cidr = new IPCIDR(value);
-            if (cidr.contains(input)) {
+            if (cidr.isIp4InCidr(input)) {
                 return true;
             }
         } else {
@@ -128,10 +128,10 @@ function processNETWORK_Exist(input, values, cidrRegex) {
 }
 
 function processNETWORK_NotExist(input, values, cidrRegex) {
-    const result = values.filter(element => {
+    const result = values.filter((element) => {
         if (element.match(cidrRegex)) {
             const cidr = new IPCIDR(element);
-            if (cidr.contains(input)) {
+            if (cidr.isIp4InCidr(input)) {
                 return true;
             }
         } else {
