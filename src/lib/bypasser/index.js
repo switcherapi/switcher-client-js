@@ -11,7 +11,7 @@ class Bypasser {
      * @param key 
      */
     static assume(key) {
-        const existentKey = this.searchBypassed(key, bypassedKeys);
+        const existentKey = this.searchBypassed(key);
         if (existentKey) {
             return existentKey;
         }
@@ -28,7 +28,7 @@ class Bypasser {
      */
     static forget(key) {
         bypassedKeys.splice(
-            bypassedKeys.indexOf(this.searchBypassed(key, bypassedKeys)), 1);
+            bypassedKeys.indexOf(this.searchBypassed(key)), 1);
     }
 
     /**
