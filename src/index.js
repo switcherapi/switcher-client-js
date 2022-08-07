@@ -83,27 +83,30 @@ class Switcher {
   }
 
   static async checkSnapshot() {
-    if (Switcher.snapshot) {
-      if (!Switcher.context.exp || Date.now() > (Switcher.context.exp*1000)) {
-        await Switcher._auth();
-        
-        const result = await validateSnapshot(Switcher.context, Switcher.options.snapshotLocation, 
-          Switcher.snapshot.data.domain.version);
-        
-        if (result) {
-          Switcher.loadSnapshot();
-          return true;
-        }
-      }
+    if (!Switcher.snapshot) 
       return false;
+
+    if (!Switcher.context.exp || Date.now() > (Switcher.context.exp*1000))
+      await Switcher._auth();
+
+    const result = await validateSnapshot(
+      Switcher.context, 
+      Switcher.options.snapshotLocation, 
+      Switcher.snapshot.data.domain.version
+    );
+    
+    if (result) {
+      Switcher.loadSnapshot();
+      return true;
     }
+
+    return false;
   }
 
   static async loadSnapshot(watchSnapshot) {
     Switcher.snapshot = loadDomain(Switcher.options.snapshotLocation, Switcher.context.environment);
-    if (Switcher.snapshot.data.domain.version == 0 && !Switcher.options.offline) {
+    if (Switcher.snapshot.data.domain.version == 0 && !Switcher.options.offline)
       await Switcher.checkSnapshot();
-    }
 
     if (watchSnapshot)
       Switcher.watchSnapshot();

@@ -154,7 +154,7 @@ describe('Integrated test - Switcher:', function () {
       assert.isTrue(await switcher.isItOn());
     });
 
-    it('should not throw when switcher keys provided were configured properly', async function() {
+    it('should NOT throw when switcher keys provided were configured properly', async function() {
       //given
       clientAuth.returns(generateAuth('[auth_token]', 5));
       const response = { not_found: [] };
