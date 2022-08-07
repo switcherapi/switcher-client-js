@@ -51,7 +51,7 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
     clientAuth = sinon.stub(services, 'auth');
     fetchStub = sinon.stub(fetch, 'Promise');
 
-    clientAuth.returns(Promise.resolve({ json: () => generateAuth('uqwu1u8qj18j28wj28', 5) }));
+    clientAuth.returns(Promise.resolve({ json: () => generateAuth('[API_KEY]', 5) }));
     given(fetchStub, 0, { json: () => generateStatus(false) }); // Snapshot outdated
     given(fetchStub, 1, { json: () => JSON.parse(dataJSON) });
 
@@ -74,11 +74,15 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
     clientAuth = sinon.stub(services, 'auth');
     fetchStub = sinon.stub(fetch, 'Promise');
 
-    clientAuth.returns(Promise.resolve({ json: () => generateAuth('uqwu1u8qj18j28wj28', 5) }));
+    clientAuth.returns(Promise.resolve({ json: () => generateAuth('[API_KEY]', 5) }));
     given(fetchStub, 0, { json: () => generateStatus(true) }); // No available update
     
     //test
     await Switcher.loadSnapshot();
+    assert.isFalse(await Switcher.checkSnapshot());
+  });
+
+  it('should NOT update snapshot - Snapshot not loaded', async function () {
     assert.isFalse(await Switcher.checkSnapshot());
   });
 
@@ -89,7 +93,7 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
     clientAuth = sinon.stub(services, 'auth');
     fetchStub = sinon.stub(fetch, 'Promise');
 
-    clientAuth.returns(Promise.resolve({ json: () => generateAuth('uqwu1u8qj18j28wj28', 5) }));
+    clientAuth.returns(Promise.resolve({ json: () => generateAuth('[API_KEY]', 5) }));
     givenError(fetchStub, 0, { errno: 'ECONNREFUSED' });
     
     //test
@@ -104,7 +108,7 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
     clientAuth = sinon.stub(services, 'auth');
     fetchStub = sinon.stub(fetch, 'Promise');
 
-    clientAuth.returns(Promise.resolve({ json: () => generateAuth('uqwu1u8qj18j28wj28', 5) }));
+    clientAuth.returns(Promise.resolve({ json: () => generateAuth('[API_KEY]', 5) }));
     given(fetchStub, 0, { json: () => generateStatus(false) }); // Snapshot outdated
     givenError(fetchStub, 1, { errno: 'ECONNREFUSED' });
     
@@ -120,7 +124,7 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
     clientAuth = sinon.stub(services, 'auth');
     fetchStub = sinon.stub(fetch, 'Promise');
 
-    clientAuth.returns(Promise.resolve({ json: () => generateAuth('uqwu1u8qj18j28wj28', 5) }));
+    clientAuth.returns(Promise.resolve({ json: () => generateAuth('[API_KEY]', 5) }));
     given(fetchStub, 0, { json: () => generateStatus(false) }); // Snapshot outdated
     given(fetchStub, 1, { json: () => JSON.parse(dataJSON) });
 

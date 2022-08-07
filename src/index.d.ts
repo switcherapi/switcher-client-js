@@ -29,7 +29,8 @@ declare namespace SwitcherClient {
 
     /**
      * Verifies if the current snapshot file is updated.
-     * Return true if an update has been made.
+     * 
+     * Return true when an update has been executed.
      */
     static checkSnapshot(): Promise<boolean>;
 
