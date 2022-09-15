@@ -18,7 +18,6 @@ const {
   checkPayload
 } = require('./lib/middlewares/check');
 
-const DEFAULT_URL = 'https://switcher-api.herokuapp.com';
 const DEFAULT_ENVIRONMENT = 'default';
 const DEFAULT_SNAPSHOT_LOCATION = './snapshot/';
 const DEFAULT_RETRY_TIME = '5m';
@@ -41,8 +40,8 @@ class Switcher {
     this.snapshot = undefined;
     this.context = {};
     this.context = context;
+    this.context.url = context.url;
     this.context.environment = context.environment || DEFAULT_ENVIRONMENT;
-    this.context.url = context.url || DEFAULT_URL;
 
     // Default values
     this.options = {};
@@ -217,6 +216,10 @@ class Switcher {
 
   async validate() {
     let errors = [];
+
+    if (!Switcher.context.url) {
+      errors.push('Missing API url field');
+    }
 
     if (!Switcher.context.apiKey) {
       errors.push('Missing API Key field');
