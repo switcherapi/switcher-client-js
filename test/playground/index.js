@@ -9,7 +9,7 @@ const apiKey = 'JDJiJDA4JEFweTZjSTR2bE9pUjNJOUYvRy9raC4vRS80Q2tzUnk1d3o1aXFmS2o5
 const domain = 'Playground';
 const component = 'switcher-playground';
 const environment = 'default';
-const url = 'https://switcher-api.herokuapp.com';
+const url = 'https://switcherapi.com/api';
 
 let switcher;
 

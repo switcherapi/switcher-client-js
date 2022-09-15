@@ -264,6 +264,23 @@ describe('Integrated test - Switcher:', function () {
       ]));
     });
 
+    it('should be invalid - Missing API url field', async function () {
+      // given
+      clientAuth.returns(generateAuth('[auth_token]', 5));
+
+      // test
+      Switcher.buildContext({ url: undefined, apiKey: 'apiKey', domain: 'domain', component: 'component', environment: 'default' });
+      let switcher = Switcher.factory();
+
+      await switcher.prepare('MY_FLAG', [
+        checkValue('User 1'),
+        checkNetwork('192.168.0.1')
+      ]);
+
+      await assert.isRejected(switcher.isItOn(), 
+        'Something went wrong: Missing API url field');
+    });
+
     it('should be invalid - Missing API Key field', async function () {
       // given
       clientAuth.returns(generateAuth('[auth_token]', 5));
