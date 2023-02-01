@@ -27,7 +27,7 @@ class TimedMatch {
             }, this._maxTimeLimit);
         });
     
-        await Promise.any([matchPromise, matchTimer]).then((value) => {
+        await Promise.race([matchPromise, matchTimer]).then((value) => {
             this._worker.off('message', resolveListener);
             clearTimeout(timer);
             result = value;
