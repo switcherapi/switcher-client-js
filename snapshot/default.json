@@ -74,6 +74,22 @@
                                 }
                             ],
                             "components": []
+                        },
+                        {
+                            "key": "FF2FOR2024",
+                            "description": "reDOS safe test",
+                            "activated": true,
+                            "strategies": [
+                                {
+                                    "strategy": "REGEX_VALIDATION",
+                                    "activated": true,
+                                    "operation": "EXIST",
+                                    "values": [
+                                        "^(([a-z])+.)+[A-Z]([a-z])+$"
+                                    ]
+                                }
+                            ],
+                            "components": []
                         }
                     ]
                 },
