@@ -76,7 +76,7 @@ class Switcher {
         this.options.retryDurationIn = DEFAULT_RETRY_TIME.charAt(1);
       }
 
-      this.#initTimedMatch(options);
+      this._initTimedMatch(options);
     }
   }
 
@@ -89,7 +89,7 @@ class Switcher {
       return false;
 
     if (!Switcher.context.exp || Date.now() > (Switcher.context.exp*1000))
-      await Switcher.#auth();
+      await Switcher._auth();
 
     const result = await validateSnapshot(
       Switcher.context, 
@@ -144,13 +144,13 @@ class Switcher {
     if (Switcher.options.offline) {
       checkSwitchers(Switcher.snapshot, switcherKeys);
     } else {
-      await Switcher.#auth();
+      await Switcher._auth();
       await services.checkSwitchers(
         Switcher.context.url, Switcher.context.token, switcherKeys);
     }
   }
 
-  static #initTimedMatch(options) {
+  static _initTimedMatch(options) {
     if ('regexMaxBlackList' in options) {
       TimedMatch.setMaxBlackListed(options.regexMaxBlackList);
     }
@@ -161,13 +161,13 @@ class Switcher {
   }
 
 
-  static async #auth() {
+  static async _auth() {
     const response = await services.auth(Switcher.context);
     Switcher.context.token = response.token;
     Switcher.context.exp = response.exp;
   }
 
-  static async #checkHealth() {
+  static async _checkHealth() {
     // checks if silent mode is still activated
     if (Switcher.context.token === 'SILENT') {
       if (!Switcher.context.exp || Date.now() < (Switcher.context.exp*1000)) {
@@ -224,7 +224,7 @@ class Switcher {
     if (input) { this._input = input; }
 
     if (!Switcher.options.offline) {
-      await Switcher.#auth();
+      await Switcher._auth();
     }
   }
 
@@ -247,7 +247,7 @@ class Switcher {
       errors.push('Missing key field');
     }
 
-    await this.#executeApiValidation();
+    await this._executeApiValidation();
     if (!Switcher.context.token) {
       errors.push('Missing token field');
     }
@@ -259,7 +259,7 @@ class Switcher {
 
   async isItOn(key, input, showReason = false) {
     let result;
-    this.#validateArgs(key, input);
+    this._validateArgs(key, input);
 
     // verify if query from Bypasser
     const bypassKey = Bypasser.searchBypassed(this._key);
@@ -269,13 +269,13 @@ class Switcher {
     
     // verify if query from snapshot
     if (Switcher.options.offline) {
-      result = await this.#executeOfflineCriteria();
+      result = await this._executeOfflineCriteria();
     } else {
       await this.validate();
       if (Switcher.context.token === 'SILENT')
-        result = await this.#executeOfflineCriteria();
+        result = await this._executeOfflineCriteria();
       else
-        result = await this.#executeOnlineCriteria(showReason);
+        result = await this._executeOnlineCriteria(showReason);
     }
 
     return result;
@@ -290,8 +290,8 @@ class Switcher {
     return this;
   }
 
-  async #executeOnlineCriteria(showReason) {
-    if (!this.#useSync())
+  async _executeOnlineCriteria(showReason) {
+    if (!this._useSync())
       return this._executeAsyncOnlineCriteria(showReason);
 
     const responseCriteria = await services.checkCriteria(
@@ -313,16 +313,16 @@ class Switcher {
     return ExecutionLogger.getExecution(this._key, this._input).response.result;
   }
 
-  async #executeApiValidation() {
-    if (this.#useSync()) {
-      if (await Switcher.#checkHealth() && 
+  async _executeApiValidation() {
+    if (this._useSync()) {
+      if (await Switcher._checkHealth() && 
         (!Switcher.context.exp || Date.now() > (Switcher.context.exp * 1000))) {
           await this.prepare(this._key, this._input);
       }
     }
   }
 
-  async #executeOfflineCriteria() {
+  async _executeOfflineCriteria() {
     const response = await checkCriteriaOffline(
       this._key, this._input, Switcher.snapshot);
 
@@ -332,12 +332,12 @@ class Switcher {
     return response.result;
   }
 
-  #validateArgs(key, input) {
+  _validateArgs(key, input) {
     if (key) { this._key = key; }
     if (input) { this._input = input; }
   }
 
-  #useSync() {
+  _useSync() {
     return this._delay == 0 || !ExecutionLogger.getExecution(this._key, this._input);
   }
 

@@ -7,7 +7,7 @@ const nokRE = ['^(([a-z])+.)+[A-Z]([a-z])+$'];
 const nokInput = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
 
 const COLD_TIME = 500;
-const WARM_TIME = 10;
+const WARM_TIME = 50;
 const TIMEOUT = 1000;
 
 const getTimer = (timer) => (timer - Date.now()) * -1;

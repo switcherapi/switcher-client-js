@@ -2,33 +2,33 @@ const cp = require('child_process');
 
 class TimedMatch {
 
-    static #worker = TimedMatch.#createChildProcess();
-    static #blacklisted = [];
-    static #maxBlackListed = 50;
-    static #maxTimeLimit = 3000;
+    static _worker = this._createChildProcess();
+    static _blacklisted = [];
+    static _maxBlackListed = 50;
+    static _maxTimeLimit = 3000;
 
     static async tryMatch(values, input) {
         let result = false;
         let timer, resolveListener;
 
-        if (TimedMatch.#isBlackListed({ values, input }))
+        if (this._isBlackListed({ values, input }))
             return false;
     
         const matchPromise = new Promise((resolve) => {
             resolveListener = resolve;
-            TimedMatch.#worker.on('message', resolveListener);
-            TimedMatch.#worker.send({ values, input });
+            this._worker.on('message', resolveListener);
+            this._worker.send({ values, input });
         });
     
         const matchTimer = new Promise((resolve) => {
             timer = setTimeout(() => {
-                TimedMatch.#resetWorker({ values, input });
+                this._resetWorker({ values, input });
                 resolve(false);
-            }, TimedMatch.#maxTimeLimit);
+            }, this._maxTimeLimit);
         });
     
-        await Promise.any([matchPromise, matchTimer]).then((value) => {
-            TimedMatch.#worker.off('message', resolveListener);
+        await Promise.race([matchPromise, matchTimer]).then((value) => {
+            this._worker.off('message', resolveListener);
             clearTimeout(timer);
             result = value;
         });
@@ -37,36 +37,36 @@ class TimedMatch {
     }
 
     static clearBlackList() {
-        TimedMatch.#blacklisted = [];
+        this._blacklisted = [];
     }
 
     static setMaxBlackListed(value) {
-        TimedMatch.#maxBlackListed = value;
+        this._maxBlackListed = value;
     }
 
     static setMaxTimeLimit(value) {
-        TimedMatch.#maxTimeLimit = value;
+        this._maxTimeLimit = value;
     }
 
-    static #isBlackListed({ values, input }) {
-        const bls = TimedMatch.#blacklisted.filter(bl => bl.input == input && bl.res == values);
+    static _isBlackListed({ values, input }) {
+        const bls = this._blacklisted.filter(bl => bl.input == input && bl.res == values);
         return bls.length;
     }
     
-    static #resetWorker({ values, input }) {
-        TimedMatch.#worker.kill();
-        TimedMatch.#worker = TimedMatch.#createChildProcess();
+    static _resetWorker({ values, input }) {
+        this._worker.kill();
+        this._worker = this._createChildProcess();
 
-        if (TimedMatch.#blacklisted.length == TimedMatch.#maxBlackListed)
-            TimedMatch.#blacklisted.splice(0, 1);
+        if (this._blacklisted.length == this._maxBlackListed)
+        this._blacklisted.splice(0, 1);
 
-        TimedMatch.#blacklisted.push({
+        this._blacklisted.push({
             res: values,
             input
         });
     }
     
-    static #createChildProcess() {
+    static _createChildProcess() {
         const match_proc = cp.fork(`${__dirname}/match-proc.js`, {
             stdio: 'ignore'
         });
