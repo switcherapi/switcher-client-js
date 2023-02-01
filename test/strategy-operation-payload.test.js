@@ -81,32 +81,32 @@ describe('Processing strategy: PAYLOAD', () => {
         ]);
     });
 
-    it('should return TRUE when payload has field', () => {
-        assert.isTrue(processOperation(
+    it('should return TRUE when payload has field', async () => {
+        assert.isTrue(await processOperation(
             StrategiesType.PAYLOAD, OperationsType.HAS_ONE, fixture_1, ['login']));
     });
 
-    it('should return FALSE when payload does not have field', () => {
-        assert.isFalse(processOperation(
+    it('should return FALSE when payload does not have field', async () => {
+        assert.isFalse(await processOperation(
             StrategiesType.PAYLOAD, OperationsType.HAS_ONE, fixture_1, ['user']));
     });
 
-    it('should return TRUE when payload has nested field', () => {
-        assert.isTrue(processOperation(
+    it('should return TRUE when payload has nested field', async () => {
+        assert.isTrue(await processOperation(
             StrategiesType.PAYLOAD, OperationsType.HAS_ONE, fixture_values2, [
                 'order.qty', 'order.total'
             ]));
     });
 
-    it('should return TRUE when payload has nested field with arrays', () => {
-        assert.isTrue(processOperation(
+    it('should return TRUE when payload has nested field with arrays', async () => {
+        assert.isTrue(await processOperation(
             StrategiesType.PAYLOAD, OperationsType.HAS_ONE, fixture_values2, [
                 'order.deliver.tracking.status'
             ]));
     });
 
-    it('should return TRUE when payload has all', () => {
-        assert.isTrue(processOperation(
+    it('should return TRUE when payload has all', async () => {
+        assert.isTrue(await processOperation(
             StrategiesType.PAYLOAD, OperationsType.HAS_ALL, fixture_values2, [
                 'product',
                 'order',
@@ -119,8 +119,8 @@ describe('Processing strategy: PAYLOAD', () => {
             ]));
     });
 
-    it('should return FALSE when payload does not have all', () => {
-        assert.isFalse(processOperation(
+    it('should return FALSE when payload does not have all', async () => {
+        assert.isFalse(await processOperation(
             StrategiesType.PAYLOAD, OperationsType.HAS_ALL, fixture_values2, [
                 'product',
                 'order',
@@ -128,8 +128,8 @@ describe('Processing strategy: PAYLOAD', () => {
             ]));
     });
 
-    it('should return FALSE when payload is not a JSON string', () => {
-        assert.isFalse(processOperation(
+    it('should return FALSE when payload is not a JSON string', async () => {
+        assert.isFalse(await processOperation(
             StrategiesType.PAYLOAD, OperationsType.HAS_ALL, 'NOT_JSON', []));
     });
 });

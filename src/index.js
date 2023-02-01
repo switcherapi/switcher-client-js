@@ -2,6 +2,7 @@
 
 const Bypasser = require('./lib/bypasser');
 const ExecutionLogger = require('./lib/utils/executionLogger');
+const TimedMatch = require('./lib/utils/timed-match');
 const DateMoment = require('./lib/utils/datemoment');
 const { loadDomain, validateSnapshot, checkSwitchers } = require('./lib/snapshot');
 const services = require('./lib/remote');
@@ -74,6 +75,8 @@ class Switcher {
         this.options.retryTime = DEFAULT_RETRY_TIME.charAt(0);
         this.options.retryDurationIn = DEFAULT_RETRY_TIME.charAt(1);
       }
+
+      this.#initTimedMatch(options);
     }
   }
 
@@ -86,7 +89,7 @@ class Switcher {
       return false;
 
     if (!Switcher.context.exp || Date.now() > (Switcher.context.exp*1000))
-      await Switcher._auth();
+      await Switcher.#auth();
 
     const result = await validateSnapshot(
       Switcher.context, 
@@ -141,19 +144,30 @@ class Switcher {
     if (Switcher.options.offline) {
       checkSwitchers(Switcher.snapshot, switcherKeys);
     } else {
-      await Switcher._auth();
+      await Switcher.#auth();
       await services.checkSwitchers(
         Switcher.context.url, Switcher.context.token, switcherKeys);
     }
   }
 
-  static async _auth() {
+  static #initTimedMatch(options) {
+    if ('regexMaxBlackList' in options) {
+      TimedMatch.setMaxBlackListed(options.regexMaxBlackList);
+    }
+
+    if ('regexMaxTimeLimit' in options) {
+      TimedMatch.setMaxTimeLimit(options.regexMaxTimeLimit);
+    }
+  }
+
+
+  static async #auth() {
     const response = await services.auth(Switcher.context);
     Switcher.context.token = response.token;
     Switcher.context.exp = response.exp;
   }
 
-  static async _checkHealth() {
+  static async #checkHealth() {
     // checks if silent mode is still activated
     if (Switcher.context.token === 'SILENT') {
       if (!Switcher.context.exp || Date.now() < (Switcher.context.exp*1000)) {
@@ -210,7 +224,7 @@ class Switcher {
     if (input) { this._input = input; }
 
     if (!Switcher.options.offline) {
-      await Switcher._auth();
+      await Switcher.#auth();
     }
   }
 
@@ -233,7 +247,7 @@ class Switcher {
       errors.push('Missing key field');
     }
 
-    await this._executeApiValidation();
+    await this.#executeApiValidation();
     if (!Switcher.context.token) {
       errors.push('Missing token field');
     }
@@ -245,7 +259,7 @@ class Switcher {
 
   async isItOn(key, input, showReason = false) {
     let result;
-    this._validateArgs(key, input);
+    this.#validateArgs(key, input);
 
     // verify if query from Bypasser
     const bypassKey = Bypasser.searchBypassed(this._key);
@@ -255,13 +269,13 @@ class Switcher {
     
     // verify if query from snapshot
     if (Switcher.options.offline) {
-      result = this._executeOfflineCriteria();
+      result = await this.#executeOfflineCriteria();
     } else {
       await this.validate();
       if (Switcher.context.token === 'SILENT')
-        result = this._executeOfflineCriteria();
+        result = await this.#executeOfflineCriteria();
       else
-        result = await this._executeOnlineCriteria(showReason);
+        result = await this.#executeOnlineCriteria(showReason);
     }
 
     return result;
@@ -276,8 +290,8 @@ class Switcher {
     return this;
   }
 
-  async _executeOnlineCriteria(showReason) {
-    if (!this._useSync())
+  async #executeOnlineCriteria(showReason) {
+    if (!this.#useSync())
       return this._executeAsyncOnlineCriteria(showReason);
 
     const responseCriteria = await services.checkCriteria(
@@ -299,17 +313,17 @@ class Switcher {
     return ExecutionLogger.getExecution(this._key, this._input).response.result;
   }
 
-  async _executeApiValidation() {
-    if (this._useSync()) {
-      if (await Switcher._checkHealth() && 
+  async #executeApiValidation() {
+    if (this.#useSync()) {
+      if (await Switcher.#checkHealth() && 
         (!Switcher.context.exp || Date.now() > (Switcher.context.exp * 1000))) {
           await this.prepare(this._key, this._input);
       }
     }
   }
 
-  _executeOfflineCriteria() {
-    const response = checkCriteriaOffline(
+  async #executeOfflineCriteria() {
+    const response = await checkCriteriaOffline(
       this._key, this._input, Switcher.snapshot);
 
     if (Switcher.options.logger) 
@@ -318,12 +332,12 @@ class Switcher {
     return response.result;
   }
 
-  _validateArgs(key, input) {
+  #validateArgs(key, input) {
     if (key) { this._key = key; }
     if (input) { this._input = input; }
   }
 
-  _useSync() {
+  #useSync() {
     return this._delay == 0 || !ExecutionLogger.getExecution(this._key, this._input);
   }
 

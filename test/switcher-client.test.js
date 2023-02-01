@@ -3,7 +3,7 @@ const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 chai.use(chaiAsPromised);
 const assert = chai.assert;
-const { Switcher, checkValue, checkNetwork, checkPayload } = require('../src/index');
+const { Switcher, checkValue, checkNetwork, checkPayload, checkRegex } = require('../src/index');
 const { StrategiesType } = require('../src/lib/snapshot');
 
 describe('E2E test - Switcher offline:', function () {
@@ -19,7 +19,7 @@ describe('E2E test - Switcher offline:', function () {
 
   this.beforeAll(async function() {
     Switcher.buildContext(contextSettings, {
-      offline: true, logger: true
+      offline: true, logger: true, regexMaxBlackList: 1, regexMaxTimeLimit: 500
     });
 
     await Switcher.loadSnapshot();
@@ -85,6 +85,18 @@ describe('E2E test - Switcher offline:', function () {
 
     const result = await switcher.isItOn();
     assert.isTrue(result);
+  });
+
+  it('should be invalid - REGEX failed to perform in time', async function () {
+    const getTimer = (timer) => (timer - Date.now()) * -1;
+
+    let timer = Date.now();
+    const result = await switcher.isItOn('FF2FOR2024', [checkRegex('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')]);
+    timer = getTimer(timer);
+
+    assert.isFalse(result);
+    assert.isAbove(timer, 500);
+    assert.isBelow(timer, 600);
   });
 
   it('should be invalid - JSON Payload does NOT match all keys', async function () {

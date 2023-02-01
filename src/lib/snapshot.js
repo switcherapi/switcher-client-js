@@ -1,6 +1,7 @@
 const fs = require('fs');
 const IPCIDR = require('./utils/ipcidr');
 const DateMoment = require('./utils/datemoment');
+const TimedMatch = require('./utils/timed-match');
 const { resolveSnapshot, checkSnapshotVersion } = require('./remote');
 const { CheckSwitcherError } = require('./exceptions');
 const { parseJSON, payloadReader } = require('./utils/payloadReader');
@@ -83,7 +84,7 @@ const OperationsType = Object.freeze({
     HAS_ALL: 'HAS_ALL'
 });
 
-const processOperation = (strategy, operation, input, values) => {
+const processOperation = async (strategy, operation, input, values) => {
     switch(strategy) {
         case StrategiesType.NETWORK:
             return processNETWORK(operation, input, values);
@@ -202,22 +203,16 @@ function processDATE(operation, input, values) {
     }
 }
 
-function processREGEX(operation, input, values) {
+async function processREGEX(operation, input, values) {
     switch(operation) {
-        case OperationsType.EXIST: {
-            for (const value of values) {
-                if (input.match(value)) {
-                    return true;
-                }
-            }
-            return false;
-        }
+        case OperationsType.EXIST:
+            return await TimedMatch.tryMatch(values, input);
         case OperationsType.NOT_EXIST:
-            return !processREGEX(OperationsType.EXIST, input, values);
+            return !(await processREGEX(OperationsType.EXIST, input, values));
         case OperationsType.EQUAL:
-            return input.match(`\\b${values[0]}\\b`) != null;
+            return await TimedMatch.tryMatch([`\\b${values[0]}\\b`], input);
         case OperationsType.NOT_EQUAL:
-            return !processREGEX(OperationsType.EQUAL, input, values);
+            return !(await TimedMatch.tryMatch([`\\b${values[0]}\\b`], input));
     }
 }
 

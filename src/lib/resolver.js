@@ -1,7 +1,7 @@
 const { processOperation } = require('./snapshot');
 const services = require('../lib/remote');
 
-function resolveCriteria(key, input, { domain }) {
+async function resolveCriteria(key, input, { domain }) {
     let result = true, reason = '';
 
     try {
@@ -10,7 +10,7 @@ function resolveCriteria(key, input, { domain }) {
         }
 
         const { group } = domain;
-        if (!checkGroup(group, key, input)) {
+        if (!(await checkGroup(group, key, input))) {
             throw new Error(`Something went wrong: {"error":"Unable to load a key ${key}"}`);
         }
 
@@ -36,14 +36,14 @@ function resolveCriteria(key, input, { domain }) {
  * @param {*} input strategy if exists
  * @return true if Switcher found
  */
-function checkGroup(groups, key, input) {
+async function checkGroup(groups, key, input) {
     if (groups) {
         for (const group of groups) {
             const { config } = group;
             const configFound = config.filter(c => c.key === key);
 
             // Switcher Configs are always supplied as the snapshot is loaded from components linked to the Switcher.
-            if (checkConfig(group, configFound[0], input)) {
+            if (await checkConfig(group, configFound[0], input)) {
                 return true;
             }
         }
@@ -57,7 +57,7 @@ function checkGroup(groups, key, input) {
  * @param {*} input Strategy input if exists
  * @return true if Switcher found
  */
-function checkConfig(group, config, input) {
+async function checkConfig(group, config, input) {
     if (!config)
         return false;
 
@@ -70,13 +70,13 @@ function checkConfig(group, config, input) {
     }
 
     if (config.strategies) {
-        return checkStrategy(config, input);
+        return await checkStrategy(config, input);
     }
 
     return true;
 }
 
-function checkStrategy(config, input) {
+async function checkStrategy(config, input) {
     const { strategies } = config;
     const entry = services.getEntry(input);
 
@@ -84,16 +84,16 @@ function checkStrategy(config, input) {
         if (!strategy.activated) 
             continue;
 
-        checkStrategyInput(entry, strategy);
+        await checkStrategyInput(entry, strategy);
     }
 
     return true;
 }
 
-function checkStrategyInput(entry, { strategy, operation, values }) {
+async function checkStrategyInput(entry, { strategy, operation, values }) {
     if (entry && entry.length) {
         const strategyEntry = entry.filter(e => e.strategy === strategy);
-        if (strategyEntry.length == 0 || !processOperation(strategy, operation, strategyEntry[0].input, values)) {
+        if (strategyEntry.length == 0 || !(await processOperation(strategy, operation, strategyEntry[0].input, values))) {
             throw new CriteriaFailed(`Strategy '${strategy}' does not agree`);
         }
     } else {
@@ -101,13 +101,13 @@ function checkStrategyInput(entry, { strategy, operation, values }) {
     }
 }
 
-function checkCriteriaOffline(key, input, snapshot) {
+async function checkCriteriaOffline(key, input, snapshot) {
     if (!snapshot) {
         throw new Error('Snapshot not loaded. Try to use \'Switcher.loadSnapshot()\'');
     }
     
     const {  data } = snapshot;
-    return resolveCriteria(key, input, data);
+    return await resolveCriteria(key, input, data);
 }
 
 class CriteriaFailed extends Error {
