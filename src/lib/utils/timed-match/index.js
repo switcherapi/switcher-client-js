@@ -6,7 +6,6 @@ const cp = require('child_process');
  * Blacklist caching is available to prevent sequence of matching failures and resource usage.
  */
 class TimedMatch {
-
     static _worker = this._createChildProcess();
     static _blacklisted = [];
     static _maxBlackListed = 50;
