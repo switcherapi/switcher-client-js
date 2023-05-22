@@ -31,7 +31,7 @@ const trySilent = (options) => {
             };
         }
     }
-}
+};
 
 exports.getEntry = (input) => {
     if (!input) {
