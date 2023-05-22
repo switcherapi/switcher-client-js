@@ -51,9 +51,9 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
     clientAuth = sinon.stub(services, 'auth');
     fetchStub = sinon.stub(fetch, 'Promise');
 
-    clientAuth.returns(Promise.resolve({ json: () => generateAuth('[API_KEY]', 5) }));
-    given(fetchStub, 0, { json: () => generateStatus(false) }); // Snapshot outdated
-    given(fetchStub, 1, { json: () => JSON.parse(dataJSON) });
+    clientAuth.returns(Promise.resolve({ json: () => generateAuth('[API_KEY]', 5), status: 200 }));
+    given(fetchStub, 0, { json: () => generateStatus(false), status: 200 }); // Snapshot outdated
+    given(fetchStub, 1, { json: () => JSON.parse(dataJSON), status: 200 });
 
     //test
     Switcher.buildContext({ url, apiKey, domain, component, environment }, {
@@ -75,7 +75,7 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
     fetchStub = sinon.stub(fetch, 'Promise');
 
     clientAuth.returns(Promise.resolve({ json: () => generateAuth('[API_KEY]', 5) }));
-    given(fetchStub, 0, { json: () => generateStatus(true) }); // No available update
+    given(fetchStub, 0, { json: () => generateStatus(true), status: 200 }); // No available update
     
     //test
     await Switcher.loadSnapshot();
@@ -93,7 +93,7 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
     clientAuth = sinon.stub(services, 'auth');
     fetchStub = sinon.stub(fetch, 'Promise');
 
-    clientAuth.returns(Promise.resolve({ json: () => generateAuth('[API_KEY]', 5) }));
+    clientAuth.returns(Promise.resolve({ json: () => generateAuth('[API_KEY]', 5), status: 200 }));
     givenError(fetchStub, 0, { errno: 'ECONNREFUSED' });
     
     //test
@@ -109,7 +109,7 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
     fetchStub = sinon.stub(fetch, 'Promise');
 
     clientAuth.returns(Promise.resolve({ json: () => generateAuth('[API_KEY]', 5) }));
-    given(fetchStub, 0, { json: () => generateStatus(false) }); // Snapshot outdated
+    given(fetchStub, 0, { json: () => generateStatus(false), status: 200 }); // Snapshot outdated
     givenError(fetchStub, 1, { errno: 'ECONNREFUSED' });
     
     //test
@@ -125,8 +125,8 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
     fetchStub = sinon.stub(fetch, 'Promise');
 
     clientAuth.returns(Promise.resolve({ json: () => generateAuth('[API_KEY]', 5) }));
-    given(fetchStub, 0, { json: () => generateStatus(false) }); // Snapshot outdated
-    given(fetchStub, 1, { json: () => JSON.parse(dataJSON) });
+    given(fetchStub, 0, { json: () => generateStatus(false), status: 200 }); // Snapshot outdated
+    given(fetchStub, 1, { json: () => JSON.parse(dataJSON), status: 200 });
 
     //test
     Switcher.buildContext({ url, apiKey, domain, component, environment }, {
@@ -152,6 +152,74 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
         'Something went wrong: [FEATURE02] not found');
   });
   
+});
+
+describe('E2E test - Fail response - Snapshot:', function () {
+  const apiKey = '[api_key]';
+  const domain = 'Business';
+  const component = 'business-service';
+  const environment = 'dev';
+  const url = 'http://localhost:3000';
+
+  let fetchStub;
+  let clientAuth;
+  let fsStub;
+
+  afterEach(function() {
+    if (fetchStub != undefined)
+      fetchStub.restore();
+    
+    if (clientAuth != undefined)
+      clientAuth.restore();
+
+    if (fsStub != undefined)
+      fsStub.restore();
+  });
+
+  beforeEach(function() {
+    Switcher.buildContext({ url, apiKey, domain, component, environment }, {
+      offline: true
+    });
+    Switcher.setTestEnabled();
+  });
+
+  this.afterAll(function() {
+    Switcher.unloadSnapshot();
+  });
+
+  it('should NOT update snapshot - Too many requests at checkSnapshotVersion', async function () {
+    //given
+    clientAuth = sinon.stub(services, 'auth');
+    fetchStub = sinon.stub(fetch, 'Promise');
+
+    clientAuth.returns(Promise.resolve({ json: () => generateAuth('[API_KEY]', 5), status: 200 }));
+    given(fetchStub, 0, { status: 429 })
+    
+    //test
+    Switcher.setTestEnabled();
+    await Switcher.loadSnapshot();
+    await assert.isRejected(Switcher.checkSnapshot(),
+      'Something went wrong: [checkSnapshotVersion] failed with status 429');
+  });
+
+  it('should NOT update snapshot - Too many requests at resolveSnapshot', async function () {
+    //given
+    clientAuth = sinon.stub(services, 'auth');
+    fetchStub = sinon.stub(fetch, 'Promise');
+
+    clientAuth.returns(Promise.resolve({ json: () => generateAuth('[API_KEY]', 5) }));
+    given(fetchStub, 0, { json: () => generateStatus(false), status: 200 }); // Snapshot outdated
+    given(fetchStub, 1, { status: 429 });
+
+    //test
+    Switcher.buildContext({ url, apiKey, domain, component, environment }, {
+      snapshotLocation: 'generated-snapshots/'
+    });
+
+    await assert.isRejected(Switcher.loadSnapshot(),
+      'Something went wrong: [resolveSnapshot] failed with status 429');
+  });
+
 });
 
 describe('Error Scenarios - Snapshot', function() {
