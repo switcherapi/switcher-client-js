@@ -17,6 +17,22 @@ const getHeader = (token) => {
     };
 };
 
+const trySilent = (options) => {
+    if (options && 'silentMode' in options) {
+        if (options.silentMode) {
+            const expirationTime = new DateMoment(new Date())
+                .add(options.retryTime, options.retryDurationIn).getDate();
+
+            return {
+                data: {
+                    token: 'SILENT',
+                    exp: expirationTime.getTime() / 1000
+                }
+            };
+        }
+    }
+};
+
 exports.getEntry = (input) => {
     if (!input) {
         return undefined;
@@ -43,19 +59,7 @@ exports.checkAPIHealth = async (url, options) => {
         if (response.status != 200)
             throw new ApiConnectionError('API is offline');
     } catch (e) {
-        if (options && 'silentMode' in options) {
-            if (options.silentMode) {
-                const expirationTime = new DateMoment(new Date())
-                    .add(options.retryTime, options.retryDurationIn).getDate();
-
-                return {
-                    data: {
-                        token: 'SILENT',
-                        exp: expirationTime.getTime() / 1000
-                    }
-                };
-            }
-        }
+        return trySilent(options);
     }
 };
 
@@ -68,7 +72,12 @@ exports.checkCriteria = async ({ url, token }, key, input, showReason = false) =
             headers: getHeader(token)
         });
 
-        return response.json();
+
+        if (response.status == 200) {
+            return response.json();
+        }
+      
+        throw new Error(`[checkCriteria] failed with status ${response.status}`);
     } catch (e) {
         throw new CriteriaError(e.errno ? getConnectivityError(e.errno) : e.message);
     }
@@ -89,7 +98,11 @@ exports.auth = async ({ url, apiKey, domain, component, environment }) => {
             }
         });
 
-        return response.json();
+        if (response.status == 200) {
+            return response.json();
+        }
+      
+        throw new Error(`[auth] failed with status ${response.status}`);
     } catch (e) {
         throw new AuthError(e.errno ? getConnectivityError(e.errno) : e.message);
     }
@@ -121,7 +134,11 @@ exports.checkSnapshotVersion = async (url, token, version) => {
             headers: getHeader(token)
         });
 
-        return response.json();
+        if (response.status == 200) {
+            return response.json();
+        }
+    
+        throw new Error(`[checkSnapshotVersion] failed with status ${response.status}`);
     } catch (e) {
         throw new SnapshotServiceError(e.errno ? getConnectivityError(e.errno) : e.message);
     }
@@ -150,7 +167,11 @@ exports.resolveSnapshot = async (url, token, domain, environment, component) => 
             headers: getHeader(token)
         });
         
-        return JSON.stringify(await response.json(), null, 4);
+        if (response.status == 200) {
+            return JSON.stringify(await response.json(), null, 4);
+        }
+    
+        throw new Error(`[resolveSnapshot] failed with status ${response.status}`);
     } catch (e) {
         throw new SnapshotServiceError(e.errno ? getConnectivityError(e.errno) : e.message);
     }

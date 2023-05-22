@@ -141,12 +141,19 @@ class Switcher {
   }
 
   static async checkSwitchers(switcherKeys) {
-    if (Switcher.options.offline) {
+    if (Switcher.options.offline && Switcher.snapshot) {
       checkSwitchers(Switcher.snapshot, switcherKeys);
     } else {
-      await Switcher._auth();
-      await services.checkSwitchers(
-        Switcher.context.url, Switcher.context.token, switcherKeys);
+      try {
+        await Switcher._auth();
+        await services.checkSwitchers(Switcher.context.url, Switcher.context.token, switcherKeys);
+      } catch (e) {
+        if (Switcher.options.silentMode) {
+          checkSwitchers(Switcher.snapshot, switcherKeys);
+        } else {
+          throw e;
+        }
+      }
     }
   }
 
@@ -179,15 +186,15 @@ class Switcher {
       }
     }
     
-    const response = await services.checkAPIHealth(Switcher.context.url, {
+    const responseSilentMode = await services.checkAPIHealth(Switcher.context.url, {
       silentMode: Switcher.options.silentMode,
       retryTime: Switcher.options.retryTime,
       retryDurationIn: Switcher.options.retryDurationIn
     });
 
-    if (response) {
-      Switcher.context.token = response.data.token;
-      Switcher.context.exp = response.data.exp;
+    if (responseSilentMode) {
+      Switcher.context.token = responseSilentMode.data.token;
+      Switcher.context.exp = responseSilentMode.data.exp;
       return false;
     }
 
@@ -271,11 +278,19 @@ class Switcher {
     if (Switcher.options.offline) {
       result = await this._executeOfflineCriteria();
     } else {
-      await this.validate();
-      if (Switcher.context.token === 'SILENT')
-        result = await this._executeOfflineCriteria();
-      else
-        result = await this._executeOnlineCriteria(showReason);
+      try {
+        await this.validate();
+        if (Switcher.context.token === 'SILENT')
+          result = await this._executeOfflineCriteria();
+        else
+          result = await this._executeOnlineCriteria(showReason);
+      } catch (e) {
+        if (Switcher.options.silentMode) {
+          return this._executeOfflineCriteria();
+        }
+
+        throw e;
+      }
     }
 
     return result;

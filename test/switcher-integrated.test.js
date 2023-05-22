@@ -59,9 +59,9 @@ describe('Integrated test - Switcher:', function () {
 
     it('should be valid', async function () {
       // given API responding properly
-      given(fetchStub, 0, { json: () => generateAuth('[auth_token]', 5) });
+      given(fetchStub, 0, { json: () => generateAuth('[auth_token]', 5), status: 200 });
       given(fetchStub, 1, { status: 200 });
-      given(fetchStub, 2, { json: () => generateResult(true) });
+      given(fetchStub, 2, { json: () => generateResult(true), status: 200 });
 
       // test
       Switcher.buildContext(contextSettings);
@@ -71,13 +71,26 @@ describe('Integrated test - Switcher:', function () {
       assert.isTrue(await switcher.isItOn());
     });
 
+    it('should NOT be valid - API returned 429 (too many requests)', async function () {
+      // given API responding properly
+      given(fetchStub, 0, { status: 200 });
+      given(fetchStub, 1, { error: 'Too many requests', status: 429 });
+
+      // test
+      Switcher.buildContext(contextSettings);
+      let switcher = Switcher.factory();
+      
+      await assert.isRejected(switcher.isItOn('FLAG_1'), 
+        'Something went wrong: [auth] failed with status 429');
+    });
+
     it('should be valid - throttle', async function () {
       this.timeout(3000);
 
       // given API responding properly
       // first API call
       given(fetchStub, 0, { status: 200 });
-      given(fetchStub, 1, { json: () => generateAuth('[auth_token]', 5) });
+      given(fetchStub, 1, { json: () => generateAuth('[auth_token]', 5), status: 200 });
       given(fetchStub, 2, { json: () => generateResult(true), status: 200 });
 
       // first async API call
@@ -107,6 +120,72 @@ describe('Integrated test - Switcher:', function () {
     });
   });
 
+  describe('check fail response (e2e):', function () {
+
+    let fetchStub;
+
+    beforeEach(function() {
+      fetchStub = sinon.stub(fetch, 'Promise');
+    });
+  
+    afterEach(function() {
+      fetchStub.restore();
+    });
+
+    it('should NOT be valid - API returned 429 (too many requests) at checkHealth/auth', async function () {
+      // given API responding properly
+      given(fetchStub, 0, { status: 429 });
+      given(fetchStub, 1, { error: 'Too many requests', status: 429 });
+
+      // test
+      Switcher.buildContext(contextSettings);
+      let switcher = Switcher.factory();
+      
+      await assert.isRejected(switcher.isItOn('FLAG_1'), 
+        'Something went wrong: [auth] failed with status 429');
+    });
+
+    it('should NOT be valid - API returned 429 (too many requests) at checkCriteria', async function () {
+      // given API responding properly
+      given(fetchStub, 0, { status: 200 });
+      given(fetchStub, 1, { json: () => generateAuth('[auth_token]', 5), status: 200 });
+      given(fetchStub, 2, { error: 'Too many requests', status: 429 });
+
+      // test
+      Switcher.buildContext(contextSettings);
+      let switcher = Switcher.factory();
+      
+      await assert.isRejected(switcher.isItOn('FLAG_1'), 
+        'Something went wrong: [checkCriteria] failed with status 429');
+    });
+
+    it('should use silent mode when fail to check switchers', async function() {
+      //given
+      given(fetchStub, 0, { status: 429 });
+
+      //test
+      Switcher.buildContext(contextSettings, { silentMode: true });
+      await assert.isRejected(Switcher.checkSwitchers(['FEATURE01', 'FEATURE02']), 
+        'Something went wrong: [FEATURE01,FEATURE02] not found');
+
+      await assert.isFulfilled(Switcher.checkSwitchers(['FF2FOR2021', 'FF2FOR2021']));
+    });
+
+    it('should use silent mode when fail to check criteria', async function () {
+      // given API responding properly
+      given(fetchStub, 0, { status: 200 });
+      given(fetchStub, 1, { json: () => generateAuth('[auth_token]', 5), status: 200 });
+      given(fetchStub, 2, { status: 429 });
+
+      // test
+      Switcher.buildContext(contextSettings, { silentMode: true });
+      let switcher = Switcher.factory();
+      
+      await assert.isFulfilled(switcher.isItOn('FF2FOR2022'));
+    });
+
+  });
+
   describe('check criteria:', function () {
 
     let fetchStub;
@@ -125,7 +204,7 @@ describe('Integrated test - Switcher:', function () {
     it('should be valid', async function () {
       // given API responding properly
       given(fetchStub, 0, { status: 200 });
-      given(fetchStub, 1, { json: () => generateResult(true) });
+      given(fetchStub, 1, { json: () => generateResult(true), status: 200 });
       clientAuth.returns(generateAuth('[auth_token]', 5));
 
       // test
@@ -211,7 +290,7 @@ describe('Integrated test - Switcher:', function () {
 
       // Prepare the call generating the token
       given(fetchStub, 0, { status: 200 });
-      given(fetchStub, 1, { json: () => generateResult(true) });
+      given(fetchStub, 1, { json: () => generateResult(true), status: 200 });
       await switcher.prepare('MY_FLAG');
       assert.equal(await switcher.isItOn(), true);
 
@@ -222,12 +301,12 @@ describe('Integrated test - Switcher:', function () {
       clientAuth.returns(generateAuth('asdad12d2232d2323f', 1));
 
       // In this time period the expiration time has reached, it should call prepare once again to renew the token
-      given(fetchStub, 3, { json: () => generateResult(false) });
+      given(fetchStub, 3, { json: () => generateResult(false), status: 200 });
       assert.equal(await switcher.isItOn(), false);
       assert.equal(spyPrepare.callCount, 2);
 
       // In the meantime another call is made by the time the token is still not expired, so there is no need to call prepare again
-      given(fetchStub, 5, { json: () => generateResult(false) });
+      given(fetchStub, 5, { json: () => generateResult(false), status: 200 });
       assert.equal(await switcher.isItOn(), false);
       assert.equal(spyPrepare.callCount, 2);
     });
@@ -235,7 +314,7 @@ describe('Integrated test - Switcher:', function () {
     it('should be valid - when sending key without calling prepare', async function () {
       // given API responding properly
       given(fetchStub, 0, { status: 200 });
-      given(fetchStub, 1, { json: () => generateResult(true) });
+      given(fetchStub, 1, { json: () => generateResult(true), status: 200 });
       clientAuth.returns(generateAuth('[auth_token]', 5));
 
       // test
@@ -250,7 +329,7 @@ describe('Integrated test - Switcher:', function () {
     it('should be valid - when preparing key and sending input strategy afterwards', async function () {
       // given API responding properly
       given(fetchStub, 0, { status: 200 });
-      given(fetchStub, 1, { json: () => generateResult(true) });
+      given(fetchStub, 1, { json: () => generateResult(true), status: 200 });
       clientAuth.returns(generateAuth('[auth_token]', 5));
 
       // test
@@ -397,7 +476,7 @@ describe('Integrated test - Switcher:', function () {
       
       // Setup the online mocked response and made it to return false just to make sure it's not fetching from the snapshot
       given(fetchStub, 1, { status: 200 });
-      given(fetchStub, 2, { json: () => generateResult(false) });
+      given(fetchStub, 2, { json: () => generateResult(false), status: 200 });
 
       clientAuth.returns(generateAuth('[auth_token]', 10));
 

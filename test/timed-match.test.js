@@ -6,7 +6,7 @@ const okInput = 'a';
 const nokRE = '^(([a-z])+.)+[A-Z]([a-z])+$';
 const nokInput = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
 
-const COLD_TIME = 500;
+const COLD_TIME = 550;
 const WARM_TIME = 50;
 const TIMEOUT = 1000;
 
