@@ -259,13 +259,12 @@ describe('Integrated test - Switcher:', function () {
     it('should throw when no switcher keys were provided', async function() {
       //given
       clientAuth.returns(generateAuth('[auth_token]', 5));
-      const response = { errors: [ { msg: 'Switcher Key is required' } ] };
-      given(fetchStub, 0, { json: () => response, status: 422 });
+      given(fetchStub, 0, { status: 422 });
 
       //test
       Switcher.buildContext(contextSettings);
       await assert.isRejected(Switcher.checkSwitchers([]), 
-        'Something went wrong: Switcher Key is required');
+        'Something went wrong: [checkSwitchers] failed with status 422');
     });
 
     it('should throw when switcher keys provided were invalid', async function() {

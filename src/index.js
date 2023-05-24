@@ -4,6 +4,7 @@ const Bypasser = require('./lib/bypasser');
 const ExecutionLogger = require('./lib/utils/executionLogger');
 const TimedMatch = require('./lib/utils/timed-match');
 const DateMoment = require('./lib/utils/datemoment');
+const SnapshotAutoUpdater = require('./lib/utils/snapshotAutoUpdater');
 const { loadDomain, validateSnapshot, checkSwitchers } = require('./lib/snapshot');
 const services = require('./lib/remote');
 const checkCriteriaOffline = require('./lib/resolver');
@@ -45,27 +46,22 @@ class Switcher {
     this.context.environment = context.environment || DEFAULT_ENVIRONMENT;
 
     // Default values
-    this.options = {};
-    this.options.offline = DEFAULT_OFFLINE;
-    this.options.snapshotLocation = DEFAULT_SNAPSHOT_LOCATION;
-    this.options.logger = DEFAULT_LOGGER;
+    this.options = {
+      snapshotAutoUpdateInterval: 0,
+      snapshotLocation: options?.snapshotLocation || DEFAULT_SNAPSHOT_LOCATION,
+      offline: options?.offline != undefined ? options.offline : DEFAULT_OFFLINE,
+      logger: options?.logger != undefined ? options.logger : DEFAULT_LOGGER
+    };
 
     if (options) {
-      if ('offline' in options) {
-        this.options.offline = options.offline;
-      }
-
-      if ('snapshotLocation' in options) {
-        this.options.snapshotLocation = options.snapshotLocation;
-      }
-
       if ('silentMode' in options) {
         this.options.silentMode = options.silentMode;
         this.loadSnapshot();
       }
 
-      if ('logger' in options) {
-        this.options.logger = options.logger;
+      if ('snapshotAutoUpdateInterval' in options) {
+        this.options.snapshotAutoUpdateInterval = options.snapshotAutoUpdateInterval;
+        this.scheduleSnapshotAutoUpdate();
       }
 
       if ('retryAfter' in options) {
@@ -105,9 +101,10 @@ class Switcher {
     return false;
   }
 
-  static async loadSnapshot(watchSnapshot) {
+  static async loadSnapshot(watchSnapshot, fecthOnline) {
     Switcher.snapshot = loadDomain(Switcher.options.snapshotLocation, Switcher.context.environment);
-    if (Switcher.snapshot.data.domain.version == 0 && !Switcher.options.offline)
+    if (Switcher.snapshot.data.domain.version == 0 && 
+        (fecthOnline || !Switcher.options.offline))
       await Switcher.checkSnapshot();
 
     if (watchSnapshot)
@@ -138,6 +135,21 @@ class Switcher {
     const snapshotFile = `${Switcher.options.snapshotLocation}${Switcher.context.environment}.json`;
     Switcher.snapshot = undefined;
     fs.unwatchFile(snapshotFile);
+  }
+
+  static scheduleSnapshotAutoUpdate(interval) {
+    if (interval) {
+      Switcher.options.snapshotAutoUpdateInterval = interval;
+    }
+
+    if (Switcher.options.snapshotAutoUpdateInterval > 0) {
+      SnapshotAutoUpdater.schedule(
+        Switcher.options.snapshotAutoUpdateInterval, this.checkSnapshot);
+    }
+  }
+
+  static terminateSnapshotAutoUpdate() {
+    SnapshotAutoUpdater.terminate();
   }
 
   static async checkSwitchers(switcherKeys) {
