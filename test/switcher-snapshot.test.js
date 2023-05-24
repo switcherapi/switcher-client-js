@@ -47,7 +47,7 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
   });
 
   it('should update snapshot', async function () {
-    //give
+    //given
     clientAuth = sinon.stub(services, 'auth');
     fetchStub = sinon.stub(fetch, 'Promise');
 
@@ -220,6 +220,79 @@ describe('E2E test - Fail response - Snapshot:', function () {
       'Something went wrong: [resolveSnapshot] failed with status 429');
   });
 
+});
+
+describe('E2E test - Snapshot AutoUpdater:', function () {
+  const apiKey = '[api_key]';
+  const domain = 'Business';
+  const component = 'business-service';
+  const environment = 'dev';
+  const url = 'http://localhost:3000';
+
+  const dataBuffer = fs.readFileSync('./snapshot/dev.json');
+  const dataJSON = dataBuffer.toString();
+
+  const dataBufferV2 = fs.readFileSync('./snapshot/dev_v2.json');
+  const dataJSONV2 = dataBufferV2.toString();
+
+  let fetchStub;
+  let clientAuth;
+  let fsStub;
+
+  afterEach(function() {
+    if (fetchStub != undefined)
+      fetchStub.restore();
+    
+    if (clientAuth != undefined)
+      clientAuth.restore();
+
+    if (fsStub != undefined)
+      fsStub.restore();
+  });
+
+  beforeEach(function() {
+    Switcher.buildContext({ url, apiKey, domain, component, environment }, {
+      offline: true
+    });
+    Switcher.setTestEnabled();
+  });
+
+  this.afterAll(function() {
+    Switcher.terminateSnapshotAutoUpdate();
+    Switcher.unloadSnapshot();
+  });
+
+  it('should auto update snapshot every 1000ms', async function () {
+    this.timeout(3000);
+
+    //given
+    clientAuth = sinon.stub(services, 'auth');
+    fetchStub = sinon.stub(fetch, 'Promise');
+
+    clientAuth.returns(Promise.resolve({ json: () => generateAuth('[API_KEY]', 5), status: 200 }));
+    given(fetchStub, 0, { json: () => generateStatus(false), status: 200 }); // Loading current version
+    given(fetchStub, 1, { json: () => JSON.parse(dataJSON), status: 200 });
+    given(fetchStub, 2, { json: () => generateStatus(false), status: 200 }); // Loading updated version
+    given(fetchStub, 3, { json: () => JSON.parse(dataJSONV2), status: 200 });
+
+    //test
+    Switcher.buildContext({ url, apiKey, domain, component, environment }, {
+      snapshotLocation: 'generated-snapshots/',
+      offline: true,
+      snapshotAutoUpdateInterval: 1000
+    });
+
+    //optional (already set in the buildContext)
+    Switcher.scheduleSnapshotAutoUpdate(1000);
+    
+    await Switcher.loadSnapshot(false, true);
+
+    const switcher = Switcher.factory();
+    assert.isFalse(await switcher.isItOn('FF2FOR2030'));
+    
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    assert.isTrue(await switcher.isItOn('FF2FOR2030'));
+  });
 });
 
 describe('Error Scenarios - Snapshot', function() {

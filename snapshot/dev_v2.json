@@ -1,0 +1,26 @@
+{
+    "data": {
+        "domain": {
+            "name": "Business",
+            "description": "Business description",
+            "version": 1588557288040,
+            "activated": true,
+            "group": [
+                {
+                    "name": "Rollout 2030",
+                    "description": "Changes that will be applied during the rollout",
+                    "activated": true,
+                    "config": [
+                        {
+                            "key": "FF2FOR2030",
+                            "description": "Feature Flag",
+                            "activated": true,
+                            "strategies": [],
+                            "components": []
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+}

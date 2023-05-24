@@ -18,7 +18,9 @@ let switcher;
  */
 function setupSwitcher(offline) {
     Switcher.buildContext({ url, apiKey, domain, component, environment }, { offline, logger: true });
-    Switcher.loadSnapshot();
+    Switcher.loadSnapshot()
+        .then(() => console.log('Snapshot loaded'))
+        .catch(() => console.log('Failed to load Snapshot'));
 }
 
 // Requires online API
@@ -115,7 +117,7 @@ const testSnapshotAutoload = async () => {
 };
 
 // Requires online API
-const testWatchSnapshot = async () => {
+const testWatchSnapshot = () => {
     setupSwitcher(true);
     switcher = Switcher.factory();
 
@@ -124,4 +126,19 @@ const testWatchSnapshot = async () => {
         (err) => console.log(err));
 };
 
-testSimpleAPICall(true);
+// Requires online API
+const testSnapshotAutoUpdate = async () => {
+    Switcher.buildContext({ url, apiKey, domain, component, environment }, 
+        { offline: true, logger: true, snapshotAutoUpdateInterval: 3000 });
+
+    await Switcher.loadSnapshot();
+    switcher = Switcher.factory();
+
+    setInterval(async () => {
+        const time = Date.now();
+        await switcher.isItOn(SWITCHER_KEY, [checkValue('user_1')]);
+        console.log(Switcher.getLogger(SWITCHER_KEY), `executed in ${Date.now() - time}ms`);
+    }, 2000);
+};
+
+testSnapshotUpdate();
