@@ -91,7 +91,7 @@ async function checkStrategy(config, input) {
 }
 
 async function checkStrategyInput(entry, { strategy, operation, values }) {
-    if (entry && entry.length) {
+    if (entry?.length) {
         const strategyEntry = entry.filter(e => e.strategy === strategy);
         if (strategyEntry.length == 0 || !(await processOperation(strategy, operation, strategyEntry[0].input, values))) {
             throw new CriteriaFailed(`Strategy '${strategy}' does not agree`);
