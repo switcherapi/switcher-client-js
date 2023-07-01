@@ -8,7 +8,7 @@ A JavaScript SDK for Switcher API
 <div align="center">
 
 [![Master CI](https://github.com/switcherapi/switcher-client-js/actions/workflows/master.yml/badge.svg)](https://github.com/switcherapi/switcher-client-js/actions/workflows/master.yml)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=switcherapi_switcher-client-js&metric=alert_status)](https://sonarcloud.io/dashboard?id=switcherapi_switcher-client-master)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=switcherapi_switcher-client-master&metric=alert_status)](https://sonarcloud.io/dashboard?id=switcherapi_switcher-client-master)
 [![npm version](https://badge.fury.io/js/switcher-client.svg)](https://badge.fury.io/js/switcher-client)
 [![install size](https://packagephobia.com/badge?p=switcher-client)](https://packagephobia.com/result?p=switcher-client)
 [![Known Vulnerabilities](https://snyk.io/test/github/switcherapi/switcher-client-js/badge.svg?targetFile=package.json)](https://snyk.io/test/github/switcherapi/switcher-client-js?targetFile=package.json)
