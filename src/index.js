@@ -54,26 +54,34 @@ class Switcher {
     };
 
     if (options) {
-      if ('silentMode' in options) {
-        this.options.silentMode = options.silentMode;
-        this.loadSnapshot();
-      }
-
-      if ('snapshotAutoUpdateInterval' in options) {
-        this.options.snapshotAutoUpdateInterval = options.snapshotAutoUpdateInterval;
-        this.scheduleSnapshotAutoUpdate();
-      }
-
-      if ('retryAfter' in options) {
-        this.options.retryTime =  options.retryAfter.slice(0, -1);
-        this.options.retryDurationIn = options.retryAfter.slice(-1);
-      } else {
-        this.options.retryTime = DEFAULT_RETRY_TIME.charAt(0);
-        this.options.retryDurationIn = DEFAULT_RETRY_TIME.charAt(1);
-      }
-
-      this._initTimedMatch(options);
+      Switcher._buildOptions(options);
     }
+  }
+
+  static _buildOptions(options) {
+    if ('certPath' in options && options.certPath) {
+      services.setCerts(options.certPath);
+    }
+    
+    if ('silentMode' in options) {
+      this.options.silentMode = options.silentMode;
+      this.loadSnapshot();
+    }
+
+    if ('snapshotAutoUpdateInterval' in options) {
+      this.options.snapshotAutoUpdateInterval = options.snapshotAutoUpdateInterval;
+      this.scheduleSnapshotAutoUpdate();
+    }
+
+    if ('retryAfter' in options) {
+      this.options.retryTime = options.retryAfter.slice(0, -1);
+      this.options.retryDurationIn = options.retryAfter.slice(-1);
+    } else {
+      this.options.retryTime = DEFAULT_RETRY_TIME.charAt(0);
+      this.options.retryDurationIn = DEFAULT_RETRY_TIME.charAt(1);
+    }
+
+    this._initTimedMatch(options);
   }
 
   static factory() {

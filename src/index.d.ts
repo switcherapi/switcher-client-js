@@ -157,6 +157,7 @@ declare namespace SwitcherClient {
     retryAfter: string;
     regexMaxBlackList: number;
     regexMaxTimeLimit: number;
+    certPath: string;
   }
 
   /**
