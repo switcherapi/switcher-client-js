@@ -1,6 +1,5 @@
 const fetch = require('node-fetch');
 const https = require('https');
-const http = require('http');
 const DateMoment = require('./utils/datemoment');
 const {
     ApiConnectionError,
@@ -10,14 +9,7 @@ const {
     SnapshotServiceError
 } = require('./exceptions');
 
-const httpAgent = new http.Agent();
-const httpsAgent = new https.Agent({
-    rejectUnauthorized: false,
-});
-
-const getAgent = (url) => {
-    return url.startsWith('https') ? httpsAgent : httpAgent;
-};
+let httpClient;
 
 const getConnectivityError = (code) => `Connection has been refused - ${code}`;
 
@@ -44,6 +36,17 @@ const trySilent = (options) => {
     }
 };
 
+exports.setCerts = (certPath) => {
+    const fs = require('fs');
+    if (!fs.existsSync(certPath)) {
+        throw new Error(`Invalid certificate path '${certPath}'`);
+    }
+    
+    httpClient = new https.Agent({
+        ca: fs.readFileSync(certPath)
+    });
+};
+
 exports.getEntry = (input) => {
     if (!input) {
         return undefined;
@@ -66,7 +69,7 @@ exports.getEntry = (input) => {
 
 exports.checkAPIHealth = async (url, options) => {
     try {
-        const response = await fetch(`${url}/check`, { method: 'get', agent: httpsAgent });
+        const response = await fetch(`${url}/check`, { method: 'get', agent: httpClient });
         if (response.status != 200)
             throw new ApiConnectionError('API is offline');
     } catch (e) {
@@ -81,7 +84,7 @@ exports.checkCriteria = async ({ url, token }, key, input, showReason = false) =
             method: 'post',
             body: JSON.stringify({ entry }),
             headers: getHeader(token),
-            agent: getAgent(url)
+            agent: httpClient
         });
 
 
@@ -108,7 +111,7 @@ exports.auth = async ({ url, apiKey, domain, component, environment }) => {
                 'switcher-api-key': apiKey,
                 'Content-Type': 'application/json'
             },
-            agent: getAgent(url)
+            agent: httpClient
         });
 
         if (response.status == 200) {
@@ -127,7 +130,7 @@ exports.checkSwitchers = async (url, token, switcherKeys) => {
             method: 'post',
             body: JSON.stringify({ switchers: switcherKeys }),
             headers: getHeader(token),
-            agent: getAgent(url)
+            agent: httpClient
         });
 
         if (response.status != 200) {
@@ -147,7 +150,7 @@ exports.checkSnapshotVersion = async (url, token, version) => {
         const response = await fetch(`${url}/criteria/snapshot_check/${version}`, {
             method: 'get',
             headers: getHeader(token),
-            agent: getAgent(url)
+            agent: httpClient
         });
 
         if (response.status == 200) {
@@ -181,7 +184,7 @@ exports.resolveSnapshot = async (url, token, domain, environment, component) => 
             method: 'post',
             body: JSON.stringify(data),
             headers: getHeader(token),
-            agent: getAgent(url)
+            agent: httpClient
         });
         
         if (response.status == 200) {

@@ -276,6 +276,15 @@ describe('Integrated test - Switcher:', function () {
       Switcher.buildContext(contextSettings);
       await assert.isRejected(Switcher.checkSwitchers('FEATURE02'));
     });
+
+    it('should throw when certPath is invalid', function() {
+      assert.throws(() => Switcher.buildContext(contextSettings, { certPath: 'invalid' }), 
+        'Invalid certificate path \'invalid\'');
+    });
+
+    it('should NOT throw when certPath is valid', function() {
+      assert.doesNotThrow(() => Switcher.buildContext(contextSettings, { certPath: './test/helper/dummy-cert.pem' }));
+    });
     
     it('should renew the token after expiration', async function () {
       this.timeout(3000);
