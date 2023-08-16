@@ -164,7 +164,7 @@ describe('Integrated test - Switcher:', function () {
       given(fetchStub, 0, { status: 429 });
 
       //test
-      Switcher.buildContext(contextSettings, { silentMode: true });
+      Switcher.buildContext(contextSettings, { snapshotLocation: './snapshot/', silentMode: true });
       await assert.isRejected(Switcher.checkSwitchers(['FEATURE01', 'FEATURE02']), 
         'Something went wrong: [FEATURE01,FEATURE02] not found');
 
@@ -451,6 +451,7 @@ describe('Integrated test - Switcher:', function () {
 
       // setup context to read the snapshot in case the API does not respond
       Switcher.buildContext(contextSettings, {
+        snapshotLocation: './snapshot/',
         silentMode: true,
         retryAfter: '2s'
       });
@@ -513,6 +514,7 @@ describe('Integrated test - Switcher:', function () {
 
       // test
       Switcher.buildContext(contextSettings, {
+        snapshotLocation: './snapshot/',
         silentMode: true
       });
 

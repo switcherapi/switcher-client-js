@@ -33,10 +33,18 @@ class SnapshotServiceError extends Error {
     }
 }
 
+class SnapshotNotFoundError extends Error {
+    constructor(message) {
+      super(`Something went wrong: ${message}`);
+      this.name = this.constructor.name;
+    }
+  }
+
 module.exports = {
     ApiConnectionError,
     AuthError,
     CriteriaError,
     CheckSwitcherError,
-    SnapshotServiceError
+    SnapshotServiceError,
+    SnapshotNotFoundError
 };

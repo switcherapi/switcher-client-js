@@ -37,6 +37,7 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
 
   beforeEach(function() {
     Switcher.buildContext({ url, apiKey, domain, component, environment }, {
+      snapshotLocation: './snapshot/',
       offline: true
     });
     Switcher.setTestEnabled();
@@ -82,10 +83,6 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
     assert.isFalse(await Switcher.checkSnapshot());
   });
 
-  it('should NOT update snapshot - Snapshot not loaded', async function () {
-    assert.isFalse(await Switcher.checkSnapshot());
-  });
-
   it('should NOT update snapshot - check Snapshot Error', async function () {
     this.timeout(3000);
 
@@ -117,6 +114,29 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
     await Switcher.loadSnapshot();
     await assert.isRejected(Switcher.checkSnapshot(), 
       'Something went wrong: Connection has been refused - ECONNREFUSED');
+  });
+
+  it('should NOT check snapshot with success - Snapshot not loaded', async function () {
+    //given
+    clientAuth = sinon.stub(services, 'auth');
+    fetchStub = sinon.stub(fetch, 'Promise');
+
+    clientAuth.returns(Promise.resolve({ json: () => generateAuth('[API_KEY]', 5) }));
+    given(fetchStub, 0, { json: () => generateStatus(true), status: 200 });
+    
+    //pre-load snapshot
+    Switcher.setTestDisabled();
+    await Switcher.loadSnapshot();
+    assert.equal(await Switcher.checkSnapshot(), false);
+
+    //unload snapshot
+    Switcher.unloadSnapshot();
+    
+    //test
+    let error = null;
+    await Switcher.checkSnapshot().catch((err) => error = err);
+    assert.exists(error);
+    assert.equal(error.message, 'Something went wrong: Snapshot is not loaded. Use Switcher.loadSnapshot()');
   });
 
   it('should update snapshot', async function () {
