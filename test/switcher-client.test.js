@@ -17,10 +17,16 @@ describe('E2E test - Switcher offline:', function () {
     url: 'http://localhost:3000'
   };
 
+  const options = {
+    snapshotLocation: './snapshot/',
+    offline: true, 
+    logger: true, 
+    regexMaxBlackList: 1, 
+    regexMaxTimeLimit: 500
+  };
+
   this.beforeAll(async function() {
-    Switcher.buildContext(contextSettings, {
-      offline: true, logger: true, regexMaxBlackList: 1, regexMaxTimeLimit: 500
-    });
+    Switcher.buildContext(contextSettings, options);
 
     await Switcher.loadSnapshot();
     switcher = Switcher.factory();

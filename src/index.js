@@ -5,7 +5,8 @@ const ExecutionLogger = require('./lib/utils/executionLogger');
 const TimedMatch = require('./lib/utils/timed-match');
 const DateMoment = require('./lib/utils/datemoment');
 const SnapshotAutoUpdater = require('./lib/utils/snapshotAutoUpdater');
-const { loadDomain, validateSnapshot, checkSwitchers } = require('./lib/snapshot');
+const { loadDomain, validateSnapshot, checkSwitchersLocal } = require('./lib/snapshot');
+const { SnapshotNotFoundError } = require('./lib/exceptions');
 const services = require('./lib/remote');
 const checkCriteriaOffline = require('./lib/resolver');
 const fs = require('fs');
@@ -21,7 +22,6 @@ const {
 } = require('./lib/middlewares/check');
 
 const DEFAULT_ENVIRONMENT = 'default';
-const DEFAULT_SNAPSHOT_LOCATION = './snapshot/';
 const DEFAULT_RETRY_TIME = '5m';
 const DEFAULT_OFFLINE = false;
 const DEFAULT_LOGGER = false;
@@ -48,7 +48,7 @@ class Switcher {
     // Default values
     this.options = {
       snapshotAutoUpdateInterval: 0,
-      snapshotLocation: options?.snapshotLocation || DEFAULT_SNAPSHOT_LOCATION,
+      snapshotLocation: options?.snapshotLocation,
       offline: options?.offline != undefined ? options.offline : DEFAULT_OFFLINE,
       logger: options?.logger != undefined ? options.logger : DEFAULT_LOGGER
     };
@@ -89,39 +89,52 @@ class Switcher {
   }
 
   static async checkSnapshot() {
-    if (!Switcher.snapshot) 
-      return false;
+    if (!Switcher.snapshot) {
+      throw new SnapshotNotFoundError('Snapshot is not loaded. Use Switcher.loadSnapshot()');
+    }
 
-    if (!Switcher.context.exp || Date.now() > (Switcher.context.exp*1000))
+    if (!Switcher.context.exp || Date.now() > (Switcher.context.exp*1000)) {
       await Switcher._auth();
+    }
 
-    const result = await validateSnapshot(
-      Switcher.context, 
-      Switcher.options.snapshotLocation, 
+    const snapshot = await validateSnapshot(
+      Switcher.context,
       Switcher.snapshot.data.domain.version
     );
     
-    if (result) {
-      Switcher.loadSnapshot();
+    if (snapshot) {
+      if (Switcher.options.snapshotLocation?.length) {
+        fs.writeFileSync(`${Switcher.options.snapshotLocation}${Switcher.context.environment}.json`, snapshot);
+      }
+
+      Switcher.snapshot = JSON.parse(snapshot);
       return true;
     }
 
     return false;
   }
 
-  static async loadSnapshot(watchSnapshot, fecthOnline) {
-    Switcher.snapshot = loadDomain(Switcher.options.snapshotLocation, Switcher.context.environment);
+  static async loadSnapshot(watchSnapshot = false, fecthOnline = false) {
+    Switcher.snapshot = loadDomain(
+      Switcher.options.snapshotLocation || '', 
+      Switcher.context.environment
+    );
+
     if (Switcher.snapshot.data.domain.version == 0 && 
         (fecthOnline || !Switcher.options.offline))
       await Switcher.checkSnapshot();
 
-    if (watchSnapshot)
+    if (watchSnapshot) {
       Switcher.watchSnapshot();
+    }
+
+    return Switcher.snapshot?.data.domain.version || 0;
   }
 
   static watchSnapshot(success, error) {
-    if (Switcher.testEnabled)
+    if (Switcher.testEnabled || !Switcher.options.snapshotLocation?.length) {
       return;
+    }
 
     const snapshotFile = `${Switcher.options.snapshotLocation}${Switcher.context.environment}.json`;
     fs.watchFile(snapshotFile, () => {
@@ -137,8 +150,9 @@ class Switcher {
   }
 
   static unloadSnapshot() {
-    if (Switcher.testEnabled)
+    if (Switcher.testEnabled) {
       return;
+    }
 
     const snapshotFile = `${Switcher.options.snapshotLocation}${Switcher.context.environment}.json`;
     Switcher.snapshot = undefined;
@@ -162,17 +176,21 @@ class Switcher {
 
   static async checkSwitchers(switcherKeys) {
     if (Switcher.options.offline && Switcher.snapshot) {
-      checkSwitchers(Switcher.snapshot, switcherKeys);
+      checkSwitchersLocal(Switcher.snapshot, switcherKeys);
     } else {
-      try {
-        await Switcher._auth();
-        await services.checkSwitchers(Switcher.context.url, Switcher.context.token, switcherKeys);
-      } catch (e) {
-        if (Switcher.options.silentMode) {
-          checkSwitchers(Switcher.snapshot, switcherKeys);
-        } else {
-          throw e;
-        }
+      await Switcher._checkSwitchersRemote(switcherKeys);
+    }
+  }
+
+  static async _checkSwitchersRemote(switcherKeys) {
+    try {
+      await Switcher._auth();
+      await services.checkSwitchersRemote(Switcher.context.url, Switcher.context.token, switcherKeys);
+    } catch (e) {
+      if (Switcher.options.silentMode) {
+        checkSwitchersLocal(Switcher.snapshot, switcherKeys);
+      } else {
+        throw e;
       }
     }
   }

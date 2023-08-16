@@ -14,8 +14,11 @@ const loadDomain = (snapshotLocation, environment) => {
             dataBuffer = fs.readFileSync(snapshotFile);
         } else {
             dataBuffer = JSON.stringify({ data: { domain: { version: 0 } } }, null, 4);
-            fs.mkdirSync(snapshotLocation, { recursive: true });
-            fs.writeFileSync(snapshotFile, dataBuffer);
+
+            if (snapshotLocation.length) {
+                fs.mkdirSync(snapshotLocation, { recursive: true });
+                fs.writeFileSync(snapshotFile, dataBuffer);
+            }
         }
 
         const dataJSON = dataBuffer.toString();
@@ -25,24 +28,24 @@ const loadDomain = (snapshotLocation, environment) => {
     }
 };
 
-const validateSnapshot = async ({ url, token, domain, environment, component }, snapshotLocation, snapshotVersion) => {
-    const { status } = await checkSnapshotVersion(url, token, snapshotVersion);
+const validateSnapshot = async (context, snapshotVersion) => {
+    const { status } = await checkSnapshotVersion(context.url, context.token, snapshotVersion);
     
     if (!status) {
-        const snapshot = await resolveSnapshot(url, token, domain, environment, component);
+        const snapshot = await resolveSnapshot(
+            context.url, context.token, context.domain, context.environment, context.component);
         
-        fs.writeFileSync(`${snapshotLocation}${environment}.json`, snapshot);
-        return true;
+        return snapshot;
     }
-    return false;
+    return undefined;
 };
 
-const checkSwitchers = (snapshot, switcherKeys) => {
+const checkSwitchersLocal = (snapshot, switcherKeys) => {
     const { group } = snapshot.data.domain;
     let notFound = [], found = false;
     
     for (const switcher of switcherKeys) {
-        for (const g of group) {
+        for (const g of group || []) {
             found = false;
             const { config } = g;
 
@@ -234,7 +237,7 @@ module.exports = {
     loadDomain,
     validateSnapshot,
     processOperation,
-    checkSwitchers,
+    checkSwitchersLocal,
     StrategiesType,
     OperationsType
 };

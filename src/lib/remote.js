@@ -124,7 +124,7 @@ exports.auth = async ({ url, apiKey, domain, component, environment }) => {
     }
 };
 
-exports.checkSwitchers = async (url, token, switcherKeys) => {
+exports.checkSwitchersRemote = async (url, token, switcherKeys) => {
     try {
         const response = await fetch(`${url}/criteria/switchers_check`, {
             method: 'post',
