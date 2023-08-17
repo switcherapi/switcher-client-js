@@ -1,23 +1,32 @@
 const assert = require('chai').assert;
 
+const TimedMatch = require('../src/lib/utils/timed-match');
 const {
     processOperation,
     StrategiesType,
     OperationsType
 } = require('../src/lib/snapshot');
 
-describe('Processing strategy: REGEX', () => {
-    const mock_values1 = [
-        '\\bUSER_[0-9]{1,2}\\b'
-    ];
+const mock_values1 = [
+    '\\bUSER_[0-9]{1,2}\\b'
+];
 
-    const mock_values2 = [
-        '\\bUSER_[0-9]{1,2}\\b', '\\buser-[0-9]{1,2}\\b'
-    ];
+const mock_values2 = [
+    '\\bUSER_[0-9]{1,2}\\b', '\\buser-[0-9]{1,2}\\b'
+];
 
-    const mock_values3 = [
-        'USER_[0-9]{1,2}'
-    ];
+const mock_values3 = [
+    'USER_[0-9]{1,2}'
+];
+
+describe('Processing strategy: [REGEX Safe] ', function() {
+    this.beforeAll(async function() {
+        TimedMatch.initializeWorker();
+    });
+
+    this.afterAll(function() {
+        TimedMatch.terminateWorker()
+    });
 
     it('should agree when expect to exist using EXIST operation', async () => {
         let result = await processOperation(
@@ -86,5 +95,16 @@ describe('Processing strategy: REGEX', () => {
         const result = await processOperation(
             StrategiesType.REGEX, OperationsType.EQUAL, 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', ['^(([a-z])+.)+[A-Z]([a-z])+$']);
         assert.isFalse(result);
+    });
+});
+
+describe('Strategy [REGEX] tests:', function() {
+    this.afterAll(function() {
+        TimedMatch.terminateWorker();
+    });
+  
+    it('should agree when expect to exist using EXIST operation', async function () {
+      const result = await processOperation(StrategiesType.REGEX, OperationsType.EXIST, 'USER_1', mock_values1);
+      assert.isTrue(result);
     });
 });

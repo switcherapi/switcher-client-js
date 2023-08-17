@@ -1,4 +1,5 @@
 const cp = require('child_process');
+const tryMatch = require('./match');
 
 /**
  * This class will run a match operation using a child process.
@@ -6,10 +7,27 @@ const cp = require('child_process');
  * Blacklist caching is available to prevent sequence of matching failures and resource usage.
  */
 class TimedMatch {
-    static _worker = this._createChildProcess();
+    static _worker = undefined;
+    static _workerActive = false;
     static _blacklisted = [];
     static _maxBlackListed = 50;
     static _maxTimeLimit = 3000;
+
+    /**
+     * Initialize Worker process for working with Regex process operators
+     */
+    static initializeWorker() {
+        this._worker = this._createChildProcess();
+        this._workerActive = true;
+    }
+
+    /**
+     * Gracefully terminate worker
+     */
+    static terminateWorker() {
+        this._worker?.kill();
+        this._workerActive = false;
+    }
 
     /**
      * Run match using child process
@@ -19,6 +37,36 @@ class TimedMatch {
      * @returns match result
      */
     static async tryMatch(values, input) {
+        if (this._worker && this._workerActive) {
+            return this._safeMatch(values, input);
+        }
+
+        return await Promise.resolve(tryMatch(values, input));
+    }
+
+    /**
+     * Clear entries from failed matching operations
+     */
+    static clearBlackList() {
+        this._blacklisted = [];
+    }
+
+    static setMaxBlackListed(value) {
+        this._maxBlackListed = value;
+    }
+
+    static setMaxTimeLimit(value) {
+        this._maxTimeLimit = value;
+    }
+
+    /**
+     * Run match using child process
+     * 
+     * @param {*} values array of regular expression to be evaluated
+     * @param {*} input to be matched
+     * @returns match result
+     */
+    static async _safeMatch(values, input) {
         let result = false;
         let timer, resolveListener;
 
@@ -45,21 +93,6 @@ class TimedMatch {
         });
     
         return result;
-    }
-
-    /**
-     * Clear entries from failed matching operations
-     */
-    static clearBlackList() {
-        this._blacklisted = [];
-    }
-
-    static setMaxBlackListed(value) {
-        this._maxBlackListed = value;
-    }
-
-    static setMaxTimeLimit(value) {
-        this._maxTimeLimit = value;
     }
 
     static _isBlackListed({ values, input }) {
