@@ -80,9 +80,12 @@ let switcher = Switcher.factory();
 - **snapshotAutoUpdateInterval**: Enable Snapshot Auto Update given an interval in ms (default: 0 disabled).
 - **silentMode**: If activated, all connectivity issues will be ignored and the client will automatically fetch the configuration into your snapshot file
 - **retryAfter**: Time given to the module to re-establish connectivity with the API - e.g. 5s (s: seconds - m: minutes - h: hours)
+- **regexSafe**: Enable REGEX Safe mode - Prevent agaist reDOS attack (default: true).
 - **regexMaxBlackList**: Number of entries cached when REGEX Strategy fails to perform (reDOS safe) - default: 50
 - **regexMaxTimeLimit**: Time limit (ms) used by REGEX workers (reDOS safe) - default - 3000ms
 - **certPath**: Path to the certificate file used to establish a secure connection with the API.
+
+(*) regexSafe is a feature that prevents your application from being exposed to a reDOS attack. It is recommended to keep this feature enabled.<br>
 
 ## Executing
 There are a few different ways to call the API using the JavaScript module.

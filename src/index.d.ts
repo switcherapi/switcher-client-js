@@ -155,6 +155,7 @@ declare namespace SwitcherClient {
     snapshotAutoUpdateInterval: number;
     silentMode: boolean;
     retryAfter: string;
+    regexSafe: boolean;
     regexMaxBlackList: number;
     regexMaxTimeLimit: number;
     certPath: string;

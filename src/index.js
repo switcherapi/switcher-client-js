@@ -40,7 +40,6 @@ class Switcher {
     this.testEnabled = DEFAULT_TEST_MODE;
 
     this.snapshot = undefined;
-    this.context = {};
     this.context = context;
     this.context.url = context.url;
     this.context.environment = context.environment || DEFAULT_ENVIRONMENT;
@@ -159,14 +158,14 @@ class Switcher {
     fs.unwatchFile(snapshotFile);
   }
 
-  static scheduleSnapshotAutoUpdate(interval) {
+  static scheduleSnapshotAutoUpdate(interval, callback) {
     if (interval) {
       Switcher.options.snapshotAutoUpdateInterval = interval;
     }
 
     if (Switcher.options.snapshotAutoUpdateInterval > 0) {
       SnapshotAutoUpdater.schedule(
-        Switcher.options.snapshotAutoUpdateInterval, this.checkSnapshot);
+        Switcher.options.snapshotAutoUpdateInterval, this.checkSnapshot, callback);
     }
   }
 
@@ -203,8 +202,12 @@ class Switcher {
     if ('regexMaxTimeLimit' in options) {
       TimedMatch.setMaxTimeLimit(options.regexMaxTimeLimit);
     }
-  }
 
+    const hasRegexSafeOption = 'regexSafe' in options;
+    if (!hasRegexSafeOption || (hasRegexSafeOption && options.regexSafe)) {
+      TimedMatch.initializeWorker();
+    }
+  }
 
   static async _auth() {
     const response = await services.auth(Switcher.context);

@@ -185,7 +185,7 @@ describe('E2E test - Switcher offline:', function () {
   it('should enable test mode which will prevent a snapshot to be watchable', async function () {
     //given
     Switcher.buildContext(contextSettings, {
-      offline: true, logger: true
+      offline: true, logger: true, regexSafe: false
     });
 
     switcher = Switcher.factory();
@@ -202,6 +202,7 @@ describe('E2E test - Switcher offline:', function () {
 
     Switcher.buildContext(contextSettings, {
       offline: true,
+      regexSafe: false,
       snapshotLocation: '//somewhere/'
     });
 
@@ -215,6 +216,7 @@ describe('E2E test - Switcher offline:', function () {
 
     Switcher.buildContext(contextSettings, {
       offline: true,
+      regexSafe: false,
       snapshotLocation: 'generated-snapshots/'
     });
 
