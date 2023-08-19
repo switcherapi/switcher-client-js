@@ -164,7 +164,7 @@ describe('Integrated test - Switcher:', function () {
       given(fetchStub, 0, { status: 429 });
 
       //test
-      Switcher.buildContext(contextSettings, { silentMode: true,regexSafe: false, snapshotLocation: './snapshot/' });
+      Switcher.buildContext(contextSettings, { silentMode: '5m', regexSafe: false, snapshotLocation: './snapshot/' });
       await assert.isRejected(Switcher.checkSwitchers(['FEATURE01', 'FEATURE02']), 
         'Something went wrong: [FEATURE01,FEATURE02] not found');
 
@@ -178,7 +178,7 @@ describe('Integrated test - Switcher:', function () {
       given(fetchStub, 2, { status: 429 });
 
       // test
-      Switcher.buildContext(contextSettings, { silentMode: true, regexSafe: false, snapshotLocation: './snapshot/' });
+      Switcher.buildContext(contextSettings, { silentMode: '5m', regexSafe: false, snapshotLocation: './snapshot/' });
       let switcher = Switcher.factory();
       
       await assert.isFulfilled(switcher.isItOn('FF2FOR2022'));
@@ -453,8 +453,7 @@ describe('Integrated test - Switcher:', function () {
       Switcher.buildContext(contextSettings, {
         snapshotLocation: './snapshot/',
         regexSafe: false,
-        silentMode: true,
-        retryAfter: '2s'
+        silentMode: '2s'
       });
       
       let switcher = Switcher.factory();
@@ -517,7 +516,7 @@ describe('Integrated test - Switcher:', function () {
       Switcher.buildContext(contextSettings, {
         snapshotLocation: './snapshot/',
         regexSafe: false,
-        silentMode: true
+        silentMode: '5m'
       });
 
       let switcher = Switcher.factory();
