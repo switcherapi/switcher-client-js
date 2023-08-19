@@ -22,7 +22,6 @@ const {
 } = require('./lib/middlewares/check');
 
 const DEFAULT_ENVIRONMENT = 'default';
-const DEFAULT_RETRY_TIME = '5m';
 const DEFAULT_OFFLINE = false;
 const DEFAULT_LOGGER = false;
 const DEFAULT_TEST_MODE = false;
@@ -61,23 +60,14 @@ class Switcher {
     if ('certPath' in options && options.certPath) {
       services.setCerts(options.certPath);
     }
-    
-    if ('silentMode' in options) {
-      this.options.silentMode = options.silentMode;
-      this.loadSnapshot();
+
+    if ('silentMode' in options && options.silentMode) {
+      this._initSilentMode(options.silentMode);
     }
 
     if ('snapshotAutoUpdateInterval' in options) {
       this.options.snapshotAutoUpdateInterval = options.snapshotAutoUpdateInterval;
       this.scheduleSnapshotAutoUpdate();
-    }
-
-    if ('retryAfter' in options) {
-      this.options.retryTime = options.retryAfter.slice(0, -1);
-      this.options.retryDurationIn = options.retryAfter.slice(-1);
-    } else {
-      this.options.retryTime = DEFAULT_RETRY_TIME.charAt(0);
-      this.options.retryDurationIn = DEFAULT_RETRY_TIME.charAt(1);
     }
 
     this._initTimedMatch(options);
@@ -192,6 +182,14 @@ class Switcher {
         throw e;
       }
     }
+  }
+
+  static _initSilentMode(silentMode) {
+    Switcher.options.retryTime = silentMode.slice(0, -1);
+    Switcher.options.retryDurationIn = silentMode.slice(-1);
+
+    Switcher.options.silentMode = silentMode;
+    Switcher.loadSnapshot();
   }
 
   static _initTimedMatch(options) {

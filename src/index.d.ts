@@ -153,8 +153,7 @@ declare namespace SwitcherClient {
     logger: boolean;
     snapshotLocation: string;
     snapshotAutoUpdateInterval: number;
-    silentMode: boolean;
-    retryAfter: string;
+    silentMode: string;
     regexSafe: boolean;
     regexMaxBlackList: number;
     regexMaxTimeLimit: number;
