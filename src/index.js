@@ -213,7 +213,7 @@ class Switcher {
     Switcher.context.exp = response.exp;
   }
 
-  static async _checkHealth() {
+  static _checkHealth() {
     if (Switcher.context.token !== 'SILENT') {
       return;
     }
@@ -374,7 +374,7 @@ class Switcher {
       return;
     }
 
-    await Switcher._checkHealth();
+    Switcher._checkHealth();
     if (Switcher._isTokenExpired()) {
         await this.prepare(this._key, this._input);
     }
