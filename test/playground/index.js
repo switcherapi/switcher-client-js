@@ -27,14 +27,17 @@ async function setupSwitcher(offline) {
 const testSimpleAPICall = async (offline) => {
     await setupSwitcher(offline);
     
-    await Switcher.checkSwitchers([SWITCHER_KEY]);
+    await Switcher.checkSwitchers([SWITCHER_KEY])
+        .then(() => console.log('Switcher checked'))
+        .catch(error => console.log(error));
 
     switcher = Switcher.factory();
-    setInterval(async () => {
+    while(1 == '1') {
         const time = Date.now();
-        await switcher.isItOn(SWITCHER_KEY, [checkValue('user_1')]);
-        console.log(Switcher.getLogger(SWITCHER_KEY), `executed in ${Date.now() - time}ms`);
-    }, 5000);
+        const result = await switcher.isItOn(SWITCHER_KEY);
+        console.log(`- ${Date.now() - time} ms - ${result}`);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+    }
 };
 
 // Requires online API

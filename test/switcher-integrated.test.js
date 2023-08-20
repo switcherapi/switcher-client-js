@@ -60,8 +60,7 @@ describe('Integrated test - Switcher:', function () {
     it('should be valid', async function () {
       // given API responding properly
       given(fetchStub, 0, { json: () => generateAuth('[auth_token]', 5), status: 200 });
-      given(fetchStub, 1, { status: 200 });
-      given(fetchStub, 2, { json: () => generateResult(true), status: 200 });
+      given(fetchStub, 1, { json: () => generateResult(true), status: 200 });
 
       // test
       Switcher.buildContext(contextSettings);
@@ -73,8 +72,7 @@ describe('Integrated test - Switcher:', function () {
 
     it('should NOT be valid - API returned 429 (too many requests)', async function () {
       // given API responding properly
-      given(fetchStub, 0, { status: 200 });
-      given(fetchStub, 1, { error: 'Too many requests', status: 429 });
+      given(fetchStub, 0, { error: 'Too many requests', status: 429 });
 
       // test
       Switcher.buildContext(contextSettings);
@@ -89,17 +87,16 @@ describe('Integrated test - Switcher:', function () {
 
       // given API responding properly
       // first API call
-      given(fetchStub, 0, { status: 200 });
-      given(fetchStub, 1, { json: () => generateAuth('[auth_token]', 5), status: 200 });
-      given(fetchStub, 2, { json: () => generateResult(true), status: 200 });
+      given(fetchStub, 0, { json: () => generateAuth('[auth_token]', 5), status: 200 });
+      given(fetchStub, 1, { json: () => generateResult(true), status: 200 });
 
       // first async API call
-      given(fetchStub, 3, { status: 200 });
-      given(fetchStub, 4, { json: () => generateResult(true), status: 200 });
+      given(fetchStub, 2, { status: 200 });
+      given(fetchStub, 3, { json: () => generateResult(true), status: 200 });
 
       // after throttle value has expired
-      given(fetchStub, 5, { status: 200 });
-      given(fetchStub, 6, { json: () => generateResult(true), status: 200 });
+      given(fetchStub, 4, { status: 200 });
+      given(fetchStub, 5, { json: () => generateResult(true), status: 200 });
 
       // test
       Switcher.buildContext(contextSettings);
@@ -147,9 +144,8 @@ describe('Integrated test - Switcher:', function () {
 
     it('should NOT be valid - API returned 429 (too many requests) at checkCriteria', async function () {
       // given API responding properly
-      given(fetchStub, 0, { status: 200 });
-      given(fetchStub, 1, { json: () => generateAuth('[auth_token]', 5), status: 200 });
-      given(fetchStub, 2, { error: 'Too many requests', status: 429 });
+      given(fetchStub, 0, { json: () => generateAuth('[auth_token]', 5), status: 200 });
+      given(fetchStub, 1, { error: 'Too many requests', status: 429 });
 
       // test
       Switcher.buildContext(contextSettings);
@@ -173,9 +169,8 @@ describe('Integrated test - Switcher:', function () {
 
     it('should use silent mode when fail to check criteria', async function () {
       // given API responding properly
-      given(fetchStub, 0, { status: 200 });
-      given(fetchStub, 1, { json: () => generateAuth('[auth_token]', 5), status: 200 });
-      given(fetchStub, 2, { status: 429 });
+      given(fetchStub, 0, { json: () => generateAuth('[auth_token]', 5), status: 200 });
+      given(fetchStub, 1, { status: 429 });
 
       // test
       Switcher.buildContext(contextSettings, { silentMode: '5m', regexSafe: false, snapshotLocation: './snapshot/' });
@@ -203,8 +198,7 @@ describe('Integrated test - Switcher:', function () {
 
     it('should be valid', async function () {
       // given API responding properly
-      given(fetchStub, 0, { status: 200 });
-      given(fetchStub, 1, { json: () => generateResult(true), status: 200 });
+      given(fetchStub, 0, { json: () => generateResult(true), status: 200 });
       clientAuth.returns(generateAuth('[auth_token]', 5));
 
       // test
@@ -297,8 +291,7 @@ describe('Integrated test - Switcher:', function () {
       const spyPrepare = sinon.spy(switcher, 'prepare');
 
       // Prepare the call generating the token
-      given(fetchStub, 0, { status: 200 });
-      given(fetchStub, 1, { json: () => generateResult(true), status: 200 });
+      given(fetchStub, 0, { json: () => generateResult(true), status: 200 });
       await switcher.prepare('MY_FLAG');
       assert.equal(await switcher.isItOn(), true);
 
@@ -309,20 +302,19 @@ describe('Integrated test - Switcher:', function () {
       clientAuth.returns(generateAuth('asdad12d2232d2323f', 1));
 
       // In this time period the expiration time has reached, it should call prepare once again to renew the token
-      given(fetchStub, 3, { json: () => generateResult(false), status: 200 });
+      given(fetchStub, 1, { json: () => generateResult(false), status: 200 });
       assert.equal(await switcher.isItOn(), false);
       assert.equal(spyPrepare.callCount, 2);
 
       // In the meantime another call is made by the time the token is still not expired, so there is no need to call prepare again
-      given(fetchStub, 5, { json: () => generateResult(false), status: 200 });
+      given(fetchStub, 2, { json: () => generateResult(false), status: 200 });
       assert.equal(await switcher.isItOn(), false);
       assert.equal(spyPrepare.callCount, 2);
     });
 
     it('should be valid - when sending key without calling prepare', async function () {
       // given API responding properly
-      given(fetchStub, 0, { status: 200 });
-      given(fetchStub, 1, { json: () => generateResult(true), status: 200 });
+      given(fetchStub, 0, { json: () => generateResult(true), status: 200 });
       clientAuth.returns(generateAuth('[auth_token]', 5));
 
       // test
@@ -336,8 +328,7 @@ describe('Integrated test - Switcher:', function () {
 
     it('should be valid - when preparing key and sending input strategy afterwards', async function () {
       // given API responding properly
-      given(fetchStub, 0, { status: 200 });
-      given(fetchStub, 1, { json: () => generateResult(true), status: 200 });
+      given(fetchStub, 0, { json: () => generateResult(true), status: 200 });
       clientAuth.returns(generateAuth('[auth_token]', 5));
 
       // test
@@ -457,40 +448,30 @@ describe('Integrated test - Switcher:', function () {
       });
       
       let switcher = Switcher.factory();
-      const spyPrepare = sinon.spy(switcher, 'prepare');
+      const spyOnline = sinon.spy(switcher, '_executeOnlineCriteria');
 
       // First attempt to reach the API - Since it's configured to use silent mode, it should return true (according to the snapshot)
       givenError(fetchStub, 0, { errno: 'ECONNREFUSED' });
-      let result = await switcher.isItOn('FF2FOR2030');
-      assert.isTrue(result);
+      assert.isTrue(await switcher.isItOn('FF2FOR2030'));
 
       await new Promise(resolve => setTimeout(resolve, 500));
       // The call below is in silent mode. It is getting the configuration from the offline snapshot again
-      result = await switcher.isItOn();
-      assert.isTrue(result);
+      assert.isTrue(await switcher.isItOn());
 
       // As the silent mode was configured to retry after 2 seconds, it's still in time, 
-      // therefore, prepare was never called
-      assert.equal(spyPrepare.callCount, 0);
-
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Silent mode has expired. Again, the online API is still offline. Prepare still not be invoked
-
-      result = await switcher.isItOn();
-      assert.isTrue(result);
-      assert.equal(spyPrepare.callCount, 0);
+      // therefore, online call was not yet invoked
+      assert.equal(spyOnline.callCount, 0);
 
       await new Promise(resolve => setTimeout(resolve, 3000));
       
       // Setup the online mocked response and made it to return false just to make sure it's not fetching from the snapshot
-      given(fetchStub, 1, { status: 200 });
-      given(fetchStub, 2, { json: () => generateResult(false), status: 200 });
-
+      given(fetchStub, 0, { status: 200 });
+      given(fetchStub, 1, { json: () => generateResult(false), status: 200 });
+      
       clientAuth.returns(generateAuth('[auth_token]', 10));
 
-      result = await switcher.isItOn();
-      assert.isFalse(result);
+      assert.isFalse(await switcher.isItOn());
+      assert.equal(spyOnline.callCount, 1);
     });
 
     it('should throw error if not in silent mode', async function () {

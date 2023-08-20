@@ -214,30 +214,30 @@ class Switcher {
   }
 
   static async _checkHealth() {
-    // checks if silent mode is still activated
-    if (Switcher.context.token === 'SILENT') {
-      if (!Switcher.context.exp || Date.now() < (Switcher.context.exp*1000)) {
-        const expirationTime = new DateMoment(new Date())
-          .add(Switcher.options.retryTime, Switcher.options.retryDurationIn).getDate();
-        
-        Switcher.context.exp = expirationTime.getTime() / 1000;
-        return false;
-      }
-    }
-    
-    const responseSilentMode = await services.checkAPIHealth(Switcher.context.url, {
-      silentMode: Switcher.options.silentMode,
-      retryTime: Switcher.options.retryTime,
-      retryDurationIn: Switcher.options.retryDurationIn
-    });
-
-    if (responseSilentMode) {
-      Switcher.context.token = responseSilentMode.data.token;
-      Switcher.context.exp = responseSilentMode.data.exp;
-      return false;
+    if (Switcher.context.token !== 'SILENT') {
+      return;
     }
 
-    return true;
+    if (Switcher._isTokenExpired()) {
+      Switcher._updateSilentToken();
+      services.checkAPIHealth(Switcher.context.url || '').then((isAlive) => {
+        if (isAlive) {
+          Switcher._auth();
+        }
+      });
+    }
+  }
+
+  static _updateSilentToken() {
+    const expirationTime = new DateMoment(new Date())
+      .add(Switcher.options.retryTime, Switcher.options.retryDurationIn).getDate();
+
+    Switcher.context.token = 'SILENT';
+    Switcher.context.exp = Math.round(expirationTime.getTime() / 1000);
+  }
+
+  static _isTokenExpired() {
+    return !Switcher.context.exp || Date.now() > (Switcher.context.exp * 1000);
   }
 
   static assume(key) {
@@ -319,12 +319,14 @@ class Switcher {
     } else {
       try {
         await this.validate();
-        if (Switcher.context.token === 'SILENT')
+        if (Switcher.context.token === 'SILENT') {
           result = await this._executeOfflineCriteria();
-        else
+        } else {
           result = await this._executeOnlineCriteria(showReason);
+        }
       } catch (e) {
         if (Switcher.options.silentMode) {
+          Switcher._updateSilentToken();
           return this._executeOfflineCriteria();
         }
 
@@ -368,11 +370,13 @@ class Switcher {
   }
 
   async _executeApiValidation() {
-    if (this._useSync()) {
-      if (await Switcher._checkHealth() && 
-        (!Switcher.context.exp || Date.now() > (Switcher.context.exp * 1000))) {
-          await this.prepare(this._key, this._input);
-      }
+    if (!this._useSync()) {
+      return;
+    }
+
+    await Switcher._checkHealth();
+    if (Switcher._isTokenExpired()) {
+        await this.prepare(this._key, this._input);
     }
   }
 
