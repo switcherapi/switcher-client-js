@@ -5,7 +5,7 @@ class SnapshotAutoUpdater {
         if (this._worker)
             this.terminate();
             
-        this._worker = setInterval(() => checkSnapshot(), interval);
+        this._worker = setInterval(() => checkSnapshot(), interval * 1000);
     }
 
     static terminate() {
