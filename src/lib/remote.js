@@ -1,8 +1,6 @@
 const fetch = require('node-fetch');
 const https = require('https');
-const DateMoment = require('./utils/datemoment');
 const {
-    ApiConnectionError,
     AuthError,
     CheckSwitcherError,
     CriteriaError,
@@ -18,22 +16,6 @@ const getHeader = (token) => {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
     };
-};
-
-const trySilent = (options) => {
-    if (options && 'silentMode' in options) {
-        if (options.silentMode) {
-            const expirationTime = new DateMoment(new Date())
-                .add(options.retryTime, options.retryDurationIn).getDate();
-
-            return {
-                data: {
-                    token: 'SILENT',
-                    exp: expirationTime.getTime() / 1000
-                }
-            };
-        }
-    }
 };
 
 exports.setCerts = (certPath) => {
@@ -67,13 +49,12 @@ exports.getEntry = (input) => {
     return entry;
 };
 
-exports.checkAPIHealth = async (url, options) => {
+exports.checkAPIHealth = async (url) => {
     try {
         const response = await fetch(`${url}/check`, { method: 'get', agent: httpClient });
-        if (response.status != 200)
-            throw new ApiConnectionError('API is offline');
+        return response.status == 200;
     } catch (e) {
-        return trySilent(options);
+        return false;
     }
 };
 
@@ -86,8 +67,7 @@ exports.checkCriteria = async ({ url, token }, key, input, showReason = false) =
             headers: getHeader(token),
             agent: httpClient
         });
-
-
+        
         if (response.status == 200) {
             return response.json();
         }

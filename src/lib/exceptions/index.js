@@ -1,10 +1,3 @@
-class ApiConnectionError extends Error {
-    constructor(message) {
-        super(`Something went wrong: ${message}`);
-        this.name = this.constructor.name;
-    }
-}
-
 class AuthError extends Error {
     constructor(message) {
         super(`Something went wrong: ${message}`);
@@ -41,7 +34,6 @@ class SnapshotNotFoundError extends Error {
   }
 
 module.exports = {
-    ApiConnectionError,
     AuthError,
     CriteriaError,
     CheckSwitcherError,
