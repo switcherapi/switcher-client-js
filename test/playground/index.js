@@ -133,14 +133,23 @@ const testWatchSnapshot = () => {
 // Requires online API
 const testSnapshotAutoUpdate = async () => {
     Switcher.buildContext({ url, apiKey, domain, component, environment }, 
-        { offline: true, logger: true, snapshotAutoUpdateInterval: 3 });
+        { offline: true, logger: true });
 
     await Switcher.loadSnapshot();
     switcher = Switcher.factory();
 
+    Switcher.scheduleSnapshotAutoUpdate(3, (updated, err) => {
+        if (updated != undefined) {
+            console.log('Snapshot updated', updated);
+        } else {
+            console.log(err);
+        }
+    });
+
     setInterval(async () => {
         const time = Date.now();
         await switcher.isItOn(SWITCHER_KEY, [checkValue('user_1')]);
+        console.clear();
         console.log(Switcher.getLogger(SWITCHER_KEY), `executed in ${Date.now() - time}ms`);
     }, 2000);
 };

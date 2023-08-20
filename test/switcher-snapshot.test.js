@@ -331,8 +331,12 @@ describe('E2E test - Snapshot AutoUpdater:', function () {
       snapshotAutoUpdateInterval: 1
     });
 
-    //optional (already set in the buildContext)
-    Switcher.scheduleSnapshotAutoUpdate(1);
+    let snapshotUpdated = false;
+    Switcher.scheduleSnapshotAutoUpdate(1, (updated, err) => {
+      if (updated != undefined) {
+        snapshotUpdated = updated;
+      }
+    });
     
     await Switcher.loadSnapshot(false, true);
 
@@ -340,8 +344,48 @@ describe('E2E test - Snapshot AutoUpdater:', function () {
     assert.isFalse(await switcher.isItOn('FF2FOR2030'));
     
     await new Promise(resolve => setTimeout(resolve, 2000));
+
+    assert.isTrue(snapshotUpdated);
     assert.isTrue(await switcher.isItOn('FF2FOR2030'));
   });
+
+  it('should NOT auto update snapshot ', async function () {
+    this.timeout(3000);
+    clientAuth = sinon.stub(services, 'auth');
+    fetchStub = sinon.stub(fetch, 'Promise');
+
+    //given
+    clientAuth.returns(Promise.resolve({ json: () => generateAuth('[API_KEY]', 5), status: 200 }));
+    given(fetchStub, 0, { json: () => generateStatus(false), status: 200 });
+    given(fetchStub, 1, { json: () => JSON.parse(dataJSON), status: 200 });
+
+    //test
+    Switcher.buildContext({ url, apiKey, domain, component, environment }, {
+      offline: true,
+      regexSafe: false
+    });
+
+    let error;
+    Switcher.scheduleSnapshotAutoUpdate(1, (updated, err) => {
+      if (err != undefined) {
+        error = err;
+      }
+    });
+    
+    await Switcher.loadSnapshot(false, true);
+
+    //next call will fail
+    givenError(fetchStub, 2, { errno: 'ECONNREFUSED' });
+
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    assert.exists(error);
+    assert.equal(error.message, 'Something went wrong: Connection has been refused - ECONNREFUSED');
+
+    //tearDown
+    Switcher.terminateSnapshotAutoUpdate();
+  });
+
 });
 
 describe('Error Scenarios - Snapshot', function() {
