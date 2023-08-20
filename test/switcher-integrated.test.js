@@ -470,6 +470,8 @@ describe('Integrated test - Switcher:', function () {
       
       clientAuth.returns(generateAuth('[auth_token]', 10));
 
+      // Auth is async when silent mode is enabled to prevent blocking the execution while the API is not available
+      assert.isTrue(await switcher.isItOn());
       assert.isFalse(await switcher.isItOn());
       assert.equal(spyOnline.callCount, 1);
     });
