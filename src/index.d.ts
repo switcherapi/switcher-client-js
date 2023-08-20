@@ -40,8 +40,9 @@ declare namespace SwitcherClient {
      * building context
      * 
      * @param interval in ms
+     * @param callback from the execution
      */
-    static scheduleSnapshotAutoUpdate(interval?: number): void;
+    static scheduleSnapshotAutoUpdate(interval?: number, callback?: (updated: boolean, err: Error) => void): void;
 
     /**
      * Terminates Snapshot Auto Update
