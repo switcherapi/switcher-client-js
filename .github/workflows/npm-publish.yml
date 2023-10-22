@@ -21,6 +21,9 @@ jobs:
     name: Publish to NPM
     needs: build-test
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     
     steps:
       - uses: actions/checkout@v3
@@ -29,6 +32,6 @@ jobs:
           node-version: 18
           registry-url: https://registry.npmjs.org/
       - run: npm install
-      - run: npm publish --access public
+      - run: npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
