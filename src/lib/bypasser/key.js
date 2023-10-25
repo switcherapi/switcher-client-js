@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Type definition for Switcher Keys which are used to mock results
  */

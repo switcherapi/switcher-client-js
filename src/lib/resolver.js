@@ -58,8 +58,9 @@ async function checkGroup(groups, key, input) {
  * @return true if Switcher found
  */
 async function checkConfig(group, config, input) {
-    if (!config)
+    if (!config) {
         return false;
+    }
 
     if (!group.activated) {
         throw new CriteriaFailed('Group disabled');
@@ -81,8 +82,9 @@ async function checkStrategy(config, input) {
     const entry = services.getEntry(input);
 
     for (const strategy of strategies) {
-        if (!strategy.activated) 
+        if (!strategy.activated) {
             continue;
+        }
 
         await checkStrategyInput(entry, strategy);
     }

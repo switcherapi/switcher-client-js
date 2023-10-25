@@ -9,7 +9,7 @@ const { parseJSON, payloadReader } = require('./utils/payloadReader');
 const loadDomain = (snapshotLocation, environment) => {
     try {
         let dataBuffer;
-        const snapshotFile = `${snapshotLocation}${environment}.json`;
+        const snapshotFile = `${snapshotLocation}/${environment}.json`;
         if (fs.existsSync(snapshotFile)) {
             dataBuffer = fs.readFileSync(snapshotFile);
         } else {
@@ -221,8 +221,9 @@ async function processREGEX(operation, input, values) {
 
 function processPAYLOAD(operation, input, values) {
     const inputJson = parseJSON(input);
-    if (!inputJson)
+    if (!inputJson) {
         return false;
+    }
 
     const keys = payloadReader(inputJson);
     switch(operation) {

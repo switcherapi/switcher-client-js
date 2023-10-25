@@ -1,5 +1,3 @@
-'use strict';
-
 const logger = new Array();
 
 class ExecutionLogger {
