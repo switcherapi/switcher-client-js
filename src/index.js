@@ -1,5 +1,3 @@
-'use strict';
-
 const Bypasser = require('./lib/bypasser');
 const ExecutionLogger = require('./lib/utils/executionLogger');
 const TimedMatch = require('./lib/utils/timed-match');
@@ -384,8 +382,9 @@ class Switcher {
     const response = await checkCriteriaOffline(
       this._key, this._input, Switcher.snapshot);
 
-    if (Switcher.options.logger) 
+    if (Switcher.options.logger) {
       ExecutionLogger.add(response, this._key, this._input);
+    }
 
     return response.result;
   }

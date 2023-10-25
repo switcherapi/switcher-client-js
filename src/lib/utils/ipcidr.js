@@ -1,5 +1,3 @@
-'use strict';
-
 class IPCIDR {
   constructor(cidr) {
     this.cidr = cidr;
