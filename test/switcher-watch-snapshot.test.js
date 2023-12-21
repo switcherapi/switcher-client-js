@@ -24,15 +24,11 @@ const invalidateJSON = (environment) => {
 describe('E2E test - Switcher offline - Watch Snapshot:', function () {
   const domain = 'Business';
   const component = 'business-service';
+  let devJSON;
 
   const initContext = async (environment) => {
-    const dataBuffer = fs.readFileSync('./snapshot/dev.json');
-    const dataJSON = JSON.parse(dataBuffer.toString());
-
-    dataJSON.data.domain.group[0].config[0].activated = true;
-
     fs.mkdirSync('generated-snapshots/', { recursive: true });
-    fs.writeFileSync(`generated-snapshots/${environment}.json`, JSON.stringify(dataJSON, null, 4));
+    fs.writeFileSync(`generated-snapshots/${environment}.json`, JSON.stringify(devJSON, null, 4));
 
     Switcher.buildContext({ domain, component, environment }, {
       snapshotLocation: 'generated-snapshots/',
@@ -42,6 +38,12 @@ describe('E2E test - Switcher offline - Watch Snapshot:', function () {
 
     await Switcher.loadSnapshot();
   };
+
+  this.beforeAll(function() {
+    const dataBuffer = fs.readFileSync('./snapshot/dev.json');
+    devJSON = JSON.parse(dataBuffer.toString());
+    devJSON.data.domain.group[0].config[0].activated = true;
+  });
 
   this.afterEach(function() {
     Switcher.unloadSnapshot();
@@ -71,7 +73,7 @@ describe('E2E test - Switcher offline - Watch Snapshot:', function () {
   });
   
   it('should read from updated snapshot', function (done) {
-    this.timeout(60000);
+    this.timeout(10000);
 
     initContext('watch2').then(() => {
       const switcher = Switcher.factory();
@@ -90,7 +92,7 @@ describe('E2E test - Switcher offline - Watch Snapshot:', function () {
   });
 
   it('should NOT read from updated snapshot - invalid JSON', function (done) {
-    this.timeout(60000);
+    this.timeout(10000);
 
     initContext('watch3').then(() => {
       const switcher = Switcher.factory();
