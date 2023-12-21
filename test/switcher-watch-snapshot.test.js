@@ -28,7 +28,7 @@ describe('E2E test - Switcher offline - Watch Snapshot:', function () {
 
   const initContext = async (environment) => {
     fs.mkdirSync('generated-snapshots/', { recursive: true });
-    fs.writeFileSync(`generated-snapshots/${environment}.json`, JSON.stringify(devJSON, null, 4));
+    fs.writeFileSync(`generated-snapshots/${environment}.json`, JSON.stringify(devJSON, null, 4), { flush: true  });
 
     Switcher.buildContext({ domain, component, environment }, {
       snapshotLocation: 'generated-snapshots/',
