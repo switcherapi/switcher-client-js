@@ -6,29 +6,13 @@ const assert = chai.assert;
 const { Switcher } = require('../src/index');
 const fs = require('fs');
 
-const updateSwitcher = (environment, status) => {
-  const dataBuffer = fs.readFileSync('./snapshot/dev.json');
-  const dataJSON = JSON.parse(dataBuffer.toString());
-
-  dataJSON.data.domain.group[0].config[0].activated = status;
-
-  fs.mkdirSync('generated-snapshots/', { recursive: true });
-  fs.writeFileSync(`generated-snapshots/${environment}.json`, JSON.stringify(dataJSON, null, 4));
-};
-
-const invalidateJSON = (environment) => {
-  fs.mkdirSync('generated-snapshots/', { recursive: true });
-  fs.writeFileSync(`generated-snapshots/${environment}.json`, '[INVALID]');
-};
-
 describe('E2E test - Switcher offline - Watch Snapshot:', function () {
   const domain = 'Business';
   const component = 'business-service';
   let devJSON;
 
   const initContext = async (environment) => {
-    fs.mkdirSync('generated-snapshots/', { recursive: true });
-    fs.writeFileSync(`generated-snapshots/${environment}.json`, JSON.stringify(devJSON, null, 4), { flush: true  });
+    fs.writeFileSync(`generated-snapshots/${environment}.json`, JSON.stringify(devJSON, null, 4));
 
     Switcher.buildContext({ domain, component, environment }, {
       snapshotLocation: 'generated-snapshots/',
@@ -39,7 +23,21 @@ describe('E2E test - Switcher offline - Watch Snapshot:', function () {
     await Switcher.loadSnapshot();
   };
 
+  const updateSwitcher = (environment, status) => {
+    const copyOfDevJSON = JSON.parse(JSON.stringify(devJSON));
+    copyOfDevJSON.data.domain.group[0].config[0].activated = status;
+    fs.writeFileSync(`generated-snapshots/${environment}.json`, JSON.stringify(copyOfDevJSON, null, 4));
+  };
+  
+  const invalidateJSON = (environment) => {
+    fs.writeFileSync(`generated-snapshots/${environment}.json`, '[INVALID]');
+  };
+
   this.beforeAll(function() {
+    if (!fs.existsSync('generated-snapshots/')) {
+      fs.mkdirSync('generated-snapshots/', { recursive: true });
+    }
+
     const dataBuffer = fs.readFileSync('./snapshot/dev.json');
     devJSON = JSON.parse(dataBuffer.toString());
     devJSON.data.domain.group[0].config[0].activated = true;
@@ -53,6 +51,7 @@ describe('E2E test - Switcher offline - Watch Snapshot:', function () {
     fs.unlinkSync('generated-snapshots/watch1.json');
     fs.unlinkSync('generated-snapshots/watch2.json');
     fs.unlinkSync('generated-snapshots/watch3.json');
+    Switcher.unloadSnapshot();
   });
 
   it('should read from snapshot - without watching', function (done) {
@@ -83,11 +82,13 @@ describe('E2E test - Switcher offline - Watch Snapshot:', function () {
           done();
         });
       });
-
-      switcher.isItOn('FF2FOR2030').then((val) => {
-        assert.isTrue(val);
-        updateSwitcher('watch2', false);
-      });
+      
+      setTimeout(() => {
+        switcher.isItOn('FF2FOR2030').then((val) => {
+          assert.isTrue(val);
+          updateSwitcher('watch2', false);
+        });
+      }, 1000);
     });
   });
 
@@ -101,10 +102,12 @@ describe('E2E test - Switcher offline - Watch Snapshot:', function () {
         done();
       });
 
-      switcher.isItOn('FF2FOR2030').then((val) => {
-        assert.isTrue(val);
-        invalidateJSON('watch3');
-      });
+      setTimeout(() => {
+        switcher.isItOn('FF2FOR2030').then((val) => {
+          assert.isTrue(val);
+          invalidateJSON('watch3');
+        });
+      }, 1000);
     });
   });
 
