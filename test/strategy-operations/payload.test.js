@@ -4,8 +4,8 @@ const {
     processOperation,
     StrategiesType,
     OperationsType
-} = require('../src/lib/snapshot');
-const { payloadReader } = require('../src/lib/utils/payloadReader');
+} = require('../../src/lib/snapshot');
+const { payloadReader } = require('../../src/lib/utils/payloadReader');
 
 describe('Processing strategy: PAYLOAD', () => {
 

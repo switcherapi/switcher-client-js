@@ -6,28 +6,30 @@ const assert = chai.assert;
 const { Switcher } = require('../src/index');
 const fs = require('fs');
 
-const updateSwitcher = (status) => {
+const updateSwitcher = (environment, status) => {
   const dataBuffer = fs.readFileSync('./snapshot/dev.json');
   const dataJSON = JSON.parse(dataBuffer.toString());
 
   dataJSON.data.domain.group[0].config[0].activated = status;
 
   fs.mkdirSync('generated-snapshots/', { recursive: true });
-  fs.writeFileSync('generated-snapshots/watch.json', JSON.stringify(dataJSON, null, 4));
+  fs.writeFileSync(`generated-snapshots/${environment}.json`, JSON.stringify(dataJSON, null, 4));
 };
 
-const invalidateJSON = () => {
+const invalidateJSON = (environment) => {
   fs.mkdirSync('generated-snapshots/', { recursive: true });
-  fs.writeFileSync('generated-snapshots/watch.json', '[INVALID]');
+  fs.writeFileSync(`generated-snapshots/${environment}.json`, '[INVALID]');
 };
 
 describe('E2E test - Switcher offline - Watch Snapshot:', function () {
   const domain = 'Business';
   const component = 'business-service';
-  const environment = 'watch';
+  let devJSON;
 
-  this.beforeEach(async function() {
-    updateSwitcher(true);
+  const initContext = async (environment) => {
+    fs.mkdirSync('generated-snapshots/', { recursive: true });
+    fs.writeFileSync(`generated-snapshots/${environment}.json`, JSON.stringify(devJSON, null, 4), { flush: true  });
+
     Switcher.buildContext({ domain, component, environment }, {
       snapshotLocation: 'generated-snapshots/',
       offline: true,
@@ -35,23 +37,37 @@ describe('E2E test - Switcher offline - Watch Snapshot:', function () {
     });
 
     await Switcher.loadSnapshot();
+  };
+
+  this.beforeAll(function() {
+    const dataBuffer = fs.readFileSync('./snapshot/dev.json');
+    devJSON = JSON.parse(dataBuffer.toString());
+    devJSON.data.domain.group[0].config[0].activated = true;
+  });
+
+  this.afterEach(function() {
+    Switcher.unloadSnapshot();
   });
 
   this.afterAll(function() {
-    Switcher.unloadSnapshot();
+    fs.unlinkSync('generated-snapshots/watch1.json');
+    fs.unlinkSync('generated-snapshots/watch2.json');
+    fs.unlinkSync('generated-snapshots/watch3.json');
   });
 
   it('should read from snapshot - without watching', function (done) {
     this.timeout(10000);
 
-    const switcher = Switcher.factory();
-    switcher.isItOn('FF2FOR2030').then((val1) => {
-      assert.isTrue(val1);
-      updateSwitcher(false);
+    initContext('watch1').then(() => {
+      const switcher = Switcher.factory();
+      switcher.isItOn('FF2FOR2030').then((val1) => {
+        assert.isTrue(val1);
+        updateSwitcher('watch1', false);
 
-      switcher.isItOn('FF2FOR2030').then((val2) => {
-        assert.isTrue(val2);
-        done();
+        switcher.isItOn('FF2FOR2030').then((val2) => {
+          assert.isTrue(val2);
+          done();
+        });
       });
     });
   });
@@ -59,30 +75,36 @@ describe('E2E test - Switcher offline - Watch Snapshot:', function () {
   it('should read from updated snapshot', function (done) {
     this.timeout(10000);
 
-    const switcher = Switcher.factory();
-    Switcher.watchSnapshot(async () => {
-      assert.isFalse(await switcher.isItOn('FF2FOR2030'));
-      done();
-    });
+    initContext('watch2').then(() => {
+      const switcher = Switcher.factory();
+      Switcher.watchSnapshot(() => {
+        switcher.isItOn('FF2FOR2030').then((val) => {
+          assert.isFalse(val);
+          done();
+        });
+      });
 
-    switcher.isItOn('FF2FOR2030').then((val) => {
-      assert.isTrue(val);
-      updateSwitcher(false);
+      switcher.isItOn('FF2FOR2030').then((val) => {
+        assert.isTrue(val);
+        updateSwitcher('watch2', false);
+      });
     });
   });
 
   it('should NOT read from updated snapshot - invalid JSON', function (done) {
     this.timeout(10000);
 
-    const switcher = Switcher.factory();
-    Switcher.watchSnapshot(undefined, (err) => {
-      assert.equal(err.message, 'Something went wrong: It was not possible to load the file at generated-snapshots/');
-      done();
-    });
+    initContext('watch3').then(() => {
+      const switcher = Switcher.factory();
+      Switcher.watchSnapshot(undefined, (err) => {
+        assert.equal(err.message, 'Something went wrong: It was not possible to load the file at generated-snapshots/');
+        done();
+      });
 
-    switcher.isItOn('FF2FOR2030').then((val) => {
-      assert.isTrue(val);
-      invalidateJSON();
+      switcher.isItOn('FF2FOR2030').then((val) => {
+        assert.isTrue(val);
+        invalidateJSON('watch3');
+      });
     });
   });
 
