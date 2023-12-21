@@ -1,11 +1,11 @@
 const assert = require('chai').assert;
 
-const TimedMatch = require('../src/lib/utils/timed-match');
+const TimedMatch = require('../../src/lib/utils/timed-match');
 const {
     processOperation,
     StrategiesType,
     OperationsType
-} = require('../src/lib/snapshot');
+} = require('../../src/lib/snapshot');
 
 const mock_values1 = [
     '\\bUSER_[0-9]{1,2}\\b'

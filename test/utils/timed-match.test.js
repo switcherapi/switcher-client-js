@@ -1,5 +1,5 @@
 const assert = require('chai').assert;
-const TimedMatch = require('../src/lib/utils/timed-match');
+const TimedMatch = require('../../src/lib/utils/timed-match');
 
 const okRE = '[a-z]';
 const okInput = 'a';

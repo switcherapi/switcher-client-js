@@ -4,7 +4,7 @@ const {
     processOperation,
     StrategiesType,
     OperationsType
-} = require('../src/lib/snapshot');
+} = require('../../src/lib/snapshot');
 
 describe('Processing strategy: VALUE', () => {
     const mock_values1 = [
