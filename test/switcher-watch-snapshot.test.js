@@ -60,9 +60,11 @@ describe('E2E test - Switcher offline - Watch Snapshot:', function () {
     this.timeout(10000);
 
     const switcher = Switcher.factory();
-    Switcher.watchSnapshot(async () => {
-      assert.isFalse(await switcher.isItOn('FF2FOR2030'));
-      done();
+    Switcher.watchSnapshot(() => {
+      switcher.isItOn('FF2FOR2030').then((val) => {
+        assert.isFalse(val);
+        done();
+      });
     });
 
     switcher.isItOn('FF2FOR2030').then((val) => {

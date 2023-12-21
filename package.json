@@ -18,7 +18,8 @@
   "license": "MIT",
   "scripts": {
     "lint": "eslint ./src/ --ext .js",
-    "test": "nyc --reporter=lcov --reporter=text mocha \"./test/**/*.test.js\"",
+    "test": "npm run test-local \"./test/**/*.test.js\"",
+    "test-local": "nyc --reporter=lcov --reporter=text mocha",
     "coverage": "nyc report --reporter=text-lcov"
   },
   "files": [
