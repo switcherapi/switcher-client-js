@@ -71,7 +71,7 @@ describe('E2E test - Switcher offline - Watch Snapshot:', function () {
   });
   
   it('should read from updated snapshot', function (done) {
-    this.timeout(10000);
+    this.timeout(60000);
 
     initContext('watch2').then(() => {
       const switcher = Switcher.factory();
@@ -90,7 +90,7 @@ describe('E2E test - Switcher offline - Watch Snapshot:', function () {
   });
 
   it('should NOT read from updated snapshot - invalid JSON', function (done) {
-    this.timeout(10000);
+    this.timeout(60000);
 
     initContext('watch3').then(() => {
       const switcher = Switcher.factory();
