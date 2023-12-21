@@ -240,7 +240,7 @@ describe('E2E test - Fail response - Snapshot:', function () {
     fetchStub = sinon.stub(fetch, 'Promise');
 
     clientAuth.returns(Promise.resolve({ json: () => generateAuth('[API_KEY]', 5), status: 200 }));
-    given(fetchStub, 0, { status: 429 })
+    given(fetchStub, 0, { status: 429 });
     
     //test
     Switcher.setTestEnabled();
@@ -332,7 +332,7 @@ describe('E2E test - Snapshot AutoUpdater:', function () {
     });
 
     let snapshotUpdated = false;
-    Switcher.scheduleSnapshotAutoUpdate(1, (updated, err) => {
+    Switcher.scheduleSnapshotAutoUpdate(1, (updated) => {
       if (updated != undefined) {
         snapshotUpdated = updated;
       }

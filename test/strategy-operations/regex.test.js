@@ -25,7 +25,7 @@ describe('Processing strategy: [REGEX Safe] ', function() {
     });
 
     this.afterAll(function() {
-        TimedMatch.terminateWorker()
+        TimedMatch.terminateWorker();
     });
 
     it('should agree when expect to exist using EXIST operation', async () => {

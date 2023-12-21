@@ -16,7 +16,7 @@ describe('REGEX - Timed Match', () => {
     beforeEach(() => {
         TimedMatch.clearBlackList();
         TimedMatch.setMaxBlackListed(50);
-        TimedMatch.setMaxTimeLimit(1000)
+        TimedMatch.setMaxTimeLimit(1000);
     });
 
     it('should return true', async function () {
