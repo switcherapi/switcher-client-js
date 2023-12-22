@@ -137,6 +137,12 @@ declare namespace SwitcherClient {
      */
     throttle(delay: number): Switcher;
 
+    /**
+     * Force the use of the remote API when local is enabled
+     *
+     * @param forceRemote default true
+     */
+    remote(forceRemote: boolean): Switcher;
   }
 
   interface SwitcherContext {

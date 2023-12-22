@@ -137,6 +137,14 @@ await switcher
     .isItOn('FEATURE01');
 ```
 
+6. **Hybrid mode**
+Forcing Switchers to resolve remotely can help you define exclusive features that cannot be resolved locally.
+This feature is ideal if you want to run the SDK in local mode but still want to resolve a specific switcher remotely.
+```ts
+const switcher = Switcher.factory();
+await switcher.remote().isItOn('FEATURE01');
+```
+
 ## Built-in mock feature
 You can also bypass your switcher configuration by invoking 'Switcher.assume'. This is perfect for your test code where you want to test both scenarios when the switcher is true and false.
 
