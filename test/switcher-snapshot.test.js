@@ -10,7 +10,7 @@ const services = require('../src/lib/remote');
 const fs = require('fs');
 const { given, givenError, generateAuth, generateStatus } = require('./helper/utils');
 
-describe('E2E test - Switcher offline - Snapshot:', function () {
+describe('E2E test - Switcher local - Snapshot:', function () {
   const apiKey = '[api_key]';
   const domain = 'Business';
   const component = 'business-service';
@@ -38,7 +38,7 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
   beforeEach(function() {
     Switcher.buildContext({ url, apiKey, domain, component, environment }, {
       snapshotLocation: './snapshot/',
-      offline: true,
+      local: true,
       regexSafe: false
     });
 
@@ -61,7 +61,7 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
     //test
     Switcher.buildContext({ url, apiKey, domain, component, environment }, {
       snapshotLocation: 'generated-snapshots/',
-      offline: true,
+      local: true,
       regexSafe: false
     });
     
@@ -85,7 +85,7 @@ describe('E2E test - Switcher offline - Snapshot:', function () {
     //test
     Switcher.buildContext({ url, apiKey, domain, component, environment }, {
       snapshotLocation: 'generated-snapshots/',
-      offline: true,
+      local: true,
       regexSafe: false
     });
     
@@ -225,7 +225,7 @@ describe('E2E test - Fail response - Snapshot:', function () {
 
   beforeEach(function() {
     Switcher.buildContext({ url, apiKey, domain, component, environment }, {
-      offline: true
+      local: true
     });
     Switcher.setTestEnabled();
   });
@@ -300,7 +300,7 @@ describe('E2E test - Snapshot AutoUpdater:', function () {
 
   beforeEach(function() {
     Switcher.buildContext({ url, apiKey, domain, component, environment }, {
-      offline: true
+      local: true
     });
     Switcher.setTestEnabled();
   });
@@ -326,7 +326,7 @@ describe('E2E test - Snapshot AutoUpdater:', function () {
     //test
     Switcher.buildContext({ url, apiKey, domain, component, environment }, {
       snapshotLocation: 'generated-snapshots/',
-      offline: true,
+      local: true,
       regexSafe: false,
       snapshotAutoUpdateInterval: 1
     });
@@ -361,7 +361,7 @@ describe('E2E test - Snapshot AutoUpdater:', function () {
 
     //test
     Switcher.buildContext({ url, apiKey, domain, component, environment }, {
-      offline: true,
+      local: true,
       regexSafe: false
     });
 
@@ -397,7 +397,7 @@ describe('Error Scenarios - Snapshot', function() {
 
   it('should be invalid - Load snapshot was not called', async function () {
     Switcher.buildContext({ url, apiKey, domain, component, environment }, {
-      offline: true, logger: true, regexSafe: false
+      local: true, logger: true, regexSafe: false
     });
     
     const switcher = Switcher.factory();

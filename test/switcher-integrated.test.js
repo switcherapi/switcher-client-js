@@ -103,7 +103,7 @@ describe('Integrated test - Switcher:', function () {
       let switcher = Switcher.factory();
       switcher.throttle(1000);
 
-      const spyPrepare = sinon.spy(switcher, '_executeAsyncOnlineCriteria');
+      const spyPrepare = sinon.spy(switcher, '_executeAsyncRemoteCriteria');
       for (let index = 0; index < 10; index++) {
         assert.isTrue(await switcher.isItOn('FLAG_1'));
       }
@@ -448,23 +448,23 @@ describe('Integrated test - Switcher:', function () {
       });
       
       let switcher = Switcher.factory();
-      const spyOnline = sinon.spy(switcher, '_executeOnlineCriteria');
+      const spyRemote = sinon.spy(switcher, '_executeRemoteCriteria');
 
       // First attempt to reach the API - Since it's configured to use silent mode, it should return true (according to the snapshot)
       givenError(fetchStub, 0, { errno: 'ECONNREFUSED' });
       assert.isTrue(await switcher.isItOn('FF2FOR2030'));
 
       await new Promise(resolve => setTimeout(resolve, 500));
-      // The call below is in silent mode. It is getting the configuration from the offline snapshot again
+      // The call below is in silent mode. It is getting the configuration from the local snapshot again
       assert.isTrue(await switcher.isItOn());
 
       // As the silent mode was configured to retry after 2 seconds, it's still in time, 
-      // therefore, online call was not yet invoked
-      assert.equal(spyOnline.callCount, 0);
+      // therefore, remote call was not yet invoked
+      assert.equal(spyRemote.callCount, 0);
 
       await new Promise(resolve => setTimeout(resolve, 3000));
       
-      // Setup the online mocked response and made it to return false just to make sure it's not fetching from the snapshot
+      // Setup the remote mocked response and made it to return false just to make sure it's not fetching from the snapshot
       given(fetchStub, 0, { status: 200 });
       given(fetchStub, 1, { json: () => generateResult(false), status: 200 });
       
@@ -473,7 +473,7 @@ describe('Integrated test - Switcher:', function () {
       // Auth is async when silent mode is enabled to prevent blocking the execution while the API is not available
       assert.isTrue(await switcher.isItOn());
       assert.isFalse(await switcher.isItOn());
-      assert.equal(spyOnline.callCount, 1);
+      assert.equal(spyRemote.callCount, 1);
     });
 
     it('should throw error if not in silent mode', async function () {

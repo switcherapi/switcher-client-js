@@ -16,16 +16,16 @@ let switcher;
 /**
  * Playground environment for showcasing the API
  */
-async function setupSwitcher(offline) {
-    Switcher.buildContext({ url, apiKey, domain, component, environment }, { offline, logger: true });
+async function setupSwitcher(local) {
+    Switcher.buildContext({ url, apiKey, domain, component, environment }, { local, logger: true });
     await Switcher.loadSnapshot(false, true)
         .then(() => console.log('Snapshot loaded'))
         .catch(() => console.log('Failed to load Snapshot'));
 }
 
-// Requires online API
-const testSimpleAPICall = async (offline) => {
-    await setupSwitcher(offline);
+// Requires remote API
+const testSimpleAPICall = async (local) => {
+    await setupSwitcher(local);
     
     await Switcher.checkSwitchers([SWITCHER_KEY])
         .then(() => console.log('Switcher checked'))
@@ -39,7 +39,7 @@ const testSimpleAPICall = async (offline) => {
     }, 2000);
 };
 
-// Requires online API
+// Requires remote API
 const testThrottledAPICall = async () => {
     setupSwitcher(false);
     
@@ -54,7 +54,7 @@ const testThrottledAPICall = async () => {
     Switcher.unloadSnapshot();
 };
 
-// Requires online API
+// Requires remote API
 const testSnapshotUpdate = async () => {
     setupSwitcher(false);
 
@@ -107,7 +107,7 @@ const testBypasser = async () => {
     Switcher.unloadSnapshot();
 };
 
-// Requires online API
+// Requires remote API
 const testSnapshotAutoload = async () => {
     Switcher.buildContext({ url, apiKey, domain, component, environment: 'generated' });
     await Switcher.loadSnapshot();
@@ -119,7 +119,7 @@ const testSnapshotAutoload = async () => {
     Switcher.unloadSnapshot();
 };
 
-// Requires online API
+// Requires remote API
 const testWatchSnapshot = () => {
     setupSwitcher(true);
     switcher = Switcher.factory();
@@ -129,10 +129,10 @@ const testWatchSnapshot = () => {
         (err) => console.log(err));
 };
 
-// Requires online API
+// Requires remote API
 const testSnapshotAutoUpdate = async () => {
     Switcher.buildContext({ url, apiKey, domain, component, environment }, 
-        { offline: true, logger: true });
+        { local: true, logger: true });
 
     await Switcher.loadSnapshot();
     switcher = Switcher.factory();
