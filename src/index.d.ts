@@ -25,7 +25,7 @@ declare namespace SwitcherClient {
     /**
      * Read snapshot file locally and store in a parsed JSON object
      */
-    static loadSnapshot(watchSnapshot?: boolean, fetchOnline?: boolean): Promise<void>;
+    static loadSnapshot(watchSnapshot?: boolean, fetchRemote?: boolean): Promise<void>;
 
     /**
      * Verifies if the current snapshot file is updated.
@@ -150,7 +150,7 @@ declare namespace SwitcherClient {
   }
 
   interface SwitcherOptions {
-    offline: boolean;
+    local: boolean;
     logger: boolean;
     snapshotLocation: string;
     snapshotAutoUpdateInterval: number;

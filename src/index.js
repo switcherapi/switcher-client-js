@@ -20,7 +20,7 @@ const {
 } = require('./lib/middlewares/check');
 
 const DEFAULT_ENVIRONMENT = 'default';
-const DEFAULT_OFFLINE = false;
+const DEFAULT_LOCAL = false;
 const DEFAULT_LOGGER = false;
 const DEFAULT_TEST_MODE = false;
 
@@ -45,7 +45,7 @@ class Switcher {
     this.options = {
       snapshotAutoUpdateInterval: 0,
       snapshotLocation: options?.snapshotLocation,
-      offline: options?.offline != undefined ? options.offline : DEFAULT_OFFLINE,
+      local: options?.local != undefined ? options.local : DEFAULT_LOCAL,
       logger: options?.logger != undefined ? options.logger : DEFAULT_LOGGER
     };
 
@@ -101,14 +101,14 @@ class Switcher {
     return false;
   }
 
-  static async loadSnapshot(watchSnapshot = false, fecthOnline = false) {
+  static async loadSnapshot(watchSnapshot = false, fecthRemote = false) {
     Switcher.snapshot = loadDomain(
       Switcher.options.snapshotLocation || '', 
       Switcher.context.environment
     );
 
     if (Switcher.snapshot.data.domain.version == 0 && 
-        (fecthOnline || !Switcher.options.offline))
+        (fecthRemote || !Switcher.options.local))
       await Switcher.checkSnapshot();
 
     if (watchSnapshot) {
@@ -162,7 +162,7 @@ class Switcher {
   }
 
   static async checkSwitchers(switcherKeys) {
-    if (Switcher.options.offline && Switcher.snapshot) {
+    if (Switcher.options.local && Switcher.snapshot) {
       checkSwitchersLocal(Switcher.snapshot, switcherKeys);
     } else {
       await Switcher._checkSwitchersRemote(switcherKeys);
@@ -267,7 +267,7 @@ class Switcher {
 
     if (input) { this._input = input; }
 
-    if (!Switcher.options.offline) {
+    if (!Switcher.options.local) {
       await Switcher._auth();
     }
   }
@@ -312,7 +312,7 @@ class Switcher {
     } 
     
     // verify if query from snapshot
-    if (Switcher.options.offline) {
+    if (Switcher.options.local) {
       result = await this._executeOfflineCriteria();
     } else {
       try {
@@ -320,7 +320,7 @@ class Switcher {
         if (Switcher.context.token === 'SILENT') {
           result = await this._executeOfflineCriteria();
         } else {
-          result = await this._executeOnlineCriteria(showReason);
+          result = await this._executeRemoteCriteria(showReason);
         }
       } catch (e) {
         if (Switcher.options.silentMode) {
@@ -344,9 +344,9 @@ class Switcher {
     return this;
   }
 
-  async _executeOnlineCriteria(showReason) {
+  async _executeRemoteCriteria(showReason) {
     if (!this._useSync())
-      return this._executeAsyncOnlineCriteria(showReason);
+      return this._executeAsyncRemoteCriteria(showReason);
 
     const responseCriteria = await services.checkCriteria(
       Switcher.context, this._key, this._input, showReason);
@@ -357,7 +357,7 @@ class Switcher {
     return responseCriteria.result;
   }
 
-  async _executeAsyncOnlineCriteria(showReason) {
+  async _executeAsyncRemoteCriteria(showReason) {
     if (this._nextRun < Date.now()) {
       this._nextRun = Date.now() + this._delay;
       services.checkCriteria(Switcher.context, this._key, this._input, showReason)

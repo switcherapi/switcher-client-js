@@ -6,7 +6,7 @@ const assert = chai.assert;
 const { Switcher } = require('../src/index');
 const fs = require('fs');
 
-describe('E2E test - Switcher offline - Watch Snapshot:', function () {
+describe('E2E test - Switcher local - Watch Snapshot:', function () {
   const domain = 'Business';
   const component = 'business-service';
   let devJSON;
@@ -16,7 +16,7 @@ describe('E2E test - Switcher offline - Watch Snapshot:', function () {
 
     Switcher.buildContext({ domain, component, environment }, {
       snapshotLocation: 'generated-snapshots/',
-      offline: true,
+      local: true,
       regexSafe: false
     });
 

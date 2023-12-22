@@ -6,7 +6,7 @@ const assert = chai.assert;
 const { Switcher, checkValue, checkNetwork, checkPayload, checkRegex } = require('../src/index');
 const { StrategiesType } = require('../src/lib/snapshot');
 
-describe('E2E test - Switcher offline:', function () {
+describe('E2E test - Switcher local:', function () {
   let switcher;
 
   const contextSettings = {
@@ -19,7 +19,7 @@ describe('E2E test - Switcher offline:', function () {
 
   const options = {
     snapshotLocation: './snapshot/',
-    offline: true, 
+    local: true, 
     logger: true, 
     regexMaxBlackList: 1, 
     regexMaxTimeLimit: 500
@@ -185,7 +185,7 @@ describe('E2E test - Switcher offline:', function () {
   it('should enable test mode which will prevent a snapshot to be watchable', async function () {
     //given
     Switcher.buildContext(contextSettings, {
-      offline: true, logger: true, regexSafe: false
+      local: true, logger: true, regexSafe: false
     });
 
     switcher = Switcher.factory();
@@ -201,7 +201,7 @@ describe('E2E test - Switcher offline:', function () {
     this.timeout(3000);
 
     Switcher.buildContext(contextSettings, {
-      offline: true,
+      local: true,
       regexSafe: false,
       snapshotLocation: '//somewhere/'
     });
@@ -215,7 +215,7 @@ describe('E2E test - Switcher offline:', function () {
     this.timeout(3000);
 
     Switcher.buildContext(contextSettings, {
-      offline: true,
+      local: true,
       regexSafe: false,
       snapshotLocation: 'generated-snapshots/'
     });
