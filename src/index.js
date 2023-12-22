@@ -31,6 +31,7 @@ class Switcher {
     this._nextRun = 0;
     this._input = undefined;
     this._key = '';
+    this._forceRemote = false;
   }
 
   static buildContext(context, options) {
@@ -101,14 +102,14 @@ class Switcher {
     return false;
   }
 
-  static async loadSnapshot(watchSnapshot = false, fecthRemote = false) {
+  static async loadSnapshot(watchSnapshot = false, fetchRemote = false) {
     Switcher.snapshot = loadDomain(
       Switcher.options.snapshotLocation || '', 
       Switcher.context.environment
     );
 
     if (Switcher.snapshot.data.domain.version == 0 && 
-        (fecthRemote || !Switcher.options.local))
+        (fetchRemote || !Switcher.options.local))
       await Switcher.checkSnapshot();
 
     if (watchSnapshot) {
@@ -267,7 +268,7 @@ class Switcher {
 
     if (input) { this._input = input; }
 
-    if (!Switcher.options.local) {
+    if (!Switcher.options.local || this._forceRemote) {
       await Switcher._auth();
     }
   }
@@ -312,7 +313,7 @@ class Switcher {
     } 
     
     // verify if query from snapshot
-    if (Switcher.options.local) {
+    if (Switcher.options.local && !this._forceRemote) {
       result = await this._executeOfflineCriteria();
     } else {
       try {
@@ -341,6 +342,15 @@ class Switcher {
     if (delay > 0)
       Switcher.options.logger = true;
 
+    return this;
+  }
+
+  remote(forceRemote = true) {
+    if (!Switcher.options.local) {
+      throw new Error('Local mode is not enabled');
+    }
+    
+    this._forceRemote = forceRemote;
     return this;
   }
 
