@@ -2,7 +2,6 @@
 /generated-snapshots
 
 *.idea
-*.vscode
 *.coveralls*
 coverage.html
 coverage
