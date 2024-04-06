@@ -1,10 +1,9 @@
-import { assert as _assert } from 'chai';
-const assert = _assert;
-
+import { assert } from 'chai';
 import { stub } from 'sinon';
-import { Switcher } from '../src/index.js';
-import fetch from 'node-fetch';
 import { readFileSync, unlinkSync, existsSync } from 'fs';
+
+import { Switcher } from '../src/index.js';
+import FetchFacade from '../src/lib/utils/fetchFacade.js';
 import { given, givenError, generateAuth, generateStatus, assertReject, assertResolve } from './helper/utils.js';
 
 describe('E2E test - Switcher local - Snapshot:', function () {
@@ -44,7 +43,7 @@ describe('E2E test - Switcher local - Snapshot:', function () {
 
   it('should update snapshot', async function () {
     //given
-    fetchStub = stub(fetch, 'Promise');
+    fetchStub = stub(FetchFacade, 'fetch');
 
     given(fetchStub, 0, { json: () => generateAuth('[auth_token]', 5), status: 200 });
     given(fetchStub, 1, { json: () => generateStatus(false), status: 200 }); // Snapshot outdated
@@ -67,7 +66,7 @@ describe('E2E test - Switcher local - Snapshot:', function () {
 
   it('should update snapshot - store file', async function () {
     //given
-    fetchStub = stub(fetch, 'Promise');
+    fetchStub = stub(FetchFacade, 'fetch');
 
     given(fetchStub, 0, { json: () => generateAuth('[auth_token]', 5), status: 200 });
     given(fetchStub, 1, { json: () => generateStatus(false), status: 200 }); // Snapshot outdated
@@ -90,7 +89,7 @@ describe('E2E test - Switcher local - Snapshot:', function () {
 
   it('should NOT update snapshot', async function () {
     //given
-    fetchStub = stub(fetch, 'Promise');
+    fetchStub = stub(FetchFacade, 'fetch');
 
     given(fetchStub, 0, { json: () => generateAuth('[auth_token]', 5), status: 200 });
     given(fetchStub, 1, { json: () => generateStatus(true), status: 200 }); // No available update
@@ -104,7 +103,7 @@ describe('E2E test - Switcher local - Snapshot:', function () {
     this.timeout(3000);
 
     //given
-    fetchStub = stub(fetch, 'Promise');
+    fetchStub = stub(FetchFacade, 'fetch');
 
     given(fetchStub, 0, { json: () => generateAuth('[auth_token]', 5), status: 200 });
     givenError(fetchStub, 1, { errno: 'ECONNREFUSED' });
@@ -118,7 +117,7 @@ describe('E2E test - Switcher local - Snapshot:', function () {
 
   it('should NOT update snapshot - resolve Snapshot Error', async function () {
     //given
-    fetchStub = stub(fetch, 'Promise');
+    fetchStub = stub(FetchFacade, 'fetch');
 
     given(fetchStub, 0, { json: () => generateAuth('[auth_token]', 5), status: 200 });
     given(fetchStub, 1, { json: () => generateStatus(false), status: 200 }); // Snapshot outdated
@@ -133,7 +132,7 @@ describe('E2E test - Switcher local - Snapshot:', function () {
 
   it('should NOT check snapshot with success - Snapshot not loaded', async function () {
     //given
-    fetchStub = stub(fetch, 'Promise');
+    fetchStub = stub(FetchFacade, 'fetch');
 
     given(fetchStub, 0, { json: () => generateAuth('[auth_token]', 5), status: 200 });
     given(fetchStub, 1, { json: () => generateStatus(true), status: 200 });
@@ -155,7 +154,7 @@ describe('E2E test - Switcher local - Snapshot:', function () {
 
   it('should update snapshot', async function () {
     //given
-    fetchStub = stub(fetch, 'Promise');
+    fetchStub = stub(FetchFacade, 'fetch');
 
     given(fetchStub, 0, { json: () => generateAuth('[auth_token]', 5), status: 200 });
     given(fetchStub, 1, { json: () => generateStatus(false), status: 200 }); // Snapshot outdated
@@ -218,7 +217,7 @@ describe('E2E test - Fail response - Snapshot:', function () {
 
   it('should NOT update snapshot - Too many requests at checkSnapshotVersion', async function () {
     //given
-    fetchStub = stub(fetch, 'Promise');
+    fetchStub = stub(FetchFacade, 'fetch');
 
     given(fetchStub, 0, { json: () => generateAuth('[auth_token]', 5), status: 200 });
     given(fetchStub, 1, { status: 429 });
@@ -232,7 +231,7 @@ describe('E2E test - Fail response - Snapshot:', function () {
 
   it('should NOT update snapshot - Too many requests at resolveSnapshot', async function () {
     //given
-    fetchStub = stub(fetch, 'Promise');
+    fetchStub = stub(FetchFacade, 'fetch');
 
     given(fetchStub, 0, { json: () => generateAuth('[auth_token]', 5), status: 200 });
     given(fetchStub, 1, { json: () => generateStatus(false), status: 200 }); // Snapshot outdated
@@ -290,7 +289,7 @@ describe('E2E test - Snapshot AutoUpdater:', function () {
     this.timeout(3000);
 
     //given
-    fetchStub = stub(fetch, 'Promise');
+    fetchStub = stub(FetchFacade, 'fetch');
 
     given(fetchStub, 0, { json: () => generateAuth('[auth_token]', 5), status: 200 });
     given(fetchStub, 1, { json: () => generateStatus(false), status: 200 }); // Loading current version
@@ -326,7 +325,7 @@ describe('E2E test - Snapshot AutoUpdater:', function () {
 
   it('should NOT auto update snapshot ', async function () {
     this.timeout(3000);
-    fetchStub = stub(fetch, 'Promise');
+    fetchStub = stub(FetchFacade, 'fetch');
 
     //given
     given(fetchStub, 0, { json: () => generateAuth('[auth_token]', 5), status: 200 });

@@ -1,7 +1,7 @@
 import fs from 'fs';
-import fetch from 'node-fetch';
 import { Agent } from 'https';
 import { AuthError, CheckSwitcherError, CriteriaError, SnapshotServiceError } from './exceptions/index.js';
+import FetchFacade from './utils/fetchFacade.js';
 
 let httpClient;
 
@@ -46,7 +46,7 @@ export function getEntry(input) {
 
 export async function checkAPIHealth(url) {
     try {
-        const response = await fetch(`${url}/check`, { method: 'get', agent: httpClient });
+        const response = await FetchFacade.fetch(`${url}/check`, { method: 'get', agent: httpClient });
         return response.status == 200;
     } catch (e) {
         return false;
@@ -56,7 +56,7 @@ export async function checkAPIHealth(url) {
 export async function checkCriteria({ url, token }, key, input, showReason = false) {
     try {
         const entry = getEntry(input);
-        const response = await fetch(`${url}/criteria?showReason=${showReason}&key=${key}`, {
+        const response = await FetchFacade.fetch(`${url}/criteria?showReason=${showReason}&key=${key}`, {
             method: 'post',
             body: JSON.stringify({ entry }),
             headers: getHeader(token),
@@ -75,7 +75,7 @@ export async function checkCriteria({ url, token }, key, input, showReason = fal
 
 export async function auth({ url, apiKey, domain, component, environment }) {
     try {
-        const response = await fetch(`${url}/criteria/auth`, {
+        const response = await FetchFacade.fetch(`${url}/criteria/auth`, {
             method: 'post',
             body: JSON.stringify({
                 domain,
@@ -101,7 +101,7 @@ export async function auth({ url, apiKey, domain, component, environment }) {
 
 export async function checkSwitchersRemote(url, token, switcherKeys) {
     try {
-        const response = await fetch(`${url}/criteria/switchers_check`, {
+        const response = await FetchFacade.fetch(`${url}/criteria/switchers_check`, {
             method: 'post',
             body: JSON.stringify({ switchers: switcherKeys }),
             headers: getHeader(token),
@@ -122,7 +122,7 @@ export async function checkSwitchersRemote(url, token, switcherKeys) {
 
 export async function checkSnapshotVersion(url, token, version) {
     try {
-        const response = await fetch(`${url}/criteria/snapshot_check/${version}`, {
+        const response = await FetchFacade.fetch(`${url}/criteria/snapshot_check/${version}`, {
             method: 'get',
             headers: getHeader(token),
             agent: httpClient
@@ -155,7 +155,7 @@ export async function resolveSnapshot(url, token, domain, environment, component
         };
 
     try {
-        const response = await fetch(`${url}/graphql`, {
+        const response = await FetchFacade.fetch(`${url}/graphql`, {
             method: 'post',
             body: JSON.stringify(data),
             headers: getHeader(token),
