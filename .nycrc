@@ -1,6 +1,6 @@
 {
     "all": true,
-    "exclude": ["test"],
+    "exclude": ["test", "src/lib/utils/fetchFacade.js"],
     "output": "reports",
     "reporter" : [
         "html",

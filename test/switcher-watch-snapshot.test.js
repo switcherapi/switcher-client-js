@@ -1,8 +1,7 @@
-import { assert as _assert } from 'chai';
-const assert = _assert;
+import { assert } from 'chai';
+import { writeFileSync, existsSync, mkdirSync, readFileSync, unlinkSync } from 'fs';
 
 import { Switcher } from '../src/index.js';
-import { writeFileSync, existsSync, mkdirSync, readFileSync, unlinkSync } from 'fs';
 
 describe('E2E test - Switcher local - Watch Snapshot:', function () {
   const domain = 'Business';

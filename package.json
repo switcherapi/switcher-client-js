@@ -19,6 +19,7 @@
   "license": "MIT",
   "scripts": {
     "lint": "eslint ./src/ --ext .js",
+    "test-local": "mocha",
     "test": "npm run coverage \"./test/**/*.test.js\"",
     "coverage": "c8 --include='src/**/*.js' mocha"
   },
@@ -28,7 +29,7 @@
     "src/"
   ],
   "dependencies": {
-    "node-fetch": "^2.7.0"
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^7.5.0",

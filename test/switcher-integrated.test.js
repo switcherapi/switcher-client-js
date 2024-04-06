@@ -1,9 +1,8 @@
-import { assert as _assert } from 'chai';
-const assert = _assert;
-
+import { assert } from 'chai';
 import { stub, spy } from 'sinon';
-import fetch from 'node-fetch';
 import { unwatchFile } from 'fs';
+
+import FetchFacade from '../src/lib/utils/fetchFacade.js';
 import { Switcher, checkValue, checkNetwork, checkDate, checkTime, checkRegex, checkNumeric, checkPayload } from '../src/index.js';
 import { given, givenError, throws, generateAuth, generateResult, assertReject, assertResolve } from './helper/utils.js';
 
@@ -32,7 +31,7 @@ describe('Integrated test - Switcher:', function () {
     let fetchStub;
 
     beforeEach(function() {
-      fetchStub = stub(fetch, 'Promise');
+      fetchStub = stub(FetchFacade, 'fetch');
     });
   
     afterEach(function() {
@@ -109,7 +108,7 @@ describe('Integrated test - Switcher:', function () {
     };
 
     beforeEach(function() {
-      fetchStub = stub(fetch, 'Promise');
+      fetchStub = stub(FetchFacade, 'fetch');
     });
   
     afterEach(function() {
@@ -156,7 +155,7 @@ describe('Integrated test - Switcher:', function () {
     let fetchStub;
 
     beforeEach(function() {
-      fetchStub = stub(fetch, 'Promise');
+      fetchStub = stub(FetchFacade, 'fetch');
     });
   
     afterEach(function() {
@@ -219,7 +218,7 @@ describe('Integrated test - Switcher:', function () {
     let fetchStub;
 
     beforeEach(function() {
-      fetchStub = stub(fetch, 'Promise');
+      fetchStub = stub(FetchFacade, 'fetch');
     });
   
     afterEach(function() {
@@ -505,7 +504,7 @@ describe('Integrated test - Switcher:', function () {
     it('should throw error if not in silent mode', async function () {
       // given
       fetchStub.restore();
-      fetchStub = stub(fetch, 'Promise');
+      fetchStub = stub(FetchFacade, 'fetch');
       throws(fetchStub, { errno: 'ECONNREFUSED' });
 
       // test
