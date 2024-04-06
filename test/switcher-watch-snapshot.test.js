@@ -54,17 +54,15 @@ describe('E2E test - Switcher local - Watch Snapshot:', function () {
   it('should read from snapshot - without watching', function (done) {
     this.timeout(10000);
 
-    initContext('watch1').then(() => {
+    initContext('watch1').then(async () => {
       const switcher = Switcher.factory();
-      switcher.isItOn('FF2FOR2030').then((val1) => {
-        assert.isTrue(val1);
-        updateSwitcher('watch1', false);
+      const result1 = await switcher.isItOn('FF2FOR2030');
+      assert.isTrue(result1);
 
-        switcher.isItOn('FF2FOR2030').then((val2) => {
-          assert.isTrue(val2);
-          done();
-        });
-      });
+      updateSwitcher('watch1', false);
+      const result2 = await switcher.isItOn('FF2FOR2030');
+      assert.isTrue(result2);
+      done();
     });
   });
   
@@ -73,18 +71,16 @@ describe('E2E test - Switcher local - Watch Snapshot:', function () {
 
     initContext('watch2').then(() => {
       const switcher = Switcher.factory();
-      Switcher.watchSnapshot(() => {
-        switcher.isItOn('FF2FOR2030').then((val) => {
-          assert.isFalse(val);
-          done();
-        });
+      Switcher.watchSnapshot(async () => {
+        const result = await switcher.isItOn('FF2FOR2030');
+        assert.isFalse(result);
+        done();
       });
-      
-      setTimeout(() => {
-        switcher.isItOn('FF2FOR2030').then((val) => {
-          assert.isTrue(val);
-          updateSwitcher('watch2', false);
-        });
+
+      setTimeout(async () => {
+        const result = await switcher.isItOn('FF2FOR2030');
+        assert.isTrue(result);
+        updateSwitcher('watch2', false);
       }, 1000);
     });
   });
@@ -100,12 +96,14 @@ describe('E2E test - Switcher local - Watch Snapshot:', function () {
       });
 
       setTimeout(() => {
-        switcher.isItOn('FF2FOR2030').then((val) => {
-          assert.isTrue(val);
-          invalidateJSON('watch3');
-        });
+        switcher.isItOn('FF2FOR2030').then(handleValue);
       }, 1000);
     });
+
+    function handleValue(result) {
+      assert.isTrue(result);
+      invalidateJSON('watch3');
+    }
   });
 
 });
