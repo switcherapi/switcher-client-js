@@ -125,9 +125,9 @@ declare namespace SwitcherClient {
      * 
      * @param key 
      * @param input 
-     * @param showReason
+     * @param showDetail (returns ResultDetail object)
      */
-    isItOn(key?: string, input?: string[], showReason?: boolean): Promise<boolean>;
+    isItOn(key?: string, input?: string[], showDetail?: boolean): Promise<boolean | ResultDetail>;
 
     /**
      * Configure the time elapsed between each call to the API.
@@ -143,6 +143,12 @@ declare namespace SwitcherClient {
      * @param forceRemote default true
      */
     remote(forceRemote: boolean): Switcher;
+  }
+
+  interface ResultDetail {
+    result: boolean;
+    reason: string;
+    metadata: any;
   }
 
   interface SwitcherContext {

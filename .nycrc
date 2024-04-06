@@ -1,6 +1,6 @@
 {
     "all": true,
-    "exclude": ["test", "src/lib/utils/fetchFacade.js"],
+    "exclude": ["test", "src/lib/utils/timed-match/match-proc.js", "src/lib/utils/fetchFacade.js"],
     "output": "reports",
     "reporter" : [
         "html",

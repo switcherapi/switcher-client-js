@@ -5,18 +5,16 @@ import DateMoment from './lib/utils/datemoment.js';
 import SnapshotAutoUpdater from './lib/utils/snapshotAutoUpdater.js';
 import { loadDomain, validateSnapshot, checkSwitchersLocal } from './lib/snapshot.js';
 import { SnapshotNotFoundError } from './lib/exceptions/index.js';
-import { setCerts, checkSwitchersRemote, auth, checkAPIHealth, checkCriteria } from './lib/remote.js';
-import checkCriteriaOffline from './lib/resolver.js';
+import * as services from './lib/remote.js';
+import checkCriteriaLocal from './lib/resolver.js';
 import { writeFileSync, watchFile, unwatchFile } from 'fs';
-
-import { checkDate, checkNetwork, checkNumeric, checkRegex, checkTime, checkValue, checkPayload } from './lib/middlewares/check.js';
 
 const DEFAULT_ENVIRONMENT = 'default';
 const DEFAULT_LOCAL = false;
 const DEFAULT_LOGGER = false;
 const DEFAULT_TEST_MODE = false;
 
-class Switcher {
+export class Switcher {
 
   constructor() {
     this._delay = 0;
@@ -49,7 +47,7 @@ class Switcher {
 
   static _buildOptions(options) {
     if ('certPath' in options && options.certPath) {
-      setCerts(options.certPath);
+      services.setCerts(options.certPath);
     }
 
     if ('silentMode' in options && options.silentMode) {
@@ -165,7 +163,7 @@ class Switcher {
   static async _checkSwitchersRemote(switcherKeys) {
     try {
       await Switcher._auth();
-      await checkSwitchersRemote(Switcher.context.url, Switcher.context.token, switcherKeys);
+      await services.checkSwitchersRemote(Switcher.context.url, Switcher.context.token, switcherKeys);
     } catch (e) {
       if (Switcher.options.silentMode) {
         checkSwitchersLocal(Switcher.snapshot, switcherKeys);
@@ -199,7 +197,7 @@ class Switcher {
   }
 
   static async _auth() {
-    const response = await auth(Switcher.context);
+    const response = await services.auth(Switcher.context);
     Switcher.context.token = response.token;
     Switcher.context.exp = response.exp;
   }
@@ -211,7 +209,7 @@ class Switcher {
 
     if (Switcher._isTokenExpired()) {
       Switcher._updateSilentToken();
-      checkAPIHealth(Switcher.context.url || '').then((isAlive) => {
+      services.checkAPIHealth(Switcher.context.url || '').then((isAlive) => {
         if (isAlive) {
           Switcher._auth();
         }
@@ -294,7 +292,7 @@ class Switcher {
     }
   }
 
-  async isItOn(key, input, showReason = false) {
+  async isItOn(key, input, showDetail = false) {
     let result;
     this._validateArgs(key, input);
 
@@ -306,19 +304,19 @@ class Switcher {
     
     // verify if query from snapshot
     if (Switcher.options.local && !this._forceRemote) {
-      result = await this._executeOfflineCriteria();
+      result = await this._executeLocalCriteria();
     } else {
       try {
         await this.validate();
         if (Switcher.context.token === 'SILENT') {
-          result = await this._executeOfflineCriteria();
+          result = await this._executeLocalCriteria();
         } else {
-          result = await this._executeRemoteCriteria(showReason);
+          result = await this._executeRemoteCriteria(showDetail);
         }
       } catch (e) {
         if (Switcher.options.silentMode) {
           Switcher._updateSilentToken();
-          return this._executeOfflineCriteria();
+          return this._executeLocalCriteria();
         }
 
         throw e;
@@ -331,8 +329,9 @@ class Switcher {
   throttle(delay) {
     this._delay = delay;
 
-    if (delay > 0)
+    if (delay > 0) {
       Switcher.options.logger = true;
+    }
 
     return this;
   }
@@ -346,24 +345,29 @@ class Switcher {
     return this;
   }
 
-  async _executeRemoteCriteria(showReason) {
-    if (!this._useSync())
-      return this._executeAsyncRemoteCriteria(showReason);
+  async _executeRemoteCriteria(showDetail) {
+    if (!this._useSync()) {
+      return this._executeAsyncRemoteCriteria(showDetail);
+    }
 
-    const responseCriteria = await checkCriteria(
-      Switcher.context, this._key, this._input, showReason);
+    const responseCriteria = await services.checkCriteria(
+      Switcher.context, this._key, this._input, showDetail);
     
     if (Switcher.options.logger) {
       ExecutionLogger.add(responseCriteria, this._key, this._input);
     }
 
+    if (showDetail) {
+      return responseCriteria;
+    }
+
     return responseCriteria.result;
   }
 
-  async _executeAsyncRemoteCriteria(showReason) {
+  async _executeAsyncRemoteCriteria(showDetail) {
     if (this._nextRun < Date.now()) {
       this._nextRun = Date.now() + this._delay;
-      checkCriteria(Switcher.context, this._key, this._input, showReason)
+      services.checkCriteria(Switcher.context, this._key, this._input, showDetail)
         .then(response => ExecutionLogger.add(response, this._key, this._input));
     }
 
@@ -377,12 +381,12 @@ class Switcher {
 
     Switcher._checkHealth();
     if (Switcher._isTokenExpired()) {
-        await this.prepare(this._key, this._input);
+      await this.prepare(this._key, this._input);
     }
   }
 
-  async _executeOfflineCriteria() {
-    const response = await checkCriteriaOffline(
+  async _executeLocalCriteria() {
+    const response = await checkCriteriaLocal(
       this._key, this._input, Switcher.snapshot);
 
     if (Switcher.options.logger) {
@@ -402,14 +406,3 @@ class Switcher {
   }
 
 }
-
-export { 
-  Switcher,
-  checkDate,
-  checkNetwork,
-  checkNumeric,
-  checkRegex,
-  checkTime,
-  checkValue,
-  checkPayload
-};

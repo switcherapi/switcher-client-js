@@ -3,8 +3,8 @@ import { stub, spy } from 'sinon';
 import { unwatchFile } from 'fs';
 
 import FetchFacade from '../src/lib/utils/fetchFacade.js';
-import { Switcher, checkValue, checkNetwork, checkDate, checkTime, checkRegex, checkNumeric, checkPayload } from '../src/index.js';
-import { given, givenError, throws, generateAuth, generateResult, assertReject, assertResolve } from './helper/utils.js';
+import { Switcher, checkValue, checkNetwork, checkDate, checkTime, checkRegex, checkNumeric, checkPayload } from '../switcher-client.js';
+import { given, givenError, throws, generateAuth, generateResult, assertReject, assertResolve, generateDetailedResult } from './helper/utils.js';
 
 describe('Integrated test - Switcher:', function () {
 
@@ -137,6 +137,27 @@ describe('Integrated test - Switcher:', function () {
       await Switcher.loadSnapshot();
       assert.isFalse(await switcher.remote().isItOn('FF2FOR2030'));
       assert.equal(executeRemoteCriteria.callCount, 1);
+    });
+
+    it('should return true - including reason and metadata', async function () {
+      // given API responding properly
+      given(fetchStub, 0, { json: () => generateAuth('[auth_token]', 5), status: 200 });
+      given(fetchStub, 1, { json: () => generateDetailedResult({ 
+        result: true, 
+        reason: 'Success',
+        metadata: { 
+          user: 'user1',
+        }
+      }), status: 200 });
+
+      // test
+      Switcher.buildContext(contextSettings);
+
+      const switcher = Switcher.factory();
+      const detailedResult = await switcher.isItOn('FF2FOR2030', undefined, true);
+      assert.isTrue(detailedResult.result);
+      assert.equal(detailedResult.reason, 'Success');
+      assert.equal(detailedResult.metadata.user, 'user1');
     });
 
     it('should return error when local is not enabled', async function () {

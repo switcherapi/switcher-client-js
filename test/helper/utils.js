@@ -47,3 +47,7 @@ export const generateResult = (result) => {
     result
   };
 };
+
+export const generateDetailedResult = (detailedResult) => {
+  return detailedResult;
+};
