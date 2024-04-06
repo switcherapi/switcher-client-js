@@ -1,5 +1,5 @@
-const assert = require('chai').assert;
-const TimedMatch = require('../../src/lib/utils/timed-match');
+import { assert } from 'chai';
+import TimedMatch from '../../src/lib/utils/timed-match/index.js';
 
 const okRE = '[a-z]';
 const okInput = 'a';

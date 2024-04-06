@@ -1,10 +1,11 @@
 {
   "name": "switcher-client",
-  "version": "3.2.1",
+  "version": "4.0.0",
   "description": "Client JS SDK for working with Switcher-API",
   "main": "./src/index.js",
+  "type": "module",
   "types": "./src/index.d.ts",
-    "author": {
+  "author": {
     "name": "Roger Floriano",
     "email": "switcher.project@gmail.com",
     "url": "https://github.com/petruki"
@@ -18,9 +19,8 @@
   "license": "MIT",
   "scripts": {
     "lint": "eslint ./src/ --ext .js",
-    "test": "npm run test-local \"./test/**/*.test.js\"",
-    "test-local": "nyc --reporter=lcov --reporter=text mocha",
-    "coverage": "nyc report --reporter=text-lcov"
+    "test": "npm run coverage \"./test/**/*.test.js\"",
+    "coverage": "c8 --include='src/**/*.js' mocha"
   },
   "files": [
     "LICENSE",
@@ -31,15 +31,14 @@
     "node-fetch": "^2.7.0"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^7.1.0",
-    "@typescript-eslint/parser": "^7.1.0",
+    "@typescript-eslint/eslint-plugin": "^7.5.0",
+    "@typescript-eslint/parser": "^7.5.0",
     "babel-eslint": "^10.1.0",
-    "chai": "^4.4.1",
-    "chai-as-promised": "^7.1.1",
+    "c8": "^9.1.0",
+    "chai": "^5.1.0",
     "eslint": "^8.57.0",
-    "mocha": "^10.3.0",
+    "mocha": "^10.4.0",
     "mocha-sonarqube-reporter": "^1.0.2",
-    "nyc": "^15.1.0",
     "sinon": "^17.0.1"
   },
   "repository": {
@@ -50,6 +49,6 @@
     "access": "public"
   },
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=16.0.0"
   }
 }

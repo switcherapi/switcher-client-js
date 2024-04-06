@@ -1,4 +1,4 @@
-class SnapshotAutoUpdater {
+export default class SnapshotAutoUpdater {
     static _worker = undefined;
 
     static schedule(interval, checkSnapshot, callback) {
@@ -25,5 +25,3 @@ class SnapshotAutoUpdater {
         clearInterval(this._worker);
     }
 }
-
-module.exports = SnapshotAutoUpdater;

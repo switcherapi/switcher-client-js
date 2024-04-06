@@ -1,2 +1,10 @@
-// eslint-disable-next-line no-undef
-window.Switcher = require('./src/index');
+export { 
+    Switcher,
+    checkDate,
+    checkNetwork,
+    checkNumeric,
+    checkRegex,
+    checkTime,
+    checkValue,
+    checkPayload
+  } from './src/index.js';

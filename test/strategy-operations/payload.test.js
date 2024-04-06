@@ -1,11 +1,7 @@
-const assert = require('chai').assert;
+import { assert } from 'chai';
 
-const {
-    processOperation,
-    StrategiesType,
-    OperationsType
-} = require('../../src/lib/snapshot');
-const { payloadReader } = require('../../src/lib/utils/payloadReader');
+import { processOperation, StrategiesType, OperationsType } from '../../src/lib/snapshot.js';
+import { payloadReader } from '../../src/lib/utils/payloadReader.js';
 
 describe('Processing strategy: PAYLOAD', () => {
 

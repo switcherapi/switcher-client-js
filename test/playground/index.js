@@ -1,15 +1,15 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-console */
 
-const { checkNumeric } = require('../../src');
-const { Switcher, checkValue, checkNetwork } = require('../../src/index');
+import { Switcher, checkValue, checkNumeric } from '../../src/index.js';
 
 const SWITCHER_KEY = 'MY_SWITCHER';
 const apiKey = 'JDJiJDA4JEFweTZjSTR2bE9pUjNJOUYvRy9raC4vRS80Q2tzUnk1d3o1aXFmS2o5eWJmVW11cjR0ODNT';
 const domain = 'Playground';
 const component = 'switcher-playground';
 const environment = 'default';
-const url = 'https://switcherapi.com/api';
+const url = 'https://api.switcherapi.com';
+const snapshotLocation = './snapshot/';
 
 let switcher;
 
@@ -18,13 +18,41 @@ let switcher;
  */
 async function setupSwitcher(local) {
     Switcher.buildContext({ url, apiKey, domain, component, environment }, { local, logger: true });
-    await Switcher.loadSnapshot(false, true)
-        .then(() => console.log('Snapshot loaded'))
+    await Switcher.loadSnapshot(false, local)
+        .then(version => console.log('Snapshot loaded - version:', version))
         .catch(() => console.log('Failed to load Snapshot'));
 }
 
+/**
+ * This code snippet is a minimal example of how to configure and use Switcher4Deno locally.
+ * No remote API account is required.
+ * 
+ * Snapshot is loaded from file at test/playground/snapshot/local.json
+ */
+const _testLocal = async () => {
+    Switcher.buildContext({ 
+        domain: 'Local Playground', 
+        environment: 'local' 
+    }, { 
+        snapshotLocation: './snapshot/', 
+        local: true
+    });
+
+    await Switcher.loadSnapshot()
+        .then(version => console.log('Snapshot loaded - version:', version))
+        .catch(() => console.log('Failed to load Snapshot'));
+
+    switcher = Switcher.factory();
+
+    setInterval(async () => {
+        const time = Date.now();
+        const result = await switcher.isItOn(SWITCHER_KEY);
+        console.log(`- ${Date.now() - time} ms - ${result}`);
+    }, 1000);
+};
+
 // Requires remote API
-const testSimpleAPICall = async (local) => {
+const _testSimpleAPICall = async (local) => {
     await setupSwitcher(local);
     
     await Switcher.checkSwitchers([SWITCHER_KEY])
@@ -32,15 +60,16 @@ const testSimpleAPICall = async (local) => {
         .catch(error => console.log(error));
 
     switcher = Switcher.factory();
+
     setInterval(async () => {
         const time = Date.now();
         const result = await switcher.isItOn(SWITCHER_KEY);
         console.log(`- ${Date.now() - time} ms - ${result}`);
-    }, 2000);
+    }, 1000);
 };
 
 // Requires remote API
-const testThrottledAPICall = async () => {
+const _testThrottledAPICall = async () => {
     setupSwitcher(false);
     
     await Switcher.checkSwitchers([SWITCHER_KEY]);
@@ -48,55 +77,45 @@ const testThrottledAPICall = async () => {
     switcher = Switcher.factory();
     switcher.throttle(1000);
 
-    for (let index = 0; index < 10; index++)
+    for (let index = 0; index < 10; index++) {
         console.log(`Call #${index} - ${await switcher.isItOn(SWITCHER_KEY, [checkNumeric('1')])}}`);
+    }
 
     Switcher.unloadSnapshot();
 };
 
 // Requires remote API
-const testSnapshotUpdate = async () => {
+const _testSnapshotUpdate = async () => {
     setupSwitcher(false);
-
-    switcher = Switcher.factory();
-    let result = await switcher.isItOn(SWITCHER_KEY);
-    console.log(result);
+    await new Promise(resolve => setTimeout(resolve, 2000));
     
-    await Switcher.checkSnapshot();
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    result = await switcher.isItOn(SWITCHER_KEY);
-    console.log(result);
+    switcher = Switcher.factory();
+    console.log('checkSnapshot:', await Switcher.checkSnapshot());
 
     Switcher.unloadSnapshot();
 };
 
-const testAsyncCall = async () => {
+const _testAsyncCall = async () => {
     setupSwitcher(true);
     switcher = Switcher.factory();
 
-    let result = await switcher.isItOn(SWITCHER_KEY);
-    console.log(result);
+    console.log('Sync:', await switcher.isItOn(SWITCHER_KEY));
 
     switcher.isItOn(SWITCHER_KEY)
         .then(res => console.log('Promise result:', res))
         .catch(error => console.log(error));
 
-    Switcher.assume(SWITCHER_KEY).false();
-    result = await switcher.isItOn(SWITCHER_KEY);
-    console.log('Value changed:', result);
-
     Switcher.unloadSnapshot();
 };
 
-const testBypasser = async () => {
+const _testBypasser = async () => {
     setupSwitcher(true);
     switcher = Switcher.factory();
 
     let result = await switcher.isItOn(SWITCHER_KEY);
     console.log(result);
 
-    Switcher.assume(SWITCHER_KEY).false();
+    Switcher.assume(SWITCHER_KEY).true();
     result = await switcher.isItOn(SWITCHER_KEY);
     console.log(result);
 
@@ -108,42 +127,30 @@ const testBypasser = async () => {
 };
 
 // Requires remote API
-const testSnapshotAutoload = async () => {
-    Switcher.buildContext({ url, apiKey, domain, component, environment: 'generated' });
-    await Switcher.loadSnapshot();
+const _testWatchSnapshot = async () => {
+    Switcher.buildContext({ url, apiKey, domain, component, environment }, { snapshotLocation, local: true, logger: true });
+    await Switcher.loadSnapshot(false, true)
+        .then(() => console.log('Snapshot loaded'))
+        .catch(() => console.log('Failed to load Snapshot'));
 
-    switcher = Switcher.factory();
-    let result = await switcher.isItOn(SWITCHER_KEY);
-    console.log(result);
-
-    Switcher.unloadSnapshot();
-};
-
-// Requires remote API
-const testWatchSnapshot = () => {
-    setupSwitcher(true);
-    switcher = Switcher.factory();
+    const switcher = Switcher.factory();
 
     Switcher.watchSnapshot(
-        () =>  console.log('In-memory snapshot updated'), 
+        async () => console.log('In-memory snapshot updated', await switcher.isItOn(SWITCHER_KEY)), 
         (err) => console.log(err));
 };
 
 // Requires remote API
-const testSnapshotAutoUpdate = async () => {
+const _testSnapshotAutoUpdate = async () => {
     Switcher.buildContext({ url, apiKey, domain, component, environment }, 
         { local: true, logger: true });
 
-    await Switcher.loadSnapshot();
-    switcher = Switcher.factory();
+    await Switcher.loadSnapshot(false, true);
+    const switcher = Switcher.factory();
 
-    Switcher.scheduleSnapshotAutoUpdate(3, (updated, err) => {
-        if (updated != undefined) {
-            console.log('Snapshot updated', updated);
-        } else {
-            console.log(err);
-        }
-    });
+    Switcher.scheduleSnapshotAutoUpdate(3, 
+        (updated) => console.log('In-memory snapshot updated', updated), 
+        (err) => console.log(err));
 
     setInterval(async () => {
         const time = Date.now();
@@ -153,4 +160,4 @@ const testSnapshotAutoUpdate = async () => {
     }, 2000);
 };
 
-testSimpleAPICall(true);
+_testLocal();

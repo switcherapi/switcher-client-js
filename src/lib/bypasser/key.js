@@ -1,7 +1,7 @@
 /**
  * Type definition for Switcher Keys which are used to mock results
  */
-class Key {
+export default class Key {
     
     constructor(key) {
         this.key = key;
@@ -36,5 +36,3 @@ class Key {
         return this.value;
     }
 }
-
-module.exports = Key;

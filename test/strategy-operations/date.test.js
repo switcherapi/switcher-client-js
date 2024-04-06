@@ -1,10 +1,6 @@
-const assert = require('chai').assert;
+import { assert } from 'chai';
 
-const {
-    processOperation,
-    StrategiesType,
-    OperationsType
-} = require('../../src/lib/snapshot');
+import { processOperation, StrategiesType, OperationsType } from '../../src/lib/snapshot.js';
 
 describe('Processing strategy: DATE', () => {
     const mock_values1 = [

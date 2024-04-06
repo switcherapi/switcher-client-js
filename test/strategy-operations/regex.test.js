@@ -1,11 +1,7 @@
-const assert = require('chai').assert;
+import { assert } from 'chai';
 
-const TimedMatch = require('../../src/lib/utils/timed-match');
-const {
-    processOperation,
-    StrategiesType,
-    OperationsType
-} = require('../../src/lib/snapshot');
+import TimedMatch from '../../src/lib/utils/timed-match/index.js';
+import { processOperation, StrategiesType, OperationsType } from '../../src/lib/snapshot.js';
 
 const mock_values1 = [
     '\\bUSER_[0-9]{1,2}\\b'
@@ -20,7 +16,7 @@ const mock_values3 = [
 ];
 
 describe('Processing strategy: [REGEX Safe] ', function() {
-    this.beforeAll(async function() {
+    this.beforeAll(function() {
         TimedMatch.initializeWorker();
     });
 
