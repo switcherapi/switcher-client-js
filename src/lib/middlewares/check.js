@@ -1,39 +1,29 @@
-const { StrategiesType } = require('../snapshot');
+import { StrategiesType } from '../snapshot.js';
 
-function checkValue(input) {
+export function checkValue(input) {
     return [StrategiesType.VALUE, input];
 }
 
-function checkNumeric(input) {
+export function checkNumeric(input) {
     return [StrategiesType.NUMERIC, input];
 }
 
-function checkNetwork(input) {
+export function checkNetwork(input) {
     return [StrategiesType.NETWORK, input];
 }
 
-function checkDate(input) {
+export function checkDate(input) {
     return [StrategiesType.DATE, input];
 }
 
-function checkTime(input) {
+export function checkTime(input) {
     return [StrategiesType.TIME, input];
 }
 
-function checkRegex(input) {
+export function checkRegex(input) {
     return [StrategiesType.REGEX, input];
 }
 
-function checkPayload(input) {
+export function checkPayload(input) {
     return [StrategiesType.PAYLOAD, input];
 }
-
-module.exports = {
-    checkValue,
-    checkNumeric,
-    checkNetwork,
-    checkDate,
-    checkTime,
-    checkRegex,
-    checkPayload
-};

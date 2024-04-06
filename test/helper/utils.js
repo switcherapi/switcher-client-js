@@ -1,39 +1,49 @@
-function given(fetchStub, order, expect) {
+export function given(fetchStub, order, expect) {
   fetchStub.onCall(order).returns(Promise.resolve(expect));
 }
 
-function givenError(fetchStub, order, expect) {
+export function givenError(fetchStub, order, expect) {
   fetchStub.onCall(order).throws(expect);
 }
 
-function throws(fetchStub, expect) {
+export function throws(fetchStub, expect) {
   fetchStub.throws(expect);
 }
 
-const generateAuth = (token, seconds) => {
+export async function assertReject(assert, promise, expectedError) {
+  let result;
+  await promise.catch(e => {
+    result = e;
+  });
+
+  assert.isNotNull(result);
+  assert.equal(expectedError, result.message);
+}
+
+export async function assertResolve(assert, promise) {
+  let result = true;
+  await promise.catch(() => {
+    result = false;
+  });
+
+  assert.isTrue(result);
+}
+
+export const generateAuth = (token, seconds) => {
   return {
     token,
     exp: (Date.now() + (seconds * 1000)) / 1000
   };
 };
 
-const generateStatus = (status) => {
+export const generateStatus = (status) => {
   return {
     status
   };
 };
 
-const generateResult = (result) => {
+export const generateResult = (result) => {
   return {
     result
   };
-};
-
-module.exports = {
-  given,
-  givenError,
-  throws,
-  generateAuth,
-  generateStatus,
-  generateResult
 };

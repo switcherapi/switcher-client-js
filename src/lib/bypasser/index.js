@@ -1,7 +1,7 @@
-const Key = require('./key');
+import Key from './key.js';
 const bypassedKeys = new Array();
 
-class Bypasser {
+export default class Bypasser {
 
     /**
      * Force a switcher value to return a given value by calling one of both methods - true() false()
@@ -42,5 +42,3 @@ class Bypasser {
         }
     }
 }
-
-module.exports = Bypasser;

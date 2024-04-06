@@ -1,5 +1,5 @@
-const { processOperation } = require('./snapshot');
-const services = require('../lib/remote');
+import { processOperation } from './snapshot.js';
+import { getEntry } from '../lib/remote.js';
 
 async function resolveCriteria(key, input, { domain }) {
     let result = true, reason = '';
@@ -79,7 +79,7 @@ async function checkConfig(group, config, input) {
 
 async function checkStrategy(config, input) {
     const { strategies } = config;
-    const entry = services.getEntry(input);
+    const entry = getEntry(input);
 
     for (const strategy of strategies) {
         if (!strategy.activated) {
@@ -119,4 +119,4 @@ class CriteriaFailed extends Error {
     }
 }
 
-module.exports = checkCriteriaOffline;
+export default checkCriteriaOffline;

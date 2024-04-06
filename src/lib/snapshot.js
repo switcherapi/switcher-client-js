@@ -1,23 +1,23 @@
-const fs = require('fs');
-const IPCIDR = require('./utils/ipcidr');
-const DateMoment = require('./utils/datemoment');
-const TimedMatch = require('./utils/timed-match');
-const { resolveSnapshot, checkSnapshotVersion } = require('./remote');
-const { CheckSwitcherError } = require('./exceptions');
-const { parseJSON, payloadReader } = require('./utils/payloadReader');
+import { existsSync, readFileSync, mkdirSync, writeFileSync } from 'fs';
+import IPCIDR from './utils/ipcidr.js';
+import DateMoment from './utils/datemoment.js';
+import TimedMatch from './utils/timed-match/index.js';
+import { resolveSnapshot, checkSnapshotVersion } from './remote.js';
+import { CheckSwitcherError } from './exceptions/index.js';
+import { parseJSON, payloadReader } from './utils/payloadReader.js';
 
 const loadDomain = (snapshotLocation, environment) => {
     try {
         let dataBuffer;
         const snapshotFile = `${snapshotLocation}/${environment}.json`;
-        if (fs.existsSync(snapshotFile)) {
-            dataBuffer = fs.readFileSync(snapshotFile);
+        if (existsSync(snapshotFile)) {
+            dataBuffer = readFileSync(snapshotFile);
         } else {
             dataBuffer = JSON.stringify({ data: { domain: { version: 0 } } }, null, 4);
 
             if (snapshotLocation.length) {
-                fs.mkdirSync(snapshotLocation, { recursive: true });
-                fs.writeFileSync(snapshotFile, dataBuffer);
+                mkdirSync(snapshotLocation, { recursive: true });
+                writeFileSync(snapshotFile, dataBuffer);
             }
         }
 
@@ -234,7 +234,7 @@ function processPAYLOAD(operation, input, values) {
     }
 }
 
-module.exports = {
+export {
     loadDomain,
     validateSnapshot,
     processOperation,

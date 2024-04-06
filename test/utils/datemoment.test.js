@@ -1,5 +1,5 @@
-const assert = require('chai').assert;
-const DateMoment = require('../../src/lib/utils/datemoment');
+import { assert } from 'chai';
+import DateMoment from '../../src/lib/utils/datemoment.js';
 
 describe('Manipulate date and time', () => {
 

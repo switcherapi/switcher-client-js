@@ -1,4 +1,4 @@
-class DateMoment {
+export default class DateMoment {
     constructor(date, time) {
         this.date = new Date(date);
         this.setTime(time);
@@ -71,5 +71,3 @@ class DateMoment {
         return this;
     }
 }
-
-module.exports = DateMoment;

@@ -1,6 +1,6 @@
 const logger = new Array();
 
-class ExecutionLogger {
+export default class ExecutionLogger {
 
     /**
      * Add new execution result
@@ -52,5 +52,3 @@ class ExecutionLogger {
     }
     
 }
-
-module.exports = ExecutionLogger;

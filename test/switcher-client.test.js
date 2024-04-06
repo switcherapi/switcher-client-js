@@ -1,10 +1,9 @@
-const fs = require('fs');
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
-chai.use(chaiAsPromised);
-const assert = chai.assert;
-const { Switcher, checkValue, checkNetwork, checkPayload, checkRegex } = require('../src/index');
-const { StrategiesType } = require('../src/lib/snapshot');
+import { rmdir } from 'fs';
+import { assert } from 'chai';
+
+import { Switcher, checkValue, checkNetwork, checkPayload, checkRegex } from '../src/index.js';
+import { StrategiesType } from '../src/lib/snapshot.js';
+import { assertReject, assertResolve } from './helper/utils.js';
 
 describe('E2E test - Switcher local:', function () {
   let switcher;
@@ -34,7 +33,7 @@ describe('E2E test - Switcher local:', function () {
 
   this.afterAll(function() {
     Switcher.unloadSnapshot();
-    fs.rmdir('//somewhere/', () => {
+    rmdir('//somewhere/', () => {
       return;
     });
   });
@@ -178,8 +177,7 @@ describe('E2E test - Switcher local:', function () {
     assert.isTrue(await switcher.isItOn());
 
     Switcher.forget('UNKNOWN');
-    await assert.isRejected(switcher.isItOn(), 
-      'Something went wrong: {"error":"Unable to load a key UNKNOWN"}');
+    await assertReject(assert, switcher.isItOn(), 'Something went wrong: {"error":"Unable to load a key UNKNOWN"}');
   });
 
   it('should enable test mode which will prevent a snapshot to be watchable', async function () {
@@ -207,8 +205,7 @@ describe('E2E test - Switcher local:', function () {
     });
 
     Switcher.setTestEnabled();
-    await assert.isRejected(Switcher.loadSnapshot(), 
-      'Something went wrong: It was not possible to load the file at //somewhere/');
+    await assertReject(assert, Switcher.loadSnapshot(), 'Something went wrong: It was not possible to load the file at //somewhere/');
   });
 
   it('should be valid - Offline mode', async function () {
@@ -220,7 +217,7 @@ describe('E2E test - Switcher local:', function () {
       snapshotLocation: 'generated-snapshots/'
     });
 
-    await assert.isFulfilled(Switcher.loadSnapshot());
+    await assertResolve(assert, Switcher.loadSnapshot());
     assert.isNotNull(Switcher.snapshot);
   });
 });

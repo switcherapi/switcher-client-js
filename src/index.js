@@ -1,23 +1,15 @@
-const Bypasser = require('./lib/bypasser');
-const ExecutionLogger = require('./lib/utils/executionLogger');
-const TimedMatch = require('./lib/utils/timed-match');
-const DateMoment = require('./lib/utils/datemoment');
-const SnapshotAutoUpdater = require('./lib/utils/snapshotAutoUpdater');
-const { loadDomain, validateSnapshot, checkSwitchersLocal } = require('./lib/snapshot');
-const { SnapshotNotFoundError } = require('./lib/exceptions');
-const services = require('./lib/remote');
-const checkCriteriaOffline = require('./lib/resolver');
-const fs = require('fs');
+import Bypasser from './lib/bypasser/index.js';
+import ExecutionLogger from './lib/utils/executionLogger.js';
+import TimedMatch from './lib/utils/timed-match/index.js';
+import DateMoment from './lib/utils/datemoment.js';
+import SnapshotAutoUpdater from './lib/utils/snapshotAutoUpdater.js';
+import { loadDomain, validateSnapshot, checkSwitchersLocal } from './lib/snapshot.js';
+import { SnapshotNotFoundError } from './lib/exceptions/index.js';
+import { setCerts, checkSwitchersRemote, auth, checkAPIHealth, checkCriteria } from './lib/remote.js';
+import checkCriteriaOffline from './lib/resolver.js';
+import { writeFileSync, watchFile, unwatchFile } from 'fs';
 
-const {
-  checkDate,
-  checkNetwork,
-  checkNumeric,
-  checkRegex,
-  checkTime,
-  checkValue,
-  checkPayload
-} = require('./lib/middlewares/check');
+import { checkDate, checkNetwork, checkNumeric, checkRegex, checkTime, checkValue, checkPayload } from './lib/middlewares/check.js';
 
 const DEFAULT_ENVIRONMENT = 'default';
 const DEFAULT_LOCAL = false;
@@ -57,7 +49,7 @@ class Switcher {
 
   static _buildOptions(options) {
     if ('certPath' in options && options.certPath) {
-      services.setCerts(options.certPath);
+      setCerts(options.certPath);
     }
 
     if ('silentMode' in options && options.silentMode) {
@@ -92,7 +84,7 @@ class Switcher {
     
     if (snapshot) {
       if (Switcher.options.snapshotLocation?.length) {
-        fs.writeFileSync(`${Switcher.options.snapshotLocation}${Switcher.context.environment}.json`, snapshot);
+        writeFileSync(`${Switcher.options.snapshotLocation}${Switcher.context.environment}.json`, snapshot);
       }
 
       Switcher.snapshot = JSON.parse(snapshot);
@@ -125,7 +117,7 @@ class Switcher {
     }
 
     const snapshotFile = `${Switcher.options.snapshotLocation}${Switcher.context.environment}.json`;
-    fs.watchFile(snapshotFile, () => {
+    watchFile(snapshotFile, () => {
       try {
         Switcher.snapshot = loadDomain(Switcher.options.snapshotLocation, Switcher.context.environment);
         if (success)
@@ -144,7 +136,7 @@ class Switcher {
 
     const snapshotFile = `${Switcher.options.snapshotLocation}${Switcher.context.environment}.json`;
     Switcher.snapshot = undefined;
-    fs.unwatchFile(snapshotFile);
+    unwatchFile(snapshotFile);
   }
 
   static scheduleSnapshotAutoUpdate(interval, callback) {
@@ -173,7 +165,7 @@ class Switcher {
   static async _checkSwitchersRemote(switcherKeys) {
     try {
       await Switcher._auth();
-      await services.checkSwitchersRemote(Switcher.context.url, Switcher.context.token, switcherKeys);
+      await checkSwitchersRemote(Switcher.context.url, Switcher.context.token, switcherKeys);
     } catch (e) {
       if (Switcher.options.silentMode) {
         checkSwitchersLocal(Switcher.snapshot, switcherKeys);
@@ -207,7 +199,7 @@ class Switcher {
   }
 
   static async _auth() {
-    const response = await services.auth(Switcher.context);
+    const response = await auth(Switcher.context);
     Switcher.context.token = response.token;
     Switcher.context.exp = response.exp;
   }
@@ -219,7 +211,7 @@ class Switcher {
 
     if (Switcher._isTokenExpired()) {
       Switcher._updateSilentToken();
-      services.checkAPIHealth(Switcher.context.url || '').then((isAlive) => {
+      checkAPIHealth(Switcher.context.url || '').then((isAlive) => {
         if (isAlive) {
           Switcher._auth();
         }
@@ -358,11 +350,12 @@ class Switcher {
     if (!this._useSync())
       return this._executeAsyncRemoteCriteria(showReason);
 
-    const responseCriteria = await services.checkCriteria(
+    const responseCriteria = await checkCriteria(
       Switcher.context, this._key, this._input, showReason);
     
-    if (Switcher.options.logger) 
+    if (Switcher.options.logger) {
       ExecutionLogger.add(responseCriteria, this._key, this._input);
+    }
 
     return responseCriteria.result;
   }
@@ -370,7 +363,7 @@ class Switcher {
   async _executeAsyncRemoteCriteria(showReason) {
     if (this._nextRun < Date.now()) {
       this._nextRun = Date.now() + this._delay;
-      services.checkCriteria(Switcher.context, this._key, this._input, showReason)
+      checkCriteria(Switcher.context, this._key, this._input, showReason)
         .then(response => ExecutionLogger.add(response, this._key, this._input));
     }
 
@@ -410,7 +403,7 @@ class Switcher {
 
 }
 
-module.exports = { 
+export { 
   Switcher,
   checkDate,
   checkNetwork,

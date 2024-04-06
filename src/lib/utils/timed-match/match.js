@@ -1,4 +1,4 @@
-function tryMatch(values, input) {
+export default function tryMatch(values, input) {
     let result = false;
     for (const value of values) {
         if (input.match(value)) {
@@ -9,5 +9,3 @@ function tryMatch(values, input) {
 
     return result;
 }
-
-module.exports = tryMatch;
