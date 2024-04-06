@@ -53,16 +53,16 @@ export async function checkAPIHealth(url) {
     }
 }
 
-export async function checkCriteria({ url, token }, key, input, showReason = false) {
+export async function checkCriteria({ url, token }, key, input, showDetail = false) {
     try {
         const entry = getEntry(input);
-        const response = await FetchFacade.fetch(`${url}/criteria?showReason=${showReason}&key=${key}`, {
+        const response = await FetchFacade.fetch(`${url}/criteria?showReason=${showDetail}&key=${key}`, {
             method: 'post',
             body: JSON.stringify({ entry }),
             headers: getHeader(token),
             agent: httpClient
         });
-        
+
         if (response.status == 200) {
             return response.json();
         }

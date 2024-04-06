@@ -103,12 +103,12 @@ async function checkStrategyInput(entry, { strategy, operation, values }) {
     }
 }
 
-async function checkCriteriaOffline(key, input, snapshot) {
+export default async function checkCriteriaLocal(key, input, snapshot) {
     if (!snapshot) {
         throw new Error('Snapshot not loaded. Try to use \'Switcher.loadSnapshot()\'');
     }
     
-    const {  data } = snapshot;
+    const { data } = snapshot;
     return await resolveCriteria(key, input, data);
 }
 
@@ -118,5 +118,3 @@ class CriteriaFailed extends Error {
         this.name = this.constructor.name;
     }
 }
-
-export default checkCriteriaOffline;

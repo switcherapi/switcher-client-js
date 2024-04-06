@@ -1,7 +1,7 @@
 import { rmdir } from 'fs';
 import { assert } from 'chai';
 
-import { Switcher, checkValue, checkNetwork, checkPayload, checkRegex } from '../src/index.js';
+import { Switcher, checkValue, checkNetwork, checkPayload, checkRegex } from '../switcher-client.js';
 import { StrategiesType } from '../src/lib/snapshot.js';
 import { assertReject, assertResolve } from './helper/utils.js';
 
