@@ -217,12 +217,12 @@ declare class Key {
   /**
    * Force result to true
    */
-  true(): void;
+  true(): Key;
 
   /**
    * Force result to false
    */
-  false(): void;
+  false(): Key;
 
   /**
    * Return selected switcher name
@@ -230,9 +230,14 @@ declare class Key {
   getKey(): Key;
 
   /**
-   * Return current value
+   * Define metadata for the response
    */
-  getValue(): boolean;
+  withMetadata(metadata: any): Key;
+
+  /**
+   * Return key response
+   */
+  getResponse(): boolean | ResultDetail;
 }
 
 export = SwitcherClient;

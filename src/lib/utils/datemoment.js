@@ -1,6 +1,6 @@
 export default class DateMoment {
     constructor(date, time) {
-        this.date = new Date(date);
+        this._date = new Date(date);
         this.setTime(time);
     }
 
@@ -11,8 +11,8 @@ export default class DateMoment {
     setTime(time) {
         if (time) {
             const timeArr = time.split(':');
-            this.date.setHours(Number.parseInt(timeArr[0]));
-            this.date.setMinutes(Number.parseInt(timeArr[1]));
+            this._date.setHours(Number.parseInt(timeArr[0]));
+            this._date.setMinutes(Number.parseInt(timeArr[1]));
         }
     }
 
@@ -20,14 +20,14 @@ export default class DateMoment {
      * Current date configured
      */
     getDate() {
-        return this.date;
+        return this._date;
     }
 
     /**
      * It verifies if the configured date is before the given date/time
      */
     isSameOrBefore(date, time) {
-        return this.date.getTime() <= 
+        return this._date.getTime() <= 
             new DateMoment(date, time || undefined).getDate().getTime();
     }
 
@@ -35,7 +35,7 @@ export default class DateMoment {
      * It verifies if the configured date is after the given date/time
      */
     isSameOrAfter(date, time) {
-        return this.date.getTime() >= 
+        return this._date.getTime() >= 
             new DateMoment(date, time || undefined).getDate().getTime();
     }
 
@@ -56,13 +56,13 @@ export default class DateMoment {
     add(amount, unit) {
         switch (unit.toLowerCase()) {
             case 's':
-                this.date.setTime(this.date.getTime() + amount * 1000);
+                this._date.setTime(this._date.getTime() + amount * 1000);
                 break;
             case 'm':
-                this.date.setTime(this.date.getTime() + amount * 1000 * 60);
+                this._date.setTime(this._date.getTime() + amount * 1000 * 60);
                 break;
             case 'h':
-                this.date.setTime(this.date.getTime() + amount * 1000 * 60 * 60);
+                this._date.setTime(this._date.getTime() + amount * 1000 * 60 * 60);
                 break;
             default:
                 throw new Error(`Unit ${unit} not compatible - try [s, m or h]`);

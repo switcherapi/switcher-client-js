@@ -40,7 +40,7 @@ https://github.com/switcherapi/switcher-api
 The context properties stores all information regarding connectivity.
 
 ```js
-import { Switcher } = from 'switcher-client';
+import { Switcher } from 'switcher-client';
 
 const apiKey = '[API_KEY]';
 const environment = 'default';
@@ -110,7 +110,7 @@ switcher.isItOn('KEY')
 Loading information into the switcher can be made by using *prepare*, in case you want to include input from a different place of your code. Otherwise, it is also possible to include everything in the same call.
 
 ```js
-import { checkValue, checkNetwork } = from 'switcher-client';
+import { checkValue, checkNetwork } from 'switcher-client';
 
 switcher.prepare('FEATURE01', [checkValue('USER_1')];
 switcher.isItOn();

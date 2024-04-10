@@ -4,35 +4,54 @@
 export default class Key {
     
     constructor(key) {
-        this.key = key;
-        this.value = undefined;
+        this._key = key;
+        this._result = undefined;
+        this._reason = undefined;
+        this._metadata = undefined;
     }
 
     /**
      * Force result to true
      */
     true() {
-        this.value = true;
+        this._result = true;
+        this._reason = 'Forced to true';
+        return this;
     }
 
     /**
      * Force result to false
      */
     false() {
-        this.value = false;
+        this._result = false;
+        this._reason = 'Forced to false';
+        return this;
+    }
+
+    /**
+     * Define metadata for the response
+     */
+    withMetadata(metadata) {
+        this._metadata = metadata;
+        return this;
     }
 
     /**
      * Return selected switcher name
      */
     getKey() {
-        return this.key;
+        return this._key;
     }
 
     /**
-     * Return current value
+     * Return key response
      */
-    getValue() {
-        return this.value;
+    getResponse() {
+        return {
+            key: this._key,
+            result: this._result,
+            reason: this._reason,
+            metadata: this._metadata
+        };
     }
 }

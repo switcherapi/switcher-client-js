@@ -109,7 +109,7 @@ export default async function checkCriteriaLocal(key, input, snapshot) {
     }
     
     const { data } = snapshot;
-    return await resolveCriteria(key, input, data);
+    return resolveCriteria(key, input, data);
 }
 
 class CriteriaFailed extends Error {
