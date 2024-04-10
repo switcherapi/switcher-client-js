@@ -1,6 +1,6 @@
 export default class IPCIDR {
   constructor(cidr) {
-    this.cidr = cidr;
+    this._cidr = cidr;
   }
 
   ip4ToInt(ip) {
@@ -8,7 +8,7 @@ export default class IPCIDR {
   }
 
   isIp4InCidr(ip) {
-    const [range, bits = 32] = this.cidr.split('/');
+    const [range, bits = 32] = this._cidr.split('/');
     const mask = ~(2 ** (32 - Number(bits)) - 1);
     return (this.ip4ToInt(ip) & mask) === (this.ip4ToInt(range) & mask);
   }
