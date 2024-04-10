@@ -167,6 +167,23 @@ describe('E2E test - Switcher local:', function () {
     assert.isTrue(await switcher.isItOn());
   });
 
+  it('should be valid assuming key to be false - with details', async function () {
+    Switcher.assume('FF2FOR2020').false();
+    const { result, reason } = await switcher.isItOn('FF2FOR2020', [], true);
+
+    assert.isFalse(result);
+    assert.equal(reason, 'Forced to false');
+  });
+
+  it('should be valid assuming key to be false - with metadata', async function () {
+    Switcher.assume('FF2FOR2020').false().withMetadata({ value: 'something' });
+    const { result, reason, metadata } = await switcher.isItOn('FF2FOR2020', [], true);
+
+    assert.isFalse(result);
+    assert.equal(reason, 'Forced to false');
+    assert.deepEqual(metadata, { value: 'something' });
+  });
+
   it('should be valid assuming unknown key to be true', async function () {
     await switcher.prepare('UNKNOWN', [
       checkValue('Japan'),

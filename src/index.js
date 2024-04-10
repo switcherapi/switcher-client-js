@@ -295,34 +295,35 @@ export class Switcher {
   async isItOn(key, input, showDetail = false) {
     let result;
     this._validateArgs(key, input);
-
+    
     // verify if query from Bypasser
     const bypassKey = Bypasser.searchBypassed(this._key);
     if (bypassKey) {
-      return bypassKey.getValue();
+      result = bypassKey.getResponse();
+      return showDetail ? result : result.result;
     } 
     
     // verify if query from snapshot
     if (Switcher.options.local && !this._forceRemote) {
-      result = await this._executeLocalCriteria();
+      result = await this._executeLocalCriteria(showDetail);
     } else {
       try {
         await this.validate();
         if (Switcher.context.token === 'SILENT') {
-          result = await this._executeLocalCriteria();
+          result = await this._executeLocalCriteria(showDetail);
         } else {
           result = await this._executeRemoteCriteria(showDetail);
         }
       } catch (e) {
         if (Switcher.options.silentMode) {
           Switcher._updateSilentToken();
-          return this._executeLocalCriteria();
+          return this._executeLocalCriteria(showDetail);
         }
-
+        
         throw e;
       }
     }
-
+    
     return result;
   }
 
@@ -385,12 +386,16 @@ export class Switcher {
     }
   }
 
-  async _executeLocalCriteria() {
+  async _executeLocalCriteria(showDetail) {
     const response = await checkCriteriaLocal(
       this._key, this._input, Switcher.snapshot);
 
     if (Switcher.options.logger) {
       ExecutionLogger.add(response, this._key, this._input);
+    }
+
+    if (showDetail) {
+      return response;
     }
 
     return response.result;
