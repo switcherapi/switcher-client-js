@@ -8,11 +8,15 @@ import { SnapshotNotFoundError } from './lib/exceptions/index.js';
 import * as services from './lib/remote.js';
 import checkCriteriaLocal from './lib/resolver.js';
 import { writeFileSync, watchFile, unwatchFile } from 'fs';
-
-const DEFAULT_ENVIRONMENT = 'default';
-const DEFAULT_LOCAL = false;
-const DEFAULT_LOGGER = false;
-const DEFAULT_TEST_MODE = false;
+import { 
+  DEFAULT_ENVIRONMENT, 
+  DEFAULT_LOCAL, 
+  DEFAULT_LOGGER, 
+  DEFAULT_REGEX_MAX_BLACKLISTED, 
+  DEFAULT_REGEX_MAX_TIME_LIMIT, 
+  DEFAULT_TEST_MODE,
+  SWITCHER_OPTIONS 
+} from './lib/constants.js';
 
 export class Switcher {
 
@@ -46,15 +50,15 @@ export class Switcher {
   }
 
   static _buildOptions(options) {
-    if ('certPath' in options && options.certPath) {
+    if (SWITCHER_OPTIONS.CERT_PATH in options && options.certPath) {
       services.setCerts(options.certPath);
     }
 
-    if ('silentMode' in options && options.silentMode) {
+    if (SWITCHER_OPTIONS.SILENT_MODE in options && options.silentMode) {
       this._initSilentMode(options.silentMode);
     }
 
-    if ('snapshotAutoUpdateInterval' in options) {
+    if (SWITCHER_OPTIONS.SNAPSHOT_AUTO_UPDATE_INTERVAL in options) {
       this.options.snapshotAutoUpdateInterval = options.snapshotAutoUpdateInterval;
       this.scheduleSnapshotAutoUpdate();
     }
@@ -182,15 +186,15 @@ export class Switcher {
   }
 
   static _initTimedMatch(options) {
-    if ('regexMaxBlackList' in options) {
-      TimedMatch.setMaxBlackListed(options.regexMaxBlackList);
+    if (SWITCHER_OPTIONS.REGEX_MAX_BLACK_LIST in options) {
+      TimedMatch.setMaxBlackListed(options.regexMaxBlackList || DEFAULT_REGEX_MAX_BLACKLISTED);
     }
 
-    if ('regexMaxTimeLimit' in options) {
-      TimedMatch.setMaxTimeLimit(options.regexMaxTimeLimit);
+    if (SWITCHER_OPTIONS.REGEX_MAX_TIME_LIMIT in options) {
+      TimedMatch.setMaxTimeLimit(options.regexMaxTimeLimit || DEFAULT_REGEX_MAX_TIME_LIMIT);
     }
 
-    const hasRegexSafeOption = 'regexSafe' in options;
+    const hasRegexSafeOption = SWITCHER_OPTIONS.REGEX_SAFE in options;
     if (!hasRegexSafeOption || (hasRegexSafeOption && options.regexSafe)) {
       TimedMatch.initializeWorker();
     }

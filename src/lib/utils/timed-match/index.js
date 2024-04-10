@@ -2,6 +2,7 @@ import cp from 'child_process';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import tryMatch from '../timed-match/match.js';
+import { DEFAULT_REGEX_MAX_BLACKLISTED, DEFAULT_REGEX_MAX_TIME_LIMIT } from '../../constants.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -15,8 +16,8 @@ export default class TimedMatch {
     static _worker = undefined;
     static _workerActive = false;
     static _blacklisted = [];
-    static _maxBlackListed = 50;
-    static _maxTimeLimit = 3000;
+    static _maxBlackListed = DEFAULT_REGEX_MAX_BLACKLISTED;
+    static _maxTimeLimit = DEFAULT_REGEX_MAX_TIME_LIMIT;
 
     /**
      * Initialize Worker process for working with Regex process operators
