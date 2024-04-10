@@ -54,6 +54,16 @@ describe('E2E test - Switcher local:', function () {
     assert.isNotEmpty(Switcher.getLogger('FF2FOR2020'));
   });
 
+  it('should be valid - isItOn - with detail', async function () {
+    const response = await switcher.isItOn('FF2FOR2020', [
+      checkValue('Japan'),
+      checkNetwork('10.0.0.3')
+    ], true);
+
+    assert.isTrue(response.result);
+    assert.equal(response.reason, 'Success');
+  });
+
   it('should be valid - No prepare function needed', async function () {
     const result = await switcher.isItOn('FF2FOR2020', [
       checkValue('Japan'),
