@@ -89,7 +89,7 @@ declare namespace SwitcherClient {
      * 
      * @param key 
      */
-    static getLogger(key: string): any[];
+    static getLogger(key: string): LoggerRecord[];
 
     /**
      * Clear all results from the execution log
@@ -145,13 +145,19 @@ declare namespace SwitcherClient {
     remote(forceRemote: boolean): Switcher;
   }
 
-  interface ResultDetail {
+  type ResultDetail = {
     result: boolean;
     reason: string;
     metadata: any;
   }
 
-  interface SwitcherContext {
+  type LoggerRecord = {
+    key: string;
+    input: string[][];
+    response: ResultDetail
+  }
+
+  type SwitcherContext = {
     url: string;
     apiKey: string;
     domain: string;
@@ -161,7 +167,7 @@ declare namespace SwitcherClient {
     exp?: number;
   }
 
-  interface SwitcherOptions {
+  type SwitcherOptions = {
     local: boolean;
     logger: boolean;
     snapshotLocation: string;
@@ -237,7 +243,7 @@ declare class Key {
   /**
    * Return key response
    */
-  getResponse(): boolean | ResultDetail;
+  getResponse(): ResultDetail;
 }
 
 export = SwitcherClient;
