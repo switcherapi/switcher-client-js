@@ -26,6 +26,7 @@ export class Switcher {
     this._input = undefined;
     this._key = '';
     this._forceRemote = false;
+    this._showDetail = false;
   }
 
   static buildContext(context, options) {
@@ -296,32 +297,32 @@ export class Switcher {
     }
   }
 
-  async isItOn(key, input, showDetail = false) {
+  async isItOn(key, input) {
     let result;
     this._validateArgs(key, input);
     
     // verify if query from Bypasser
     const bypassKey = Bypasser.searchBypassed(this._key);
     if (bypassKey) {
-      result = bypassKey.getResponse();
-      return showDetail ? result : result.result;
+      const response = bypassKey.getResponse();
+      return this._showDetail ? response : response.result;
     } 
     
     // verify if query from snapshot
     if (Switcher.options.local && !this._forceRemote) {
-      result = await this._executeLocalCriteria(showDetail);
+      result = await this._executeLocalCriteria();
     } else {
       try {
         await this.validate();
         if (Switcher.context.token === 'SILENT') {
-          result = await this._executeLocalCriteria(showDetail);
+          result = await this._executeLocalCriteria();
         } else {
-          result = await this._executeRemoteCriteria(showDetail);
+          result = await this._executeRemoteCriteria();
         }
       } catch (e) {
         if (Switcher.options.silentMode) {
           Switcher._updateSilentToken();
-          return this._executeLocalCriteria(showDetail);
+          return this._executeLocalCriteria();
         }
         
         throw e;
@@ -350,33 +351,37 @@ export class Switcher {
     return this;
   }
 
-  async _executeRemoteCriteria(showDetail) {
-    if (!this._useSync()) {
-      return this._executeAsyncRemoteCriteria(showDetail);
-    }
-
-    const responseCriteria = await services.checkCriteria(
-      Switcher.context, this._key, this._input, showDetail);
-    
-    if (Switcher.options.logger) {
-      ExecutionLogger.add(responseCriteria, this._key, this._input);
-    }
-
-    if (showDetail) {
-      return responseCriteria;
-    }
-
-    return responseCriteria.result;
+  detail(showDetail = true) {
+    this._showDetail = showDetail;
+    return this;
   }
 
-  async _executeAsyncRemoteCriteria(showDetail) {
+  async _executeRemoteCriteria() {
+    let responseCriteria;
+
+    if (this._useSync()) {
+      responseCriteria = await services.checkCriteria(
+        Switcher.context, this._key, this._input, this._showDetail);
+      
+      if (Switcher.options.logger) {
+        ExecutionLogger.add(responseCriteria, this._key, this._input);
+      }
+    } else {
+      responseCriteria = this._executeAsyncRemoteCriteria(this._showDetail);
+    }
+    
+    return this._showDetail ? responseCriteria : responseCriteria.result;
+  }
+
+  _executeAsyncRemoteCriteria(showDetail) {
     if (this._nextRun < Date.now()) {
       this._nextRun = Date.now() + this._delay;
       services.checkCriteria(Switcher.context, this._key, this._input, showDetail)
         .then(response => ExecutionLogger.add(response, this._key, this._input));
     }
 
-    return ExecutionLogger.getExecution(this._key, this._input).response.result;
+    const executionLog = ExecutionLogger.getExecution(this._key, this._input);
+    return executionLog.response;
   }
 
   async _executeApiValidation() {
@@ -390,7 +395,7 @@ export class Switcher {
     }
   }
 
-  async _executeLocalCriteria(showDetail) {
+  async _executeLocalCriteria() {
     const response = await checkCriteriaLocal(
       this._key, this._input, Switcher.snapshot);
 
@@ -398,7 +403,7 @@ export class Switcher {
       ExecutionLogger.add(response, this._key, this._input);
     }
 
-    if (showDetail) {
+    if (this._showDetail) {
       return response;
     }
 

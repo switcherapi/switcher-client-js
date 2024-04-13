@@ -125,9 +125,8 @@ declare namespace SwitcherClient {
      * 
      * @param key 
      * @param input 
-     * @param showDetail (returns ResultDetail object)
      */
-    isItOn(key?: string, input?: string[], showDetail?: boolean): Promise<boolean | ResultDetail>;
+    isItOn(key?: string, input?: string[]): Promise<boolean | ResultDetail>;
 
     /**
      * Configure the time elapsed between each call to the API.
@@ -143,6 +142,13 @@ declare namespace SwitcherClient {
      * @param forceRemote default true
      */
     remote(forceRemote: boolean): Switcher;
+
+    /**
+     * Enable or disable detailed result when using isItOn as ResultDetail
+     * 
+     * @param showDetail default true
+     */
+    detail(showDetail: boolean): Switcher;
   }
 
   type ResultDetail = {
@@ -243,7 +249,7 @@ declare class Key {
   /**
    * Return key response
    */
-  getResponse(): ResultDetail;
+  getResponse(): SwitcherClient.ResultDetail;
 }
 
 export = SwitcherClient;

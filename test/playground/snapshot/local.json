@@ -1,0 +1,22 @@
+{
+    "data": {
+        "domain": {
+            "name": "Local Playground",
+            "version": 1,
+            "activated": true,
+            "group": [
+                {
+                    "name": "My Features",
+                    "activated": true,
+                    "config": [
+                        {
+                            "key": "MY_SWITCHER",
+                            "activated": true,
+                            "strategies": []
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+}

@@ -9,7 +9,7 @@ const domain = 'Playground';
 const component = 'switcher-playground';
 const environment = 'default';
 const url = 'https://api.switcherapi.com';
-const snapshotLocation = './snapshot/';
+const snapshotLocation = './test/playground/snapshot/';
 
 let switcher;
 
@@ -34,7 +34,7 @@ const _testLocal = async () => {
         domain: 'Local Playground', 
         environment: 'local' 
     }, { 
-        snapshotLocation: './snapshot/', 
+        snapshotLocation: './test/playground/snapshot/', 
         local: true
     });
 
@@ -46,8 +46,8 @@ const _testLocal = async () => {
 
     setInterval(async () => {
         const time = Date.now();
-        const result = await switcher.isItOn(SWITCHER_KEY);
-        console.log(`- ${Date.now() - time} ms - ${result}`);
+        const result = await switcher.detail().isItOn(SWITCHER_KEY);
+        console.log(`- ${Date.now() - time} ms - ${JSON.stringify(result)}`);
     }, 1000);
 };
 
@@ -64,7 +64,7 @@ const _testSimpleAPICall = async (local) => {
     setInterval(async () => {
         const time = Date.now();
         const result = await switcher.isItOn(SWITCHER_KEY);
-        console.log(`- ${Date.now() - time} ms - ${result}`);
+        console.log(`- ${Date.now() - time} ms - ${JSON.stringify(result)}`);
     }, 1000);
 };
 
@@ -79,7 +79,7 @@ const _testThrottledAPICall = async () => {
 
     for (let index = 0; index < 10; index++) {
         const result = await switcher.isItOn(SWITCHER_KEY, [checkNumeric('1')]);
-        console.log(`Call #${index} - ${String(result)}`);
+        console.log(`Call #${index} - ${JSON.stringify(result)}`);
     }
 
     Switcher.unloadSnapshot();
