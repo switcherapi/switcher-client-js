@@ -5,6 +5,7 @@ import { unwatchFile } from 'fs';
 import FetchFacade from '../src/lib/utils/fetchFacade.js';
 import { Switcher, checkValue, checkNetwork, checkDate, checkTime, checkRegex, checkNumeric, checkPayload } from '../switcher-client.js';
 import { given, givenError, throws, generateAuth, generateResult, assertReject, assertResolve, generateDetailedResult } from './helper/utils.js';
+import ExecutionLogger from '../src/lib/utils/executionLogger.js';
 
 describe('Integrated test - Switcher:', function () {
 
@@ -74,26 +75,48 @@ describe('Integrated test - Switcher:', function () {
       given(fetchStub, 2, { status: 200 });
       given(fetchStub, 3, { json: () => generateResult(true), status: 200 });
 
-      // after throttle value has expired
-      given(fetchStub, 4, { status: 200 });
-      given(fetchStub, 5, { json: () => generateResult(true), status: 200 });
-
       // test
       Switcher.buildContext(contextSettings);
       let switcher = Switcher.factory();
       switcher.throttle(1000);
 
       const spyPrepare = spy(switcher, '_executeAsyncRemoteCriteria');
+      const spyExecutionLogger = spy(ExecutionLogger, 'add');
+
       for (let index = 0; index < 10; index++) {
         assert.isTrue(await switcher.isItOn('FLAG_1'));
       }
 
       assert.equal(spyPrepare.callCount, 9);
+      assert.equal(spyExecutionLogger.callCount, 1); // First call is not throttled
 
       // Next call should call the API again as the throttle has expired
       await new Promise(resolve => setTimeout(resolve, 2000));
       assert.isTrue(await switcher.isItOn('FLAG_1'));
       assert.equal(spyPrepare.callCount, 10);
+      assert.equal(spyExecutionLogger.callCount, 2); // Last call is not throttled, expired throttle
+    });
+
+    it('should be valid - throttle - with details', async function () {
+      this.timeout(3000);
+
+      // given API responding properly
+      // first API call
+      given(fetchStub, 0, { json: () => generateAuth('[auth_token]', 5), status: 200 });
+      given(fetchStub, 1, { json: () => generateResult(true), status: 200 });
+
+      // test
+      Switcher.buildContext(contextSettings);
+
+      let switcher = Switcher.factory();
+      switcher.throttle(1000);
+
+      // first API call - stores result in cache
+      await switcher.isItOn('FLAG_2');
+
+      // first async API call
+      const response = await switcher.detail().isItOn('FLAG_2');
+      assert.isTrue(response.result);
     });
   });
 
@@ -154,7 +177,7 @@ describe('Integrated test - Switcher:', function () {
       Switcher.buildContext(contextSettings);
 
       const switcher = Switcher.factory();
-      const detailedResult = await switcher.isItOn('FF2FOR2030', undefined, true);
+      const detailedResult = await switcher.detail().isItOn('FF2FOR2030');
       assert.isTrue(detailedResult.result);
       assert.equal(detailedResult.reason, 'Success');
       assert.equal(detailedResult.metadata.user, 'user1');

@@ -21,7 +21,8 @@
     "lint": "eslint ./src/ --ext .js",
     "test-local": "mocha",
     "test": "npm run coverage \"./test/**/*.test.js\"",
-    "coverage": "c8 --include='src/**/*.js' mocha"
+    "coverage": "c8 --include='src/**/*.js' mocha",
+    "play": "node ./test/playground/index.js"
   },
   "files": [
     "LICENSE",
