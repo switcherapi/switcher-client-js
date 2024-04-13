@@ -106,4 +106,17 @@ describe('E2E test - Switcher local - Watch Snapshot:', function () {
     }
   });
 
+  it('should NOT allow to watch snapshot - Switcher test is enabled', function (done) {
+    Switcher.setTestEnabled();
+
+    let errorMessage;
+    Switcher.watchSnapshot(undefined, (err) => {
+      errorMessage = err.message;
+    });
+    
+    assert.equal(errorMessage, 'Watch Snapshot cannot be used in test mode or without a snapshot location');
+    done();
+    Switcher.setTestDisabled();
+  });
+
 });

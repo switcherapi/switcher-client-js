@@ -114,20 +114,18 @@ export class Switcher {
     return Switcher.snapshot?.data.domain.version || 0;
   }
 
-  static watchSnapshot(success, error) {
+  static watchSnapshot(success = () => {}, error = () => {}) {
     if (Switcher.testEnabled || !Switcher.options.snapshotLocation?.length) {
-      return;
+      return error(new Error('Watch Snapshot cannot be used in test mode or without a snapshot location'));
     }
 
     const snapshotFile = `${Switcher.options.snapshotLocation}${Switcher.context.environment}.json`;
     watchFile(snapshotFile, () => {
       try {
         Switcher.snapshot = loadDomain(Switcher.options.snapshotLocation, Switcher.context.environment);
-        if (success)
-          success();
+        success();
       } catch (e) {
-        if (error)
-          error(e);
+        error(e);
       }
     });
   }
