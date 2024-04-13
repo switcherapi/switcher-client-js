@@ -24,6 +24,11 @@ describe('Processing strategy: NETWORK', () => {
         assert.isTrue(result);
     });
 
+    it('should agree when input range EXIST - Irregular CIDR', async function () {
+        const result = await processOperation(StrategiesType.NETWORK, OperationsType.EXIST, '10.0.0.3', ['10.0.0.3/24']);
+        assert.isTrue(result);
+    });
+
     it('should NOT agree when input range DOES NOT EXIST', async () => {
         const result = await processOperation(
             StrategiesType.NETWORK, OperationsType.EXIST, '10.0.0.4', mock_values1);
