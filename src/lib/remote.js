@@ -99,7 +99,7 @@ export async function auth({ url, apiKey, domain, component, environment }) {
     }
 }
 
-export async function checkSwitchersRemote(url, token, switcherKeys) {
+export async function checkSwitchers(url, token, switcherKeys) {
     try {
         const response = await FetchFacade.fetch(`${url}/criteria/switchers_check`, {
             method: 'post',
