@@ -16,7 +16,7 @@ describe('Integrated test - Switcher:', function () {
   });
 
   this.beforeEach(function() {
-    Switcher.setTestEnabled();
+    Switcher.testMode();
 
     contextSettings = {
       apiKey: '[api_key]',
@@ -275,10 +275,10 @@ describe('Integrated test - Switcher:', function () {
       given(fetchStub, 1, { json: () => generateResult(true), status: 200 });
 
       // test
-      Switcher.buildContext(contextSettings);
+      Switcher.buildContext(contextSettings, { logger: true });
       let switcher = Switcher.factory();
       
-      await switcher.prepare('FLAG_1', [
+      await switcher.prepare('SWITCHER_MULTIPLE_INPUT', [
         checkValue('User 1'),
         checkNumeric('1'),
         checkNetwork('192.168.0.1'),
@@ -287,8 +287,11 @@ describe('Integrated test - Switcher:', function () {
         checkRegex('\\bUSER_[0-9]{1,2}\\b'),
         checkPayload(JSON.stringify({ name: 'User 1' }))
       ]);
-
-      assert.sameDeepMembers(switcher._input, [
+      
+      assert.isTrue(await switcher.isItOn());
+      
+      const input = ExecutionLogger.getByKey('SWITCHER_MULTIPLE_INPUT').map(log => log.input)[0];
+      assert.sameDeepMembers(input, [
         [ 'VALUE_VALIDATION', 'User 1' ],
         [ 'NUMERIC_VALIDATION', '1' ],
         [ 'NETWORK_VALIDATION', '192.168.0.1' ],  
@@ -297,7 +300,6 @@ describe('Integrated test - Switcher:', function () {
         [ 'REGEX_VALIDATION', '\\bUSER_[0-9]{1,2}\\b' ],
         [ 'PAYLOAD_VALIDATION', '{"name":"User 1"}' ]
       ]);
-      assert.isTrue(await switcher.isItOn());
     });
 
     it('should NOT throw when switcher keys provided were configured properly', async function() {

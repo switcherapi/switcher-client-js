@@ -97,15 +97,10 @@ declare namespace SwitcherClient {
     static clearLogger(): void;
 
     /**
-    * Enable testing mode
+    * Enable/Disable test mode
     * It prevents from watching Snapshots that may hold process
     */
-    static setTestEnabled(): void;
-
-    /**
-     * Disable testing mode
-     */
-    static setTestDisabled(): void;
+    static testMode(testEnabled: boolean): void;
 
     /**
     * Validate the input provided to access the API
