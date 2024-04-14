@@ -168,7 +168,7 @@ It prevents the Switcher Client from locking snapshot files even after the test 
 
 To enable this feature, it is recommended to place the following on your test setup files:
 ```js
-Switcher.setTestEnabled();
+Switcher.testMode();
 ```
 
 **Smoke Test**
