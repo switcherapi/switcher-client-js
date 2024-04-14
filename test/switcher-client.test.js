@@ -231,7 +231,7 @@ describe('E2E test - Switcher local:', function () {
       snapshotLocation: '//somewhere/'
     });
 
-    Switcher.setTestEnabled();
+    Switcher.testMode();
     await assertReject(assert, Switcher.loadSnapshot(), 'Something went wrong: It was not possible to load the file at //somewhere/');
   });
 

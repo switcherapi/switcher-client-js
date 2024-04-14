@@ -34,7 +34,7 @@ describe('E2E test - Switcher local - Snapshot:', function () {
       regexSafe: false
     });
 
-    Switcher.setTestEnabled();
+    Switcher.testMode();
   });
 
   this.afterAll(function() {
@@ -109,7 +109,7 @@ describe('E2E test - Switcher local - Snapshot:', function () {
     givenError(fetchStub, 1, { errno: 'ECONNREFUSED' });
     
     //test
-    Switcher.setTestEnabled();
+    Switcher.testMode();
     await Switcher.loadSnapshot();
     await assertReject(assert, Switcher.checkSnapshot(), 
       'Something went wrong: Connection has been refused - ECONNREFUSED');
@@ -124,7 +124,7 @@ describe('E2E test - Switcher local - Snapshot:', function () {
     givenError(fetchStub, 2, { errno: 'ECONNREFUSED' });
     
     //test
-    Switcher.setTestEnabled();
+    Switcher.testMode();
     await Switcher.loadSnapshot();
     await assertReject(assert, Switcher.checkSnapshot(), 
       'Something went wrong: Connection has been refused - ECONNREFUSED');
@@ -138,7 +138,7 @@ describe('E2E test - Switcher local - Snapshot:', function () {
     given(fetchStub, 1, { json: () => generateStatus(true), status: 200 });
     
     //pre-load snapshot
-    Switcher.setTestDisabled();
+    Switcher.testMode(false);
     await Switcher.loadSnapshot();
     assert.equal(await Switcher.checkSnapshot(), false);
 
@@ -208,7 +208,7 @@ describe('E2E test - Fail response - Snapshot:', function () {
     Switcher.buildContext({ url, apiKey, domain, component, environment }, {
       local: true
     });
-    Switcher.setTestEnabled();
+    Switcher.testMode();
   });
 
   this.afterAll(function() {
@@ -223,7 +223,7 @@ describe('E2E test - Fail response - Snapshot:', function () {
     given(fetchStub, 1, { status: 429 });
     
     //test
-    Switcher.setTestEnabled();
+    Switcher.testMode();
     await Switcher.loadSnapshot();
     await assertReject(assert, Switcher.checkSnapshot(),
       'Something went wrong: [checkSnapshotVersion] failed with status 429');
@@ -277,7 +277,7 @@ describe('E2E test - Snapshot AutoUpdater:', function () {
     Switcher.buildContext({ url, apiKey, domain, component, environment }, {
       local: true
     });
-    Switcher.setTestEnabled();
+    Switcher.testMode();
   });
 
   this.afterAll(function() {
