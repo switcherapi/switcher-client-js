@@ -118,6 +118,40 @@ describe('Integrated test - Switcher:', function () {
       const response = await switcher.detail().isItOn('FLAG_2');
       assert.isTrue(response.result);
     });
+
+    it('should renew token when using throttle', async function () {
+      this.timeout(3000);
+
+      // given API responding properly
+      // first API call
+      given(fetchStub, 0, { json: () => generateAuth('[auth_token]', 1), status: 200 });
+      given(fetchStub, 1, { json: () => generateResult(true), status: 200 }); // before token expires
+      given(fetchStub, 2, { json: () => generateResult(false), status: 200 }); // after token expires
+
+      // test
+      Switcher.buildContext(contextSettings);
+
+      let switcher = Switcher.factory();
+      switcher.throttle(500);
+
+      const spyPrepare = spy(switcher, 'prepare');
+
+      // first API call - stores result in cache
+      let result = await switcher.isItOn('FLAG_3');
+      assert.isTrue(result);
+      assert.equal(spyPrepare.callCount, 1);
+
+      // first async API call
+      result = await switcher.isItOn('FLAG_3');
+      assert.isTrue(result);
+      assert.equal(spyPrepare.callCount, 1);
+
+      // Next call should call the API again - token has expired
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      result = await switcher.isItOn('FLAG_3');
+      assert.isFalse(result);
+      assert.equal(spyPrepare.callCount, 2);
+    });
   });
 
   describe('force remote (hybrid):', function () {
