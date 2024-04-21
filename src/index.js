@@ -370,21 +370,31 @@ export class Switcher {
         ExecutionLogger.add(responseCriteria, this.#key, this.#input);
       }
     } else {
-      responseCriteria = this._executeAsyncRemoteCriteria(this.#showDetail);
+      responseCriteria = this._executeAsyncRemoteCriteria();
     }
     
     return this.#showDetail ? responseCriteria : responseCriteria.result;
   }
 
-  _executeAsyncRemoteCriteria(showDetail) {
+  _executeAsyncRemoteCriteria() {
     if (this.#nextRun < Date.now()) {
       this.#nextRun = Date.now() + this.#delay;
-      remote.checkCriteria(Switcher.#context, this.#key, this.#input, showDetail)
-        .then(response => ExecutionLogger.add(response, this.#key, this.#input));
+
+      if (Switcher.#isTokenExpired()) {
+        this.prepare(this.#key, this.#input)
+          .then(() => this.#executeAsyncCheckCriteria());
+      } else {
+        this.#executeAsyncCheckCriteria();
+      }
     }
 
     const executionLog = ExecutionLogger.getExecution(this.#key, this.#input);
     return executionLog.response;
+  }
+
+  #executeAsyncCheckCriteria() {
+    remote.checkCriteria(Switcher.#context, this.#key, this.#input, this.#showDetail)
+      .then(response => ExecutionLogger.add(response, this.#key, this.#input));
   }
 
   async #executeApiValidation() {
