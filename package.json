@@ -1,6 +1,6 @@
 {
   "name": "switcher-client",
-  "version": "4.0.3",
+  "version": "4.0.4",
   "description": "Client JS SDK for working with Switcher-API",
   "main": "./switcher-client.js",
   "type": "module",
