@@ -15,7 +15,7 @@ declare namespace SwitcherClient {
      * @param context Necessary arguments
      * @param options 
      */
-    static buildContext(context: SwitcherContext, options: SwitcherOptions): void;
+    static buildContext(context: SwitcherContext, options?: SwitcherOptions): void;
 
     /**
      * Creates a new instance of Switcher
@@ -100,7 +100,7 @@ declare namespace SwitcherClient {
     * Enable/Disable test mode
     * It prevents from watching Snapshots that may hold process
     */
-    static testMode(testEnabled: boolean): void;
+    static testMode(testEnabled?: boolean): void;
 
     /**
     * Validate the input provided to access the API
@@ -113,7 +113,7 @@ declare namespace SwitcherClient {
      * @param key 
      * @param input 
      */
-    prepare(key: string, input?: string[]): Promise<void>;
+    prepare(key: string, input?: string[][]): Promise<void>;
 
     /**
      * Execute async criteria
@@ -121,7 +121,7 @@ declare namespace SwitcherClient {
      * @param key 
      * @param input 
      */
-    isItOn(key?: string, input?: string[]): Promise<boolean | ResultDetail>;
+    isItOn(key?: string, input?: string[][]): Promise<boolean | ResultDetail>;
 
     /**
      * Configure the time elapsed between each call to the API.
@@ -136,14 +136,14 @@ declare namespace SwitcherClient {
      *
      * @param forceRemote default true
      */
-    remote(forceRemote: boolean): Switcher;
+    remote(forceRemote?: boolean): Switcher;
 
     /**
      * Enable or disable detailed result when using isItOn as ResultDetail
      * 
      * @param showDetail default true
      */
-    detail(showDetail: boolean): Switcher;
+    detail(showDetail?: boolean): Switcher;
   }
 
   type ResultDetail = {
@@ -159,25 +159,25 @@ declare namespace SwitcherClient {
   }
 
   type SwitcherContext = {
-    url: string;
-    apiKey: string;
+    url?: string;
+    apiKey?: string;
     domain: string;
-    component: string;
-    environment: string;
+    component?: string;
+    environment?: string;
     token?: string;
     exp?: number;
   }
 
   type SwitcherOptions = {
-    local: boolean;
-    logger: boolean;
-    snapshotLocation: string;
-    snapshotAutoUpdateInterval: number;
-    silentMode: string;
-    regexSafe: boolean;
-    regexMaxBlackList: number;
-    regexMaxTimeLimit: number;
-    certPath: string;
+    local?: boolean;
+    logger?: boolean;
+    snapshotLocation?: string;
+    snapshotAutoUpdateInterval?: number;
+    silentMode?: string;
+    regexSafe?: boolean;
+    regexMaxBlackList?: number;
+    regexMaxTimeLimit?: number;
+    certPath?: string;
   }
 
   /**
