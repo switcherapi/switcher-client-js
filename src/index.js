@@ -96,7 +96,7 @@ export class Switcher {
     
     if (snapshot) {
       if (Switcher.#options.snapshotLocation?.length) {
-        writeFileSync(`${Switcher.#options.snapshotLocation}${Switcher.#context.environment}.json`, snapshot);
+        writeFileSync(`${Switcher.#options.snapshotLocation}/${Switcher.#context.environment}.json`, snapshot);
       }
 
       Switcher.snapshot = JSON.parse(snapshot);
@@ -113,8 +113,9 @@ export class Switcher {
     );
 
     if (Switcher.snapshot.data.domain.version == 0 && 
-        (fetchRemote || !Switcher.#options.local))
+        (fetchRemote || !Switcher.#options.local)) {
       await Switcher.checkSnapshot();
+    }
 
     if (watchSnapshot) {
       Switcher.watchSnapshot();
@@ -128,13 +129,18 @@ export class Switcher {
       return error(new Error('Watch Snapshot cannot be used in test mode or without a snapshot location'));
     }
 
-    const snapshotFile = `${Switcher.#options.snapshotLocation}${Switcher.#context.environment}.json`;
-    watchFile(snapshotFile, () => {
+    const snapshotFile = `${Switcher.#options.snapshotLocation}/${Switcher.#context.environment}.json`;
+    let lastUpdate;
+    watchFile(snapshotFile, (listener) => {
       try {
-        Switcher.snapshot = loadDomain(Switcher.#options.snapshotLocation, Switcher.#context.environment);
-        success();
+        if (!lastUpdate || listener.ctime > lastUpdate) {
+          Switcher.snapshot = loadDomain(Switcher.#options.snapshotLocation, Switcher.#context.environment);
+          success();
+        }
       } catch (e) {
         error(e);
+      } finally {
+        lastUpdate = listener.ctime;
       }
     });
   }

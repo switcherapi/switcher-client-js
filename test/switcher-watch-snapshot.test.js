@@ -45,9 +45,15 @@ describe('E2E test - Switcher local - Watch Snapshot:', function () {
   });
 
   this.afterAll(function() {
-    unlinkSync('generated-snapshots/watch1.json');
-    unlinkSync('generated-snapshots/watch2.json');
-    unlinkSync('generated-snapshots/watch3.json');
+    if (existsSync('generated-snapshots/watch1.json'))
+      unlinkSync('generated-snapshots/watch1.json');
+
+    if (existsSync('generated-snapshots/watch2.json'))
+      unlinkSync('generated-snapshots/watch2.json');
+
+    if (existsSync('generated-snapshots/watch3.json'))
+      unlinkSync('generated-snapshots/watch3.json');
+
     Switcher.unloadSnapshot();
   });
 
