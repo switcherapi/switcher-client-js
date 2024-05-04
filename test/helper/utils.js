@@ -40,7 +40,7 @@ export async function assertUntilResolve(assert, actual, expected) {
     }, 10);
   });
 
-  await Promise.race([promise, sleep(5000)]);
+  await Promise.race([promise, sleep(4000)]);
 
   if (!actual()) {
     console.warn('Async test could not resolve in time');
