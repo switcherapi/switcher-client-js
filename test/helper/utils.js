@@ -29,14 +29,17 @@ export async function assertResolve(assert, promise) {
   assert.isTrue(result);
 }
 
-export async function assertUntil(assert, actual, expected, timeout) {
-  const start = Date.now();
-  while (!actual()) {
-    if (Date.now() - start > timeout) {
-      assert.fail('Timeout');
-    }
-    await sleep(10);
-  }
+export async function assertUntilResolve(assert, actual, expected) {
+  const promise = new Promise((resolve) => {
+    const interval = setInterval(() => {
+      if (actual()) {
+        clearInterval(interval);
+        resolve();
+      }
+    }, 10);
+  });
+
+  await promise;
 
   assert.equal(expected, actual());
 }

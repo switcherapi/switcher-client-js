@@ -4,7 +4,7 @@ import { unwatchFile } from 'fs';
 
 import FetchFacade from '../src/lib/utils/fetchFacade.js';
 import { Switcher, checkValue, checkNetwork, checkDate, checkTime, checkRegex, checkNumeric, checkPayload } from '../switcher-client.js';
-import { given, givenError, throws, generateAuth, generateResult, assertReject, assertResolve, generateDetailedResult, assertUntil, sleep } from './helper/utils.js';
+import { given, givenError, throws, generateAuth, generateResult, assertReject, assertResolve, generateDetailedResult, sleep, assertUntilResolve } from './helper/utils.js';
 import ExecutionLogger from '../src/lib/utils/executionLogger.js';
 
 describe('Integrated test - Switcher:', function () {
@@ -158,7 +158,7 @@ describe('Integrated test - Switcher:', function () {
     });
 
     it('should not crash when async checkCriteria fails', async function () {
-      this.timeout(8000);
+      this.timeout(5000);
 
       // given API responding properly
       // first API call
@@ -183,10 +183,11 @@ describe('Integrated test - Switcher:', function () {
 
       // given
       given(fetchStub, 3, { status: 500 });
-      assert.isTrue(await switcher.isItOn('FLAG_1')); // async
 
-      await assertUntil(assert, () => asyncErrorMessage, 
-        'Something went wrong: [checkCriteria] failed with status 500', 8000);
+      // test
+      assert.isTrue(await switcher.isItOn('FLAG_1')); // async
+      await assertUntilResolve(assert, () => asyncErrorMessage, 
+        'Something went wrong: [checkCriteria] failed with status 500');
     });
 
   });
@@ -326,8 +327,8 @@ describe('Integrated test - Switcher:', function () {
 
       const switcher = Switcher.factory();
       await assertResolve(assert, switcher.isItOn('FF2FOR2021'));
-      await assertUntil(assert, () => asyncErrorMessage, 
-        'Something went wrong: [checkCriteria] failed with status 429', 5000);
+      await assertUntilResolve(assert, () => asyncErrorMessage, 
+        'Something went wrong: [checkCriteria] failed with status 429');
     });
 
   });
