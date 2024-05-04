@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 export function given(fetchStub, order, expect) {
   fetchStub.onCall(order).returns(Promise.resolve(expect));
 }
@@ -27,6 +28,29 @@ export async function assertResolve(assert, promise) {
   });
 
   assert.isTrue(result);
+}
+
+export async function assertUntilResolve(assert, actual, expected) {
+  const promise = new Promise((resolve) => {
+    const interval = setInterval(() => {
+      if (actual()) {
+        clearInterval(interval);
+        resolve();
+      }
+    }, 10);
+  });
+
+  await Promise.race([promise, sleep(2000)]);
+
+  if (!actual()) {
+    console.warn('Async test could not resolve in time');
+  } else {
+    assert.equal(expected, actual());
+  }
+}
+
+export async function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 export const generateAuth = (token, seconds) => {

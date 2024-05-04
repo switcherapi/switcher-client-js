@@ -2,6 +2,7 @@
 /* eslint-disable no-console */
 
 import { Switcher, checkValue, checkNumeric } from '../../switcher-client.js';
+import { sleep } from '../helper/utils.js';
 
 const SWITCHER_KEY = 'MY_SWITCHER';
 const apiKey = 'JDJiJDA4JEFweTZjSTR2bE9pUjNJOUYvRy9raC4vRS80Q2tzUnk1d3o1aXFmS2o5eWJmVW11cjR0ODNT';
@@ -77,18 +78,17 @@ const _testThrottledAPICall = async () => {
     switcher = Switcher.factory();
     switcher.throttle(1000);
 
-    for (let index = 0; index < 10; index++) {
+    setInterval(async () => {
+        const time = Date.now();
         const result = await switcher.isItOn(SWITCHER_KEY, [checkNumeric('1')]);
-        console.log(`Call #${index} - ${JSON.stringify(result)}`);
-    }
-
-    Switcher.unloadSnapshot();
+        console.log(`- ${Date.now() - time} ms - ${JSON.stringify(result)}`);
+    }, 1000);
 };
 
 // Requires remote API
 const _testSnapshotUpdate = async () => {
     setupSwitcher(false);
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await sleep(2000);
     
     switcher = Switcher.factory();
     console.log('checkSnapshot:', await Switcher.checkSnapshot());

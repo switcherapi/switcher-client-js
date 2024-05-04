@@ -71,6 +71,15 @@ declare namespace SwitcherClient {
     static unloadSnapshot(): void;
 
     /**
+     * Subscribe to notify when an asynchronous error is thrown.
+     * 
+     * It is usually used when throttle and silent mode are enabled.
+     * 
+     * @param callback function to be called when an error is thrown
+     */
+    static subscribeNotifyError(callback: (err: Error) => void): void;
+
+    /**
      * Force a switcher value to return a given value by calling one of both methods - true() false()
      * 
      * @param key 
