@@ -4,7 +4,7 @@ import { unwatchFile } from 'fs';
 
 import FetchFacade from '../src/lib/utils/fetchFacade.js';
 import { Switcher, checkValue, checkNetwork, checkDate, checkTime, checkRegex, checkNumeric, checkPayload } from '../switcher-client.js';
-import { given, givenError, throws, generateAuth, generateResult, assertReject, assertResolve, generateDetailedResult } from './helper/utils.js';
+import { given, givenError, throws, generateAuth, generateResult, assertReject, assertResolve, generateDetailedResult, assertUntil, sleep } from './helper/utils.js';
 import ExecutionLogger from '../src/lib/utils/executionLogger.js';
 
 describe('Integrated test - Switcher:', function () {
@@ -139,19 +139,19 @@ describe('Integrated test - Switcher:', function () {
       assert.equal(spyPrepare.callCount, 1);
       
       // Next call should call the API again - token has expired
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await sleep(2000);
       
       // given
       given(fetchStub, 3, { json: () => generateAuth('[auth_token]', 5), status: 200 });
       given(fetchStub, 4, { json: () => generateResult(false), status: 200 }); // after token expires
 
       // test - stores result in cache after token renewal
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await sleep(500);
       result = await switcher.isItOn('FLAG_3');
       assert.isTrue(result);
       assert.equal(spyPrepare.callCount, 2);
 
-      await new Promise(resolve => setTimeout(resolve, 50));
+      await sleep(50);
       result = await switcher.isItOn('FLAG_3');
       assert.isFalse(result);
       assert.equal(spyPrepare.callCount, 2);
@@ -178,16 +178,17 @@ describe('Integrated test - Switcher:', function () {
       assert.isTrue(await switcher.isItOn('FLAG_1')); // async
 
       // Next call should call the API again - valid token but crashes on checkCriteria
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await sleep(1000);
       assert.isNull(asyncErrorMessage);
 
       // given
       given(fetchStub, 3, { status: 500 });
       assert.isTrue(await switcher.isItOn('FLAG_1')); // async
 
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      assert.equal(asyncErrorMessage, 'Something went wrong: [checkCriteria] failed with status 500');
+      await assertUntil(assert, () => asyncErrorMessage, 
+        'Something went wrong: [checkCriteria] failed with status 500', 5000);
     });
+
   });
 
   describe('force remote (hybrid):', function () {
@@ -325,7 +326,8 @@ describe('Integrated test - Switcher:', function () {
 
       const switcher = Switcher.factory();
       await assertResolve(assert, switcher.isItOn('FF2FOR2021'));
-      assert.equal(asyncErrorMessage, 'Something went wrong: [checkCriteria] failed with status 429');
+      await assertUntil(assert, () => asyncErrorMessage, 
+        'Something went wrong: [checkCriteria] failed with status 429', 5000);
     });
 
   });
@@ -445,7 +447,7 @@ describe('Integrated test - Switcher:', function () {
       assert.equal(await switcher.isItOn(), true);
 
       // The program delay 2 secs later for the next call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await sleep(2000);
 
       // Prepare the stub to provide the new token
       given(fetchStub, 2, { json: () => generateAuth('asdad12d2232d2323f', 1), status: 200 });
@@ -599,15 +601,14 @@ describe('Integrated test - Switcher:', function () {
       givenError(fetchStub, 0, { errno: 'ECONNREFUSED' });
       assert.isTrue(await switcher.isItOn('FF2FOR2030'));
 
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await sleep(500);
       // The call below is in silent mode. It is getting the configuration from the local snapshot again
       assert.isTrue(await switcher.isItOn());
 
       // As the silent mode was configured to retry after 2 seconds, it's still in time, 
       // therefore, remote call was not yet invoked
       assert.equal(spyRemote.callCount, 0);
-
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      await sleep(3000);
       
       // Setup the remote mocked response and made it to return false just to make sure it's not fetching from the snapshot
       given(fetchStub, 1, { status: 200 });

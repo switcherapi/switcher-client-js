@@ -4,7 +4,7 @@ import { readFileSync, unlinkSync, existsSync } from 'fs';
 
 import { Switcher } from '../src/index.js';
 import FetchFacade from '../src/lib/utils/fetchFacade.js';
-import { given, givenError, generateAuth, generateStatus, assertReject, assertResolve } from './helper/utils.js';
+import { given, givenError, generateAuth, generateStatus, assertReject, assertResolve, sleep } from './helper/utils.js';
 
 describe('E2E test - Switcher local - Snapshot:', function () {
   const apiKey = '[api_key]';
@@ -317,7 +317,7 @@ describe('E2E test - Snapshot AutoUpdater:', function () {
     const switcher = Switcher.factory();
     assert.isFalse(await switcher.isItOn('FF2FOR2030'));
     
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await sleep(2000);
 
     assert.isTrue(snapshotUpdated);
     assert.isTrue(await switcher.isItOn('FF2FOR2030'));
@@ -349,8 +349,8 @@ describe('E2E test - Snapshot AutoUpdater:', function () {
 
     //next call will fail
     givenError(fetchStub, 3, { errno: 'ECONNREFUSED' });
-
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    await sleep(2000);
 
     assert.exists(error);
     assert.equal(error.message, 'Something went wrong: Connection has been refused - ECONNREFUSED');

@@ -29,6 +29,22 @@ export async function assertResolve(assert, promise) {
   assert.isTrue(result);
 }
 
+export async function assertUntil(assert, actual, expected, timeout) {
+  const start = Date.now();
+  while (!actual()) {
+    if (Date.now() - start > timeout) {
+      assert.fail('Timeout');
+    }
+    await sleep(10);
+  }
+
+  assert.equal(expected, actual());
+}
+
+export async function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export const generateAuth = (token, seconds) => {
   return {
     token,
