@@ -139,6 +139,14 @@ await switcher
     .isItOn('FEATURE01');
 ```
 
+In order to capture issues that may occur during the process, it is possible to log the error by subscribing to the error events.
+
+```js
+Switcher.subscribeNotifyError((error) => {
+    console.log(error);
+});
+```
+
 6. **Hybrid mode**
 Forcing Switchers to resolve remotely can help you define exclusive features that cannot be resolved locally.
 This feature is ideal if you want to run the SDK in local mode but still want to resolve a specific switcher remotely.

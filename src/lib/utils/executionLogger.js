@@ -2,6 +2,8 @@ const logger = new Array();
 
 export default class ExecutionLogger {
 
+    static callbackError;
+
     /**
      * Add new execution result
      * 
@@ -49,6 +51,22 @@ export default class ExecutionLogger {
      */
     static clearLogger() {
         logger.splice(0, logger.length);
+    }
+
+    /**
+     * Subscribe to error notifications
+     */
+    static subscribeNotifyError(callbackError) {
+        ExecutionLogger.callbackError = callbackError;
+    }
+
+    /**
+     * Push error notification
+     */
+    static notifyError(error) {
+        if (ExecutionLogger.callbackError) {
+            ExecutionLogger.callbackError(error);
+        }
     }
     
 }

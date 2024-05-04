@@ -77,12 +77,11 @@ const _testThrottledAPICall = async () => {
     switcher = Switcher.factory();
     switcher.throttle(1000);
 
-    for (let index = 0; index < 10; index++) {
+    setInterval(async () => {
+        const time = Date.now();
         const result = await switcher.isItOn(SWITCHER_KEY, [checkNumeric('1')]);
-        console.log(`Call #${index} - ${JSON.stringify(result)}`);
-    }
-
-    Switcher.unloadSnapshot();
+        console.log(`- ${Date.now() - time} ms - ${JSON.stringify(result)}`);
+    }, 1000);
 };
 
 // Requires remote API

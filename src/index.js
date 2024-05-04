@@ -44,14 +44,14 @@ export class Switcher {
     this.snapshot = undefined;
     this.#context = context;
     this.#context.url = context.url;
-    this.#context.environment = context.environment || DEFAULT_ENVIRONMENT;
+    this.#context.environment = Switcher.#get(context.environment, DEFAULT_ENVIRONMENT);
 
     // Default values
     this.#options = {
       snapshotAutoUpdateInterval: 0,
       snapshotLocation: options?.snapshotLocation,
-      local: options?.local != undefined ? options.local : DEFAULT_LOCAL,
-      logger: options?.logger != undefined ? options.logger : DEFAULT_LOGGER
+      local: Switcher.#get(options?.local, DEFAULT_LOCAL),
+      logger: Switcher.#get(options?.logger, DEFAULT_LOGGER)
     };
 
     if (options) {
@@ -108,8 +108,8 @@ export class Switcher {
 
   static async loadSnapshot(watchSnapshot = false, fetchRemote = false) {
     Switcher.snapshot = loadDomain(
-      Switcher.#options.snapshotLocation || '', 
-      Switcher.#context.environment
+      Switcher.#get(Switcher.#options.snapshotLocation, ''), 
+      Switcher.#get(Switcher.#context.environment, DEFAULT_ENVIRONMENT)
     );
 
     if (Switcher.snapshot.data.domain.version == 0 && 
@@ -201,11 +201,11 @@ export class Switcher {
 
   static #initTimedMatch(options) {
     if (SWITCHER_OPTIONS.REGEX_MAX_BLACK_LIST in options) {
-      TimedMatch.setMaxBlackListed(options.regexMaxBlackList || DEFAULT_REGEX_MAX_BLACKLISTED);
+      TimedMatch.setMaxBlackListed(Switcher.#get(options.regexMaxBlackList, DEFAULT_REGEX_MAX_BLACKLISTED));
     }
 
     if (SWITCHER_OPTIONS.REGEX_MAX_TIME_LIMIT in options) {
-      TimedMatch.setMaxTimeLimit(options.regexMaxTimeLimit || DEFAULT_REGEX_MAX_TIME_LIMIT);
+      TimedMatch.setMaxTimeLimit(Switcher.#get(options.regexMaxTimeLimit, DEFAULT_REGEX_MAX_TIME_LIMIT));
     }
 
     const hasRegexSafeOption = SWITCHER_OPTIONS.REGEX_SAFE in options;
@@ -227,11 +227,12 @@ export class Switcher {
 
     if (Switcher.#isTokenExpired()) {
       Switcher.#updateSilentToken();
-      remote.checkAPIHealth(Switcher.#context.url || '').then((isAlive) => {
-        if (isAlive) {
-          Switcher.#auth();
-        }
-      });
+      remote.checkAPIHealth(Switcher.#get(Switcher.#context.url, ''))
+        .then((isAlive) => {
+          if (isAlive) {
+            Switcher.#auth();
+          }
+        });
     }
   }
 
@@ -245,6 +246,10 @@ export class Switcher {
 
   static #isTokenExpired() {
     return !Switcher.#context.exp || Date.now() > (Switcher.#context.exp * 1000);
+  }
+
+  static #get(value, defaultValue) {
+    return value ?? defaultValue;
   }
 
   static assume(key) {
@@ -329,6 +334,8 @@ export class Switcher {
           result = await this._executeRemoteCriteria();
         }
       } catch (e) {
+        Switcher.#notifyError(e);
+        
         if (Switcher.#options.silentMode) {
           Switcher.#updateSilentToken();
           return this._executeLocalCriteria();
@@ -388,7 +395,8 @@ export class Switcher {
 
       if (Switcher.#isTokenExpired()) {
         this.prepare(this.#key, this.#input)
-          .then(() => this.#executeAsyncCheckCriteria());
+          .then(() => this.#executeAsyncCheckCriteria())
+          .catch(e => Switcher.#notifyError(e));
       } else {
         this.#executeAsyncCheckCriteria();
       }
@@ -400,7 +408,16 @@ export class Switcher {
 
   #executeAsyncCheckCriteria() {
     remote.checkCriteria(Switcher.#context, this.#key, this.#input, this.#showDetail)
-      .then(response => ExecutionLogger.add(response, this.#key, this.#input));
+      .then(response => ExecutionLogger.add(response, this.#key, this.#input))
+      .catch(e => Switcher.#notifyError(e));
+  }
+
+  static #notifyError(e) {
+    ExecutionLogger.notifyError(e);
+  }
+
+  static subscribeNotifyError(callback) {
+    ExecutionLogger.subscribeNotifyError(callback);
   }
 
   async #executeApiValidation() {
@@ -416,7 +433,10 @@ export class Switcher {
 
   async _executeLocalCriteria() {
     const response = await checkCriteriaLocal(
-      this.#key, this.#input, Switcher.snapshot);
+      Switcher.#get(this.#key, ''), 
+      Switcher.#get(this.#input, []), 
+      Switcher.snapshot
+    );
 
     if (Switcher.#options.logger) {
       ExecutionLogger.add(response, this.#key, this.#input);
