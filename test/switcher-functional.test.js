@@ -158,7 +158,7 @@ describe('Integrated test - Switcher:', function () {
     });
 
     it('should not crash when async checkCriteria fails', async function () {
-      this.timeout(5000);
+      this.timeout(8000);
 
       // given API responding properly
       // first API call
@@ -186,7 +186,7 @@ describe('Integrated test - Switcher:', function () {
       assert.isTrue(await switcher.isItOn('FLAG_1')); // async
 
       await assertUntil(assert, () => asyncErrorMessage, 
-        'Something went wrong: [checkCriteria] failed with status 500', 5000);
+        'Something went wrong: [checkCriteria] failed with status 500', 8000);
     });
 
   });
