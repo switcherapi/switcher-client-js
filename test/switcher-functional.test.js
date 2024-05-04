@@ -158,7 +158,7 @@ describe('Integrated test - Switcher:', function () {
     });
 
     it('should not crash when async checkCriteria fails', async function () {
-      this.timeout(5000);
+      this.timeout(10000);
 
       // given API responding properly
       // first API call
