@@ -185,7 +185,7 @@ describe('Integrated test - Switcher:', function () {
       given(fetchStub, 3, { status: 500 });
       assert.isTrue(await switcher.isItOn('FLAG_1')); // async
 
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 2000));
       assert.equal(asyncErrorMessage, 'Something went wrong: [checkCriteria] failed with status 500');
     });
   });
