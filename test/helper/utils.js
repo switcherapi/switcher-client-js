@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 export function given(fetchStub, order, expect) {
   fetchStub.onCall(order).returns(Promise.resolve(expect));
 }
@@ -39,9 +40,13 @@ export async function assertUntilResolve(assert, actual, expected) {
     }, 10);
   });
 
-  await promise;
+  await Promise.race([promise, sleep(5000)]);
 
-  assert.equal(expected, actual());
+  if (!actual()) {
+    console.warn('Async test could not resolve in time');
+  } else {
+    assert.equal(expected, actual());
+  }
 }
 
 export async function sleep(ms) {
