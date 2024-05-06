@@ -13,7 +13,7 @@ describe('E2E test - Switcher local - Snapshot:', function () {
   const environment = 'dev';
   const url = 'http://localhost:3000';
 
-  const dataBuffer = readFileSync('./snapshot/dev.json');
+  const dataBuffer = readFileSync('./test/snapshot/dev.json');
   const dataJSON = dataBuffer.toString();
 
   let fetchStub;
@@ -29,7 +29,7 @@ describe('E2E test - Switcher local - Snapshot:', function () {
 
   beforeEach(function() {
     Switcher.buildContext({ url, apiKey, domain, component, environment }, {
-      snapshotLocation: './snapshot/',
+      snapshotLocation: './test/snapshot/',
       local: true,
       regexSafe: false
     });
@@ -256,10 +256,10 @@ describe('E2E test - Snapshot AutoUpdater:', function () {
   const environment = 'dev';
   const url = 'http://localhost:3000';
 
-  const dataBuffer = readFileSync('./snapshot/dev.json');
+  const dataBuffer = readFileSync('./test/snapshot/dev.json');
   const dataJSON = dataBuffer.toString();
 
-  const dataBufferV2 = readFileSync('./snapshot/dev_v2.json');
+  const dataBufferV2 = readFileSync('./test/snapshot/dev_v2.json');
   const dataJSONV2 = dataBufferV2.toString();
 
   let fetchStub;

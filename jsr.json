@@ -1,5 +1,19 @@
 {
     "name": "@switcherapi/switcher-client-js",
-    "version": "4.0.4",
-    "exports": "./switcher-client.js"
+    "version": "4.0.5",
+    "exports": "./switcher-client.js",
+    "publish": {
+        "include": [
+            "LICENSE",
+            "switcher-client.js",
+            "src/**/*"
+        ],
+        "exclude": [
+            ".github",
+            ".vscode",
+            "test",
+            "sonar-project.properties",
+            ".snyk"
+        ]
+    }
 }

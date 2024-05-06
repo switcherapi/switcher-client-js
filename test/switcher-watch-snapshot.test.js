@@ -35,7 +35,7 @@ describe('E2E test - Switcher local - Watch Snapshot:', function () {
       mkdirSync('generated-snapshots/', { recursive: true });
     }
 
-    const dataBuffer = readFileSync('./snapshot/dev.json');
+    const dataBuffer = readFileSync('./test/snapshot/dev.json');
     devJSON = JSON.parse(dataBuffer.toString());
     devJSON.data.domain.group[0].config[0].activated = true;
   });
