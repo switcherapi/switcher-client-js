@@ -1,5 +1,6 @@
-import fs from 'fs';
-import { Agent } from 'https';
+import fs from 'node:fs';
+import { Agent } from 'node:https';
+
 import { AuthError, CheckSwitcherError, CriteriaError, SnapshotServiceError } from './exceptions/index.js';
 import FetchFacade from './utils/fetchFacade.js';
 

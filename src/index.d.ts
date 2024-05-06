@@ -11,9 +11,6 @@ declare namespace SwitcherClient {
 
     /**
      * Create the necessary configuration to communicate with the API
-     * 
-     * @param context Necessary arguments
-     * @param options 
      */
     static buildContext(context: SwitcherContext, options?: SwitcherOptions): void;
 
@@ -40,7 +37,6 @@ declare namespace SwitcherClient {
      * building context
      * 
      * @param interval in ms
-     * @param callback from the execution
      */
     static scheduleSnapshotAutoUpdate(interval?: number, callback?: (updated: boolean, err: Error) => void): void;
 
@@ -81,22 +77,16 @@ declare namespace SwitcherClient {
 
     /**
      * Force a switcher value to return a given value by calling one of both methods - true() false()
-     * 
-     * @param key 
      */
     static assume(key: string): Key;
 
     /**
      * Remove forced value from a switcher
-     * 
-     * @param key 
      */
     static forget(key: string): void;
 
     /**
      * Retrieve execution log given a switcher key
-     * 
-     * @param key 
      */
     static getLogger(key: string): LoggerRecord[];
 
@@ -118,17 +108,13 @@ declare namespace SwitcherClient {
 
     /**
      * Pre-set input values before calling the API
-     * 
-     * @param key 
-     * @param input 
      */
     prepare(key: string, input?: string[][]): Promise<void>;
 
     /**
      * Execute async criteria
      * 
-     * @param key 
-     * @param input 
+     * @returns boolean or ResultDetail when detail() is used
      */
     isItOn(key?: string, input?: string[][]): Promise<boolean | ResultDetail>;
 
@@ -155,18 +141,29 @@ declare namespace SwitcherClient {
     detail(showDetail?: boolean): Switcher;
   }
 
+  /**
+   * ResultDetail is a detailed response from the API.
+   */
   type ResultDetail = {
     result: boolean;
     reason: string;
     metadata: any;
   }
 
+  /**
+   * LoggerRecord is a detailed log of the execution.
+   * 
+   * Switcher.getLogger(key) returns an array of LoggerRecord.
+   */
   type LoggerRecord = {
     key: string;
     input: string[][];
     response: ResultDetail
   }
 
+  /**
+   * SwitcherContext is required to build the context to communicate with the API.
+   */
   type SwitcherContext = {
     url?: string;
     apiKey?: string;
@@ -177,6 +174,9 @@ declare namespace SwitcherClient {
     exp?: number;
   }
 
+  /**
+   * SwitcherOptions is optional to build the context to communicate with the API.
+   */
   type SwitcherOptions = {
     local?: boolean;
     logger?: boolean;

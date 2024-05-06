@@ -1,4 +1,5 @@
-import { existsSync, readFileSync, mkdirSync, writeFileSync } from 'fs';
+import { existsSync, readFileSync, mkdirSync, writeFileSync } from 'node:fs';
+
 import IPCIDR from './utils/ipcidr.js';
 import DateMoment from './utils/datemoment.js';
 import TimedMatch from './utils/timed-match/index.js';

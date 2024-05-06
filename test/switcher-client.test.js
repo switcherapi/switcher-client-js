@@ -1,7 +1,8 @@
 import { rmdir } from 'fs';
 import { assert } from 'chai';
 
-import { Switcher, checkValue, checkNetwork, checkPayload, checkRegex } from '../switcher-client.js';
+import { Switcher, checkValue, checkNetwork, checkPayload, checkRegex, 
+  ResultDetail, SwitcherContext, SwitcherOptions } from '../switcher-client.js';
 import { StrategiesType } from '../src/lib/snapshot.js';
 import { assertReject, assertResolve } from './helper/utils.js';
 
@@ -246,5 +247,21 @@ describe('E2E test - Switcher local:', function () {
 
     await assertResolve(assert, Switcher.loadSnapshot());
     assert.isNotNull(Switcher.snapshot);
+  });
+});
+
+describe('Type placeholders:', function () {
+  it('should check exported types', function () {
+    const resultDetail = ResultDetail.build();
+    const switcherContext = SwitcherContext.build();
+    const switcherOptions = SwitcherOptions.build();
+
+    assert.isTrue(resultDetail instanceof ResultDetail);
+    assert.isTrue(switcherContext instanceof SwitcherContext);
+    assert.isTrue(switcherOptions instanceof SwitcherOptions);
+
+    assert.isNotNull(resultDetail);
+    assert.isNotNull(switcherContext);
+    assert.isNotNull(switcherOptions);
   });
 });
