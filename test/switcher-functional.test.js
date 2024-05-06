@@ -12,7 +12,7 @@ describe('Integrated test - Switcher:', function () {
   let contextSettings;
 
   this.afterAll(function() {
-    unwatchFile('./snapshot/default.json');
+    unwatchFile('./test/snapshot/default.json');
   });
 
   this.beforeEach(function() {
@@ -198,7 +198,7 @@ describe('Integrated test - Switcher:', function () {
     
     const forceRemoteOptions = { 
       local: true, 
-      snapshotLocation: './snapshot/',
+      snapshotLocation: './test/snapshot/',
       regexSafe: false
     };
 
@@ -307,7 +307,7 @@ describe('Integrated test - Switcher:', function () {
       given(fetchStub, 0, { status: 429 });
 
       //test
-      Switcher.buildContext(contextSettings, { silentMode: '5m', regexSafe: false, snapshotLocation: './snapshot/' });
+      Switcher.buildContext(contextSettings, { silentMode: '5m', regexSafe: false, snapshotLocation: './test/snapshot/' });
       await Switcher.checkSwitchers(['FEATURE01', 'FEATURE02']).catch(e => {
         assert.equal(e.message, 'Something went wrong: [FEATURE01,FEATURE02] not found');
       });
@@ -322,7 +322,7 @@ describe('Integrated test - Switcher:', function () {
 
       // test
       let asyncErrorMessage = null;
-      Switcher.buildContext(contextSettings, { silentMode: '5m', regexSafe: false, snapshotLocation: './snapshot/' });
+      Switcher.buildContext(contextSettings, { silentMode: '5m', regexSafe: false, snapshotLocation: './test/snapshot/' });
       Switcher.subscribeNotifyError((error) => asyncErrorMessage = error.message);
 
       const switcher = Switcher.factory();
@@ -590,7 +590,7 @@ describe('Integrated test - Switcher:', function () {
 
       // setup context to read the snapshot in case the API does not respond
       Switcher.buildContext(contextSettings, {
-        snapshotLocation: './snapshot/',
+        snapshotLocation: './test/snapshot/',
         regexSafe: false,
         silentMode: '2s'
       });
@@ -642,7 +642,7 @@ describe('Integrated test - Switcher:', function () {
 
       // test
       Switcher.buildContext(contextSettings, {
-        snapshotLocation: './snapshot/',
+        snapshotLocation: './test/snapshot/',
         regexSafe: false,
         silentMode: '5m'
       });

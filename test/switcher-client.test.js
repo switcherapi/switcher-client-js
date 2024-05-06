@@ -18,7 +18,7 @@ describe('E2E test - Switcher local:', function () {
   };
 
   const options = {
-    snapshotLocation: './snapshot/',
+    snapshotLocation: './test/snapshot/',
     local: true, 
     logger: true, 
     regexMaxBlackList: 1, 

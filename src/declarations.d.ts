@@ -1,0 +1,1 @@
+declare module '@switcherapi/switcher-client-js';
