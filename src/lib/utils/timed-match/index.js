@@ -1,6 +1,7 @@
-import cp from 'child_process';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import cp from 'node:child_process';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
 import tryMatch from '../timed-match/match.js';
 import { DEFAULT_REGEX_MAX_BLACKLISTED, DEFAULT_REGEX_MAX_TIME_LIMIT } from '../../constants.js';
 

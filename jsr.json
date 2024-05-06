@@ -1,0 +1,5 @@
+{
+    "name": "@switcherapi/switcher-client-js",
+    "version": "4.0.4",
+    "exports": "./switcher-client.js"
+}

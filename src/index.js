@@ -1,3 +1,5 @@
+import { writeFileSync, watchFile, unwatchFile } from 'node:fs';
+
 import Bypasser from './lib/bypasser/index.js';
 import ExecutionLogger from './lib/utils/executionLogger.js';
 import TimedMatch from './lib/utils/timed-match/index.js';
@@ -7,7 +9,6 @@ import { loadDomain, validateSnapshot, checkSwitchersLocal } from './lib/snapsho
 import { SnapshotNotFoundError } from './lib/exceptions/index.js';
 import * as remote from './lib/remote.js';
 import checkCriteriaLocal from './lib/resolver.js';
-import { writeFileSync, watchFile, unwatchFile } from 'fs';
 import { 
   DEFAULT_ENVIRONMENT, 
   DEFAULT_LOCAL, 
@@ -28,6 +29,7 @@ export class Switcher {
   #key;
   #forceRemote;
   #showDetail;
+  snapshot;
 
   constructor() {
     this.#delay = 0;
@@ -458,4 +460,24 @@ export class Switcher {
     return this.#delay == 0 || !ExecutionLogger.getExecution(this.#key, this.#input);
   }
 
+}
+
+// Type export placeholders
+
+export class SwitcherContext {
+  static build() {
+    return new SwitcherContext();
+  }
+}
+
+export class SwitcherOptions {
+  static build() {
+    return new SwitcherOptions();
+  }
+}
+
+export class ResultDetail {
+  static build() {
+    return new ResultDetail();
+  }
 }

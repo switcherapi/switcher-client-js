@@ -15,7 +15,7 @@
  * @module
  */
 
-export { Switcher } from './src/index.js';
+export { Switcher, ResultDetail, SwitcherContext, SwitcherOptions } from './src/index.js';
 export {
   checkDate,
   checkNetwork,
