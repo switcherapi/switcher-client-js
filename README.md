@@ -112,9 +112,7 @@ switcher.isItOn('KEY')
 Loading information into the switcher can be made by using *prepare*, in case you want to include input from a different place of your code. Otherwise, it is also possible to include everything in the same call.
 
 ```js
-import { checkValue, checkNetwork } from 'switcher-client';
-
-switcher.prepare('FEATURE01', [checkValue('USER_1')];
+switcher.checkValue('USER_1').prepare('FEATURE01');
 switcher.isItOn();
 ```
 
@@ -122,10 +120,10 @@ switcher.isItOn();
 All-in-one method is fast and include everything you need to execute a complex call to the API.
 
 ```js
-await switcher.isItOn('FEATURE01', [
-    checkValue('User 1'),
-    checkNetwork('192.168.0.1')
-]);
+await switcher
+    .checkValue('User 1')
+    .checkNetwork('192.168.0.1')
+    .isItOn('FEATURE01');
 ```
 
 5. **Throttle**

@@ -33,10 +33,6 @@ export function getEntry(input) {
     if (!input) {
         return undefined;
     }
-    
-    if (input.flat().length % 2 !== 0) {
-        throw new Error(`Invalid input format for '${input}'`);
-    }
 
     let entry = [];
     for (const inputValues of input) {

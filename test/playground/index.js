@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-console */
 
-import { Switcher, checkValue, checkNumeric } from '../../switcher-client.js';
+import { Switcher } from '../../switcher-client.js';
 import { sleep } from '../helper/utils.js';
 
 const SWITCHER_KEY = 'MY_SWITCHER';
@@ -80,7 +80,10 @@ const _testThrottledAPICall = async () => {
 
     setInterval(async () => {
         const time = Date.now();
-        const result = await switcher.isItOn(SWITCHER_KEY, [checkNumeric('1')]);
+        const result = await switcher
+            .checkNumeric('1')
+            .isItOn(SWITCHER_KEY);
+            
         console.log(`- ${Date.now() - time} ms - ${JSON.stringify(result)}`);
     }, 1000);
 };
@@ -155,7 +158,7 @@ const _testSnapshotAutoUpdate = async () => {
 
     setInterval(async () => {
         const time = Date.now();
-        await switcher.isItOn(SWITCHER_KEY, [checkValue('user_1')]);
+        await switcher.checkValue('user_1').isItOn(SWITCHER_KEY);
         console.clear();
         console.log(Switcher.getLogger(SWITCHER_KEY), `executed in ${Date.now() - time}ms`);
     }, 2000);
