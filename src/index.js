@@ -62,6 +62,7 @@ export class Switcher {
   }
 
   static #buildOptions(options) {
+    remote.removeAgent();
     if (SWITCHER_OPTIONS.CERT_PATH in options && options.certPath) {
       remote.setCerts(options.certPath);
     }
