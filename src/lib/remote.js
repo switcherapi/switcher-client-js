@@ -25,6 +25,10 @@ export function setCerts(certPath) {
     });
 }
 
+export function removeAgent() {
+    httpClient = undefined;
+}
+
 export function getEntry(input) {
     if (!input) {
         return undefined;
@@ -113,7 +117,7 @@ export async function checkSwitchers(url, token, switcherKeys) {
             throw new Error(`[checkSwitchers] failed with status ${response.status}`);
         }
         
-        const json = await response.json();
+        const json = response.json();
         if (json.not_found.length)
             throw new CheckSwitcherError(json.not_found);
     } catch (e) {
@@ -164,7 +168,7 @@ export async function resolveSnapshot(url, token, domain, environment, component
         });
         
         if (response.status == 200) {
-            return JSON.stringify(await response.json(), null, 4);
+            return JSON.stringify(response.json(), null, 4);
         }
     
         throw new Error(`[resolveSnapshot] failed with status ${response.status}`);

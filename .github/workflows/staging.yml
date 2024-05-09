@@ -1,0 +1,33 @@
+name: Staging CI
+run-name: Staging - Node ${{ github.event.inputs.node }} / ${{ github.event.inputs.os }} by @${{ github.actor }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      node:
+        description: 'Node version'
+        required: true
+        default: '20.x'
+      os:
+        description: 'Operating System (ubuntu-20.04, ubuntu-latest, windows-latest)'
+        required: true
+        default: 'ubuntu-latest'
+
+jobs:
+  test:
+    name: Test - Node ${{ github.event.inputs.node }} on ${{ github.event.inputs.os }}
+    runs-on: ${{ github.event.inputs.os }}
+
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ github.event.inputs.node }}
+
+      - run: npm install
+      - run: npm test
