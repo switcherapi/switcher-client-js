@@ -5,7 +5,7 @@ import ExecutionLogger from './lib/utils/executionLogger.js';
 import TimedMatch from './lib/utils/timed-match/index.js';
 import DateMoment from './lib/utils/datemoment.js';
 import SnapshotAutoUpdater from './lib/utils/snapshotAutoUpdater.js';
-import { loadDomain, validateSnapshot, checkSwitchersLocal } from './lib/snapshot.js';
+import { loadDomain, validateSnapshot, checkSwitchersLocal, StrategiesType } from './lib/snapshot.js';
 import { SnapshotNotFoundError } from './lib/exceptions/index.js';
 import * as remote from './lib/remote.js';
 import checkCriteriaLocal from './lib/resolver.js';
@@ -31,11 +31,11 @@ export class Switcher {
   #showDetail;
   snapshot;
 
-  constructor() {
+  constructor(key) {
+    this.#key = key;
     this.#delay = 0;
     this.#nextRun = 0;
     this.#input = undefined;
-    this.#key = '';
     this.#forceRemote = false;
     this.#showDetail = false;
   }
@@ -79,8 +79,8 @@ export class Switcher {
     this.#initTimedMatch(options);
   }
 
-  static factory() {
-    return new Switcher();
+  static factory(key) {
+    return new Switcher(Switcher.#get(key, ''));
   }
 
   static async checkSnapshot() {
@@ -275,10 +275,8 @@ export class Switcher {
     Switcher.testEnabled = testEnabled;
   }
 
-  async prepare(key, input) {
+  async prepare(key) {
     this.#key = key;
-
-    if (input) { this.#input = input; }
 
     if (!Switcher.#options.local || this.#forceRemote) {
       await Switcher.#auth();
@@ -314,9 +312,9 @@ export class Switcher {
     }
   }
 
-  async isItOn(key, input) {
+  async isItOn(key) {
     let result;
-    this.#validateArgs(key, input);
+    this.#validateArgs(key, this.#input);
     
     // verify if query from Bypasser
     const bypassKey = Bypasser.searchBypassed(this.#key);
@@ -375,6 +373,43 @@ export class Switcher {
     return this;
   }
 
+  check(startegyType, input) {
+    if (!this.#input) {
+      this.#input = [];
+    }
+
+    this.#input.push([startegyType, input]);
+    return this;
+  }
+
+  checkValue(input) {
+    return this.check(StrategiesType.VALUE, input);
+  }
+
+  checkNumeric(input) {
+    return this.check(StrategiesType.NUMERIC, input);
+  }
+
+  checkNetwork(input) {
+    return this.check(StrategiesType.NETWORK, input);
+  }
+
+  checkDate(input) {
+    return this.check(StrategiesType.DATE, input);
+  }
+
+  checkTime(input) {
+    return this.check(StrategiesType.TIME, input);
+  }
+
+  checkRegex(input) {
+    return this.check(StrategiesType.REGEX, input);
+  }
+  
+  checkPayload(input) {
+    return this.check(StrategiesType.PAYLOAD, input);
+  }
+
   async _executeRemoteCriteria() {
     let responseCriteria;
 
@@ -397,7 +432,7 @@ export class Switcher {
       this.#nextRun = Date.now() + this.#delay;
 
       if (Switcher.#isTokenExpired()) {
-        this.prepare(this.#key, this.#input)
+        this.prepare(this.#key)
           .then(() => this.#executeAsyncCheckCriteria())
           .catch(e => Switcher.#notifyError(e));
       } else {
@@ -430,7 +465,7 @@ export class Switcher {
 
     Switcher.#checkHealth();
     if (Switcher.#isTokenExpired()) {
-      await this.prepare(this.#key, this.#input);
+      await this.prepare(this.#key);
     }
   }
 

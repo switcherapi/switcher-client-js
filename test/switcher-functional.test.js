@@ -3,7 +3,7 @@ import { stub, spy } from 'sinon';
 import { unwatchFile } from 'fs';
 
 import FetchFacade from '../src/lib/utils/fetchFacade.js';
-import { Switcher, checkValue, checkNetwork, checkDate, checkTime, checkRegex, checkNumeric, checkPayload } from '../switcher-client.js';
+import { Switcher } from '../switcher-client.js';
 import { given, givenError, throws, generateAuth, generateResult, assertReject, assertResolve, generateDetailedResult, sleep, assertUntilResolve } from './helper/utils.js';
 import ExecutionLogger from '../src/lib/utils/executionLogger.js';
 
@@ -354,15 +354,15 @@ describe('Integrated test - Switcher:', function () {
       Switcher.buildContext(contextSettings, { logger: true });
       let switcher = Switcher.factory();
       
-      await switcher.prepare('SWITCHER_MULTIPLE_INPUT', [
-        checkValue('User 1'),
-        checkNumeric('1'),
-        checkNetwork('192.168.0.1'),
-        checkDate('2019-12-01T08:30'),
-        checkTime('08:00'),
-        checkRegex('\\bUSER_[0-9]{1,2}\\b'),
-        checkPayload(JSON.stringify({ name: 'User 1' }))
-      ]);
+      await switcher
+        .checkValue('User 1')
+        .checkNumeric('1')
+        .checkNetwork('192.168.0.1')
+        .checkDate('2019-12-01T08:30')
+        .checkTime('08:00')
+        .checkRegex('\\bUSER_[0-9]{1,2}\\b')
+        .checkPayload(JSON.stringify({ name: 'User 1' }))
+        .prepare('SWITCHER_MULTIPLE_INPUT');
       
       assert.isTrue(await switcher.isItOn());
       
@@ -472,10 +472,10 @@ describe('Integrated test - Switcher:', function () {
       // test
       Switcher.buildContext(contextSettings);
       let switcher = Switcher.factory();
-      assert.isTrue(await switcher.isItOn('MY_FLAG', [
-        checkValue('User 1'),
-        checkNetwork('192.168.0.1')
-      ]));
+      assert.isTrue(await switcher
+          .checkValue('User 1')
+          .checkNetwork('192.168.0.1')
+          .isItOn('MY_FLAG'));
     });
 
     it('should be valid - when preparing key and sending input strategy afterwards', async function () {
@@ -488,10 +488,10 @@ describe('Integrated test - Switcher:', function () {
       let switcher = Switcher.factory();
 
       await switcher.prepare('MY_FLAG');
-      assert.isTrue(await switcher.isItOn(undefined, [
-        checkValue('User 1'),
-        checkNetwork('192.168.0.1')
-      ]));
+      assert.isTrue(await switcher
+        .checkValue('User 1')
+        .checkNetwork('192.168.0.1')
+        .isItOn(undefined));
     });
 
     it('should be invalid - Missing API url field', async function () {
@@ -502,10 +502,10 @@ describe('Integrated test - Switcher:', function () {
       Switcher.buildContext({ url: undefined, apiKey: 'apiKey', domain: 'domain', component: 'component', environment: 'default' });
       let switcher = Switcher.factory();
 
-      await switcher.prepare('MY_FLAG', [
-        checkValue('User 1'),
-        checkNetwork('192.168.0.1')
-      ]);
+      await switcher
+        .checkValue('User 1')
+        .checkNetwork('192.168.0.1')
+        .prepare('MY_FLAG');
 
       await assertReject(assert, switcher.isItOn(), 'Something went wrong: Missing API url field');
     });
@@ -518,10 +518,10 @@ describe('Integrated test - Switcher:', function () {
       Switcher.buildContext({ url: 'url', apiKey: undefined, domain: 'domain', component: 'component', environment: 'default' });
       let switcher = Switcher.factory();
 
-      await switcher.prepare('MY_FLAG', [
-        checkValue('User 1'),
-        checkNetwork('192.168.0.1')
-      ]);
+      await switcher
+        .checkValue('User 1')
+        .checkNetwork('192.168.0.1')
+        .prepare('MY_FLAG');
 
       await assertReject(assert, switcher.isItOn(), 'Something went wrong: Missing API Key field');
     });
@@ -534,10 +534,10 @@ describe('Integrated test - Switcher:', function () {
       // test
       Switcher.buildContext(contextSettings);
       let switcher = Switcher.factory();
-      await switcher.prepare(undefined, [
-        checkValue('User 1'),
-        checkNetwork('192.168.0.1')
-      ]);
+      await switcher
+        .checkValue('User 1')
+        .checkNetwork('192.168.0.1')
+        .prepare(undefined);
 
       await assertReject(assert, switcher.isItOn(), 'Something went wrong: Missing key field');
     });
@@ -551,10 +551,10 @@ describe('Integrated test - Switcher:', function () {
       Switcher.buildContext({ url: 'url', apiKey: 'apiKey', domain: 'domain', component: undefined, environment: 'default' });
       let switcher = Switcher.factory();
 
-      await assertReject(assert, switcher.isItOn('MY_FLAG', [
-        checkValue('User 1'),
-        checkNetwork('192.168.0.1')
-      ]), 'Something went wrong: Missing component field');
+      await assertReject(assert, switcher
+        .checkValue('User 1')
+        .checkNetwork('192.168.0.1')
+        .isItOn('MY_FLAG'), 'Something went wrong: Missing component field');
     });
 
     it('should be invalid - Missing token field', async function () {
@@ -566,23 +566,10 @@ describe('Integrated test - Switcher:', function () {
       Switcher.buildContext(contextSettings);
       let switcher = Switcher.factory();
       
-      await assertReject(assert, switcher.isItOn('MY_FLAG', [
-        checkValue('User 1'),
-        checkNetwork('192.168.0.1')
-      ]), 'Something went wrong: Missing token field');
-    });
-
-    it('should be invalid - bad strategy input', async function () {
-      // given
-      given(fetchStub, 0, { json: () => generateAuth('[auth_token]', 5), status: 200 });
-      given(fetchStub, 1, { json: () => generateResult(undefined) });
-
-      // test
-      Switcher.buildContext(contextSettings);
-      let switcher = Switcher.factory();
-      await switcher.prepare('MY_WRONG_FLAG', ['THIS IS WRONG']);
-
-      await assertReject(assert, switcher.isItOn(), 'Something went wrong: Invalid input format for \'THIS IS WRONG\'');
+      await assertReject(assert, switcher
+        .checkValue('User 1')
+        .checkNetwork('192.168.0.1')
+        .isItOn('MY_FLAG'), 'Something went wrong: Missing token field');
     });
 
     it('should run in silent mode', async function () {

@@ -17,7 +17,7 @@ declare namespace SwitcherClient {
     /**
      * Creates a new instance of Switcher
      */
-    static factory(): Switcher;
+    static factory(key?: string): Switcher;
 
     /**
      * Read snapshot file locally and store in a parsed JSON object
@@ -112,7 +112,7 @@ declare namespace SwitcherClient {
     prepare(key: string, input?: string[][]): Promise<void>;
 
     /**
-     * Execute async criteria
+     * Execute criteria
      * 
      * @returns boolean or ResultDetail when detail() is used
      */
@@ -139,6 +139,45 @@ declare namespace SwitcherClient {
      * @param showDetail default true
      */
     detail(showDetail?: boolean): Switcher;
+
+    /**
+     * Adds a strategy for validation
+     */
+    check(startegyType: string, input: string): Switcher;
+
+    /**
+     * Adds VALUE_VALIDATION input for strategy validation
+     */
+    checkValue(input: string): Switcher;
+    /**
+    * Adds NUMERIC_VALIDATION input for strategy validation
+    */
+    checkNumeric(input: string): Switcher;
+
+    /**
+    * Adds NETWORK_VALIDATION input for strategy validation
+    */
+    checkNetwork(input: string): Switcher;
+
+    /**
+    * Adds DATE_VALIDATION input for strategy validation
+    */
+    checkDate(input: string): Switcher;
+
+    /**
+    * Adds TIME_VALIDATION input for strategy validation
+    */
+    checkTime(input: string): Switcher;
+
+    /**
+    * Adds REGEX_VALIDATION input for strategy validation
+    */
+    checkRegex(input: string): Switcher;
+
+    /**
+    * Adds PAYLOAD_VALIDATION input for strategy validation
+    */
+    checkPayload(input: string): Switcher;
   }
 
   /**
