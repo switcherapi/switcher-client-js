@@ -54,6 +54,23 @@ describe('E2E test - Switcher local:', function () {
     assert.isNotEmpty(Client.getLogger('FF2FOR2020'));
   });
 
+  it('should get execution from logger', async function () {
+    await switcher
+      .checkValue('Japan')
+      .checkNetwork('10.0.0.3')
+      .prepare('FF2FOR2020');
+
+    await switcher.isItOn('FF2FOR2020');
+    const log = Client.getExecution(switcher);
+    
+    assert.equal(log.key, 'FF2FOR2020');
+    assert.sameDeepMembers(log.input, [
+      [ 'VALUE_VALIDATION', 'Japan' ],
+      [ 'NETWORK_VALIDATION', '10.0.0.3' ]]);
+    assert.equal(log.response.reason, 'Success');
+    assert.equal(log.response.result, true);
+  });
+
   it('should be valid - isItOn - with detail', async function () {
     const response = await switcher
       .detail()

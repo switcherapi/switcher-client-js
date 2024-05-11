@@ -87,6 +87,28 @@ describe('E2E test - Switcher local - Snapshot:', function () {
     Client.unloadSnapshot();
   });
 
+  it('should update snapshot during load - store file', async function () {
+    //given
+    fetchStub = stub(FetchFacade, 'fetch');
+
+    given(fetchStub, 0, { json: () => generateAuth('[auth_token]', 5), status: 200 });
+    given(fetchStub, 1, { json: () => generateStatus(false), status: 200 }); // Snapshot outdated
+    given(fetchStub, 2, { json: () => JSON.parse(dataJSON), status: 200 });
+
+    //test
+    Client.buildContext({ url, apiKey, domain, component, environment }, {
+      snapshotLocation: 'generated-snapshots/',
+      local: true,
+      regexSafe: false
+    });
+    
+    await Client.loadSnapshot(true, true);
+    assert.isTrue(existsSync(`generated-snapshots/${environment}.json`));
+
+    //restore state to avoid process leakage
+    Client.unloadSnapshot();
+  });
+
   it('should NOT update snapshot', async function () {
     //given
     fetchStub = stub(FetchFacade, 'fetch');
