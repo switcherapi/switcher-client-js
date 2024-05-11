@@ -2,9 +2,9 @@ import { assert } from 'chai';
 import { stub } from 'sinon';
 import { readFileSync, unlinkSync, existsSync } from 'fs';
 
-import { Switcher } from '../src/index.js';
+import { Client } from '../switcher-client.js';
 import FetchFacade from '../src/lib/utils/fetchFacade.js';
-import { given, givenError, generateAuth, generateStatus, assertReject, assertResolve, sleep } from './helper/utils.js';
+import { given, givenError, generateAuth, generateStatus, assertReject, assertResolve, sleep, deleteGeneratedSnapshot } from './helper/utils.js';
 
 describe('E2E test - Switcher local - Snapshot:', function () {
   const apiKey = '[api_key]';
@@ -28,17 +28,17 @@ describe('E2E test - Switcher local - Snapshot:', function () {
   });
 
   beforeEach(function() {
-    Switcher.buildContext({ url, apiKey, domain, component, environment }, {
+    Client.buildContext({ url, apiKey, domain, component, environment }, {
       snapshotLocation: './test/snapshot/',
       local: true,
       regexSafe: false
     });
 
-    Switcher.testMode();
+    Client.testMode();
   });
 
   this.afterAll(function() {
-    Switcher.unloadSnapshot();
+    Client.unloadSnapshot();
   });
 
   it('should update snapshot', async function () {
@@ -50,17 +50,17 @@ describe('E2E test - Switcher local - Snapshot:', function () {
     given(fetchStub, 2, { json: () => JSON.parse(dataJSON), status: 200 });
 
     //test
-    Switcher.buildContext({ url, apiKey, domain, component, environment }, {
+    Client.buildContext({ url, apiKey, domain, component, environment }, {
       snapshotLocation: 'generated-snapshots/',
       local: true,
       regexSafe: false
     });
     
-    await Switcher.loadSnapshot(true);
-    assert.isTrue(await Switcher.checkSnapshot());
+    await Client.loadSnapshot(true);
+    assert.isTrue(await Client.checkSnapshot());
 
     //restore state to avoid process leakage
-    Switcher.unloadSnapshot();
+    Client.unloadSnapshot();
     unlinkSync(`generated-snapshots/${environment}.json`);
   });
 
@@ -73,18 +73,18 @@ describe('E2E test - Switcher local - Snapshot:', function () {
     given(fetchStub, 2, { json: () => JSON.parse(dataJSON), status: 200 });
 
     //test
-    Switcher.buildContext({ url, apiKey, domain, component, environment }, {
+    Client.buildContext({ url, apiKey, domain, component, environment }, {
       snapshotLocation: 'generated-snapshots/',
       local: true,
       regexSafe: false
     });
     
-    await Switcher.loadSnapshot(true);
-    assert.isTrue(await Switcher.checkSnapshot());
+    await Client.loadSnapshot(true);
+    assert.isTrue(await Client.checkSnapshot());
     assert.isTrue(existsSync(`generated-snapshots/${environment}.json`));
 
     //restore state to avoid process leakage
-    Switcher.unloadSnapshot();
+    Client.unloadSnapshot();
   });
 
   it('should NOT update snapshot', async function () {
@@ -95,8 +95,8 @@ describe('E2E test - Switcher local - Snapshot:', function () {
     given(fetchStub, 1, { json: () => generateStatus(true), status: 200 }); // No available update
     
     //test
-    await Switcher.loadSnapshot();
-    assert.isFalse(await Switcher.checkSnapshot());
+    await Client.loadSnapshot();
+    assert.isFalse(await Client.checkSnapshot());
   });
 
   it('should NOT update snapshot - check Snapshot Error', async function () {
@@ -109,9 +109,9 @@ describe('E2E test - Switcher local - Snapshot:', function () {
     givenError(fetchStub, 1, { errno: 'ECONNREFUSED' });
     
     //test
-    Switcher.testMode();
-    await Switcher.loadSnapshot();
-    await assertReject(assert, Switcher.checkSnapshot(), 
+    Client.testMode();
+    await Client.loadSnapshot();
+    await assertReject(assert, Client.checkSnapshot(), 
       'Something went wrong: Connection has been refused - ECONNREFUSED');
   });
 
@@ -124,9 +124,9 @@ describe('E2E test - Switcher local - Snapshot:', function () {
     givenError(fetchStub, 2, { errno: 'ECONNREFUSED' });
     
     //test
-    Switcher.testMode();
-    await Switcher.loadSnapshot();
-    await assertReject(assert, Switcher.checkSnapshot(), 
+    Client.testMode();
+    await Client.loadSnapshot();
+    await assertReject(assert, Client.checkSnapshot(), 
       'Something went wrong: Connection has been refused - ECONNREFUSED');
   });
 
@@ -138,18 +138,18 @@ describe('E2E test - Switcher local - Snapshot:', function () {
     given(fetchStub, 1, { json: () => generateStatus(true), status: 200 });
     
     //pre-load snapshot
-    Switcher.testMode(false);
-    await Switcher.loadSnapshot();
-    assert.equal(await Switcher.checkSnapshot(), false);
+    Client.testMode(false);
+    await Client.loadSnapshot();
+    assert.equal(await Client.checkSnapshot(), false);
 
     //unload snapshot
-    Switcher.unloadSnapshot();
+    Client.unloadSnapshot();
     
     //test
     let error = null;
-    await Switcher.checkSnapshot().catch((err) => error = err);
+    await Client.checkSnapshot().catch((err) => error = err);
     assert.exists(error);
-    assert.equal(error.message, 'Something went wrong: Snapshot is not loaded. Use Switcher.loadSnapshot()');
+    assert.equal(error.message, 'Something went wrong: Snapshot is not loaded. Use Client.loadSnapshot()');
   });
 
   it('should update snapshot', async function () {
@@ -161,26 +161,26 @@ describe('E2E test - Switcher local - Snapshot:', function () {
     given(fetchStub, 2, { json: () => JSON.parse(dataJSON), status: 200 });
 
     //test
-    Switcher.buildContext({ url, apiKey, domain, component, environment }, {
+    Client.buildContext({ url, apiKey, domain, component, environment }, {
       snapshotLocation: 'generated-snapshots/'
     });
 
-    await Switcher.loadSnapshot();
-    assert.isNotNull(Switcher.snapshot);
+    await Client.loadSnapshot();
+    assert.isNotNull(Client.snapshot);
 
     //restore state to avoid process leakage
-    Switcher.unloadSnapshot();
+    Client.unloadSnapshot();
     unlinkSync(`generated-snapshots/${environment}.json`);
   });
 
   it('should not throw when switcher keys provided were configured properly', async function () {
-    await Switcher.loadSnapshot();
-    await assertResolve(assert, Switcher.checkSwitchers(['FF2FOR2030']));
+    await Client.loadSnapshot();
+    await assertResolve(assert, Client.checkSwitchers(['FF2FOR2030']));
   });
 
   it('should throw when switcher keys provided were not configured properly', async function () {
-    await Switcher.loadSnapshot();
-    await assertReject(assert, Switcher.checkSwitchers(['FEATURE02']),
+    await Client.loadSnapshot();
+    await assertReject(assert, Client.checkSwitchers(['FEATURE02']),
       'Something went wrong: [FEATURE02] not found');
   });
   
@@ -205,14 +205,14 @@ describe('E2E test - Fail response - Snapshot:', function () {
   });
 
   beforeEach(function() {
-    Switcher.buildContext({ url, apiKey, domain, component, environment }, {
+    Client.buildContext({ url, apiKey, domain, component, environment }, {
       local: true
     });
-    Switcher.testMode();
+    Client.testMode();
   });
 
   this.afterAll(function() {
-    Switcher.unloadSnapshot();
+    Client.unloadSnapshot();
   });
 
   it('should NOT update snapshot - Too many requests at checkSnapshotVersion', async function () {
@@ -223,9 +223,9 @@ describe('E2E test - Fail response - Snapshot:', function () {
     given(fetchStub, 1, { status: 429 });
     
     //test
-    Switcher.testMode();
-    await Switcher.loadSnapshot();
-    await assertReject(assert, Switcher.checkSnapshot(),
+    Client.testMode();
+    await Client.loadSnapshot();
+    await assertReject(assert, Client.checkSnapshot(),
       'Something went wrong: [checkSnapshotVersion] failed with status 429');
   });
 
@@ -238,12 +238,12 @@ describe('E2E test - Fail response - Snapshot:', function () {
     given(fetchStub, 2, { status: 429 });
 
     //test
-    Switcher.buildContext({ url, apiKey, domain, component, environment }, {
+    Client.buildContext({ url, apiKey, domain, component, environment }, {
       snapshotLocation: 'generated-snapshots/',
       regexSafe: false
     });
 
-    await assertReject(assert, Switcher.loadSnapshot(),
+    await assertReject(assert, Client.loadSnapshot(),
       'Something went wrong: [resolveSnapshot] failed with status 429');
   });
 
@@ -274,15 +274,15 @@ describe('E2E test - Snapshot AutoUpdater:', function () {
   });
 
   beforeEach(function() {
-    Switcher.buildContext({ url, apiKey, domain, component, environment }, {
+    Client.buildContext({ url, apiKey, domain, component, environment }, {
       local: true
     });
-    Switcher.testMode();
+    Client.testMode();
   });
 
   this.afterAll(function() {
-    Switcher.terminateSnapshotAutoUpdate();
-    Switcher.unloadSnapshot();
+    Client.terminateSnapshotAutoUpdate();
+    Client.unloadSnapshot();
   });
 
   it('should auto update snapshot every second', async function () {
@@ -298,7 +298,7 @@ describe('E2E test - Snapshot AutoUpdater:', function () {
     given(fetchStub, 4, { json: () => JSON.parse(dataJSONV2), status: 200 });
 
     //test
-    Switcher.buildContext({ url, apiKey, domain, component, environment }, {
+    Client.buildContext({ url, apiKey, domain, component, environment }, {
       snapshotLocation: 'generated-snapshots/',
       local: true,
       regexSafe: false,
@@ -306,15 +306,15 @@ describe('E2E test - Snapshot AutoUpdater:', function () {
     });
 
     let snapshotUpdated = false;
-    Switcher.scheduleSnapshotAutoUpdate(1, (updated) => {
+    Client.scheduleSnapshotAutoUpdate(1, (updated) => {
       if (updated != undefined) {
         snapshotUpdated = updated;
       }
     });
     
-    await Switcher.loadSnapshot(false, true);
+    await Client.loadSnapshot(false, true);
 
-    const switcher = Switcher.factory();
+    const switcher = Client.getSwitcher();
     assert.isFalse(await switcher.isItOn('FF2FOR2030'));
     
     await sleep(2000);
@@ -333,19 +333,19 @@ describe('E2E test - Snapshot AutoUpdater:', function () {
     given(fetchStub, 2, { json: () => JSON.parse(dataJSON), status: 200 });
 
     //test
-    Switcher.buildContext({ url, apiKey, domain, component, environment }, {
+    Client.buildContext({ url, apiKey, domain, component, environment }, {
       local: true,
       regexSafe: false
     });
 
     let error;
-    Switcher.scheduleSnapshotAutoUpdate(1, (updated, err) => {
+    Client.scheduleSnapshotAutoUpdate(1, (updated, err) => {
       if (err != undefined) {
         error = err;
       }
     });
     
-    await Switcher.loadSnapshot(false, true);
+    await Client.loadSnapshot(false, true);
 
     //next call will fail
     givenError(fetchStub, 3, { errno: 'ECONNREFUSED' });
@@ -356,7 +356,7 @@ describe('E2E test - Snapshot AutoUpdater:', function () {
     assert.equal(error.message, 'Something went wrong: Connection has been refused - ECONNREFUSED');
 
     //tearDown
-    Switcher.terminateSnapshotAutoUpdate();
+    Client.terminateSnapshotAutoUpdate();
   });
 
 });
@@ -368,13 +368,17 @@ describe('Error Scenarios - Snapshot', function() {
   const environment = 'dev';
   const url = 'http://localhost:3000';
 
+  this.afterAll(function() {
+    deleteGeneratedSnapshot('./generated-snapshots');
+  });
+
   it('should be invalid - Load snapshot was not called', async function () {
-    Switcher.buildContext({ url, apiKey, domain, component, environment }, {
+    Client.buildContext({ url, apiKey, domain, component, environment }, {
       local: true, logger: true, regexSafe: false
     });
     
-    const switcher = Switcher.factory();
+    const switcher = Client.getSwitcher();
     await assertReject(assert, switcher.isItOn('FF2FOR2030'), 
-      'Snapshot not loaded. Try to use \'Switcher.loadSnapshot()\'' );
+      'Snapshot not loaded. Try to use \'Client.loadSnapshot()\'' );
   });
 });

@@ -30,12 +30,10 @@ const loadDomain = (snapshotLocation, environment) => {
 };
 
 const validateSnapshot = async (context, snapshotVersion) => {
-    const { status } = await checkSnapshotVersion(context.url, context.token, snapshotVersion);
+    const { status } = await checkSnapshotVersion(snapshotVersion);
     
     if (!status) {
-        const snapshot = await resolveSnapshot(
-            context.url, context.token, context.domain, context.environment, context.component);
-        
+        const snapshot = await resolveSnapshot(context.domain, context.environment, context.component);
         return snapshot;
     }
     return undefined;

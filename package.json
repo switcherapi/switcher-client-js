@@ -4,7 +4,7 @@
   "description": "Client JS SDK for working with Switcher-API",
   "main": "./switcher-client.js",
   "type": "module",
-  "types": "./src/index.d.ts",
+  "types": "./src/types/index.d.ts",
   "author": {
     "name": "Roger Floriano",
     "email": "switcher.project@gmail.com",
@@ -30,15 +30,15 @@
     "src/"
   ],
   "devDependencies": {
+    "@babel/eslint-parser": "^7.24.5",
     "@typescript-eslint/eslint-plugin": "^7.8.0",
     "@typescript-eslint/parser": "^7.8.0",
-    "@babel/eslint-parser": "^7.24.5",
     "c8": "^9.1.0",
-    "chai": "^5.1.0",
+    "chai": "^5.1.1",
     "eslint": "^8.57.0",
     "mocha": "^10.4.0",
     "mocha-sonarqube-reporter": "^1.0.2",
-    "sinon": "^17.0.1"
+    "sinon": "^17.0.2"
   },
   "repository": {
     "type": "git",

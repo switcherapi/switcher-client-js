@@ -1,5 +1,6 @@
 /node_modules
 /generated-snapshots
+/generated-watch-snapshots
 
 *.idea
 *.coveralls*

@@ -105,7 +105,7 @@ async function checkStrategyInput(entry, { strategy, operation, values }) {
 
 export default async function checkCriteriaLocal(key, input, snapshot) {
     if (!snapshot) {
-        throw new Error('Snapshot not loaded. Try to use \'Switcher.loadSnapshot()\'');
+        throw new Error('Snapshot not loaded. Try to use \'Client.loadSnapshot()\'');
     }
     
     const { data } = snapshot;

@@ -1,9 +1,9 @@
 import { rmdir } from 'fs';
 import { assert } from 'chai';
 
-import { Switcher, ResultDetail, SwitcherContext, SwitcherOptions } from '../switcher-client.js';
+import { Client, ResultDetail, SwitcherContext, SwitcherOptions } from '../switcher-client.js';
 import { StrategiesType } from '../src/lib/snapshot.js';
-import { assertReject, assertResolve } from './helper/utils.js';
+import { assertReject, assertResolve, deleteGeneratedSnapshot } from './helper/utils.js';
 
 describe('E2E test - Switcher local:', function () {
   let switcher;
@@ -25,22 +25,22 @@ describe('E2E test - Switcher local:', function () {
   };
 
   this.beforeAll(async function() {
-    Switcher.buildContext(contextSettings, options);
+    Client.buildContext(contextSettings, options);
 
-    await Switcher.loadSnapshot();
-    switcher = Switcher.factory();
+    await Client.loadSnapshot();
+    switcher = Client.getSwitcher();
   });
 
   this.afterAll(function() {
-    Switcher.unloadSnapshot();
+    Client.unloadSnapshot();
     rmdir('//somewhere/', () => {
       return;
     });
   });
 
   this.beforeEach(function() {
-    Switcher.clearLogger();
-    switcher = Switcher.factory();
+    Client.clearLogger();
+    switcher = Client.getSwitcher();
   });
 
   it('should be valid - isItOn', async function () {
@@ -51,7 +51,7 @@ describe('E2E test - Switcher local:', function () {
 
     const result = await switcher.isItOn('FF2FOR2020');
     assert.isTrue(result);
-    assert.isNotEmpty(Switcher.getLogger('FF2FOR2020'));
+    assert.isNotEmpty(Client.getLogger('FF2FOR2020'));
   });
 
   it('should be valid - isItOn - with detail', async function () {
@@ -134,7 +134,7 @@ describe('E2E test - Switcher local:', function () {
 
     const result = await switcher.isItOn();
     assert.isFalse(result);
-    assert.equal(Switcher.getLogger('FF2FOR2023')[0].response.reason, 
+    assert.equal(Client.getLogger('FF2FOR2023')[0].response.reason, 
       `Strategy '${StrategiesType.PAYLOAD}' does not agree`);
   });
 
@@ -146,28 +146,28 @@ describe('E2E test - Switcher local:', function () {
 
     const result = await switcher.isItOn();
     assert.isFalse(result);
-    assert.equal(Switcher.getLogger('FF2FOR2020')[0].response.reason, 
+    assert.equal(Client.getLogger('FF2FOR2020')[0].response.reason, 
       `Strategy '${StrategiesType.NETWORK}' does not agree`);
   });
 
   it('should be invalid - Input not provided', async function () {
     const result = await switcher.isItOn('FF2FOR2020');
     assert.isFalse(result);
-    assert.equal(Switcher.getLogger('FF2FOR2020')[0].response.reason, 
+    assert.equal(Client.getLogger('FF2FOR2020')[0].response.reason, 
       `Strategy '${StrategiesType.NETWORK}' did not receive any input`);
   });
 
   it('should be invalid - Switcher config disabled', async function () {
     const result = await switcher.isItOn('FF2FOR2031');
     assert.isFalse(result);
-    assert.equal(Switcher.getLogger('FF2FOR2031')[0].response.reason, 
+    assert.equal(Client.getLogger('FF2FOR2031')[0].response.reason, 
       'Config disabled');
   });
 
   it('should be invalid - Switcher group disabled', async function () {
     const result = await switcher.isItOn('FF2FOR2040');
     assert.isFalse(result);
-    assert.equal(Switcher.getLogger('FF2FOR2040')[0].response.reason, 
+    assert.equal(Client.getLogger('FF2FOR2040')[0].response.reason, 
       'Group disabled');
   });
 
@@ -178,15 +178,15 @@ describe('E2E test - Switcher local:', function () {
       .prepare('FF2FOR2020');
     
     assert.isTrue(await switcher.isItOn());
-    Switcher.assume('FF2FOR2020').false();
+    Client.assume('FF2FOR2020').false();
     assert.isFalse(await switcher.isItOn());
     
-    Switcher.forget('FF2FOR2020');
+    Client.forget('FF2FOR2020');
     assert.isTrue(await switcher.isItOn());
   });
 
   it('should be valid assuming key to be false - with details', async function () {
-    Switcher.assume('FF2FOR2020').false();
+    Client.assume('FF2FOR2020').false();
     const { result, reason } = await switcher.detail().isItOn('FF2FOR2020');
 
     assert.isFalse(result);
@@ -194,7 +194,7 @@ describe('E2E test - Switcher local:', function () {
   });
 
   it('should be valid assuming key to be false - with metadata', async function () {
-    Switcher.assume('FF2FOR2020').false().withMetadata({ value: 'something' });
+    Client.assume('FF2FOR2020').false().withMetadata({ value: 'something' });
     const { result, reason, metadata } = await switcher.detail().isItOn('FF2FOR2020');
 
     assert.isFalse(result);
@@ -208,56 +208,61 @@ describe('E2E test - Switcher local:', function () {
       .checkNetwork('10.0.0.3')  
       .prepare('UNKNOWN');
     
-    Switcher.assume('UNKNOWN').true();
+    Client.assume('UNKNOWN').true();
     assert.isTrue(await switcher.isItOn());
 
-    Switcher.forget('UNKNOWN');
+    Client.forget('UNKNOWN');
     await assertReject(assert, switcher.isItOn(), 'Something went wrong: {"error":"Unable to load a key UNKNOWN"}');
   });
 
   it('should enable test mode which will prevent a snapshot to be watchable', async function () {
     //given
-    Switcher.buildContext(contextSettings, {
+    Client.buildContext(contextSettings, {
       local: true, logger: true, regexSafe: false
     });
 
-    switcher = Switcher.factory();
+    switcher = Client.getSwitcher();
     
     //test
-    Switcher.assume('FF2FOR2020').false();
+    Client.assume('FF2FOR2020').false();
     assert.isFalse(await switcher.isItOn('FF2FOR2020'));
-    Switcher.assume('FF2FOR2020').true();
+    Client.assume('FF2FOR2020').true();
     assert.isTrue(await switcher.isItOn('FF2FOR2020'));
   });
 
   it('should be invalid - Offline mode cannot load snapshot from an invalid path', async function () {
     this.timeout(3000);
 
-    Switcher.buildContext(contextSettings, {
+    Client.buildContext(contextSettings, {
       local: true,
       regexSafe: false,
       snapshotLocation: '//somewhere/'
     });
 
-    Switcher.testMode();
-    await assertReject(assert, Switcher.loadSnapshot(), 'Something went wrong: It was not possible to load the file at //somewhere/');
+    Client.testMode();
+    await assertReject(assert, Client.loadSnapshot(), 'Something went wrong: It was not possible to load the file at //somewhere/');
   });
 
   it('should be valid - Offline mode', async function () {
     this.timeout(3000);
 
-    Switcher.buildContext(contextSettings, {
+    Client.buildContext(contextSettings, {
       local: true,
       regexSafe: false,
       snapshotLocation: 'generated-snapshots/'
     });
 
-    await assertResolve(assert, Switcher.loadSnapshot());
-    assert.isNotNull(Switcher.snapshot);
+    await assertResolve(assert, Client.loadSnapshot());
+    assert.isNotNull(Client.snapshot);
   });
 });
 
 describe('Type placeholders:', function () {
+  
+  this.afterAll(function() {
+    deleteGeneratedSnapshot('./generated-snapshots');
+  });
+
   it('should check exported types', function () {
     const resultDetail = ResultDetail.build();
     const switcherContext = SwitcherContext.build();

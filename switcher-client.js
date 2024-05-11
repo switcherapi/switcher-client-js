@@ -4,15 +4,16 @@
  * Switcher Clinet SDK for working with Switcher API
  *
  * ```ts
- * import { Switcher } from 'switcher-client';
+ * import { Client } from 'switcher-client';
  *
- * Switcher.buildContext({ url, apiKey, domain, component, environment });
+ * Client.buildContext({ url, apiKey, domain, component, environment });
  *
- * const switcher = Switcher.factory();
+ * const switcher = Client.getSwitcher();
  * await switcher.isItOn('SWITCHER_KEY'));
  * ```
  *
  * @module
  */
 
-export { Switcher, ResultDetail, SwitcherContext, SwitcherOptions } from './src/index.js';
+export { Client, ResultDetail, SwitcherContext, SwitcherOptions } from './src/client.js';
+export { Switcher } from './src/switcher.js';
