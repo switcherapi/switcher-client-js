@@ -1,3 +1,5 @@
+import fs from 'node:fs';
+
 /* eslint-disable no-console */
 export function given(fetchStub, order, expect) {
   fetchStub.onCall(order).returns(Promise.resolve(expect));
@@ -51,6 +53,32 @@ export async function assertUntilResolve(assert, actual, expected) {
 
 export async function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+export function deleteGeneratedSnapshot(dirname) {
+  if (!fs.existsSync(dirname)) {
+    return;
+  }
+
+  fs.readdir(dirname, (err, files) => {
+    if (err) {
+      console.error('Error reading generated snapshots:', err);
+    }
+
+    for (const file of files) {
+      fs.unlink(`${dirname}/${file}`, (err) => {
+        if (err) {
+          console.error('Error deleting generated snapshot:', err);
+        }
+      });
+    }
+  });
+
+  fs.rm(dirname, { recursive: true, force: true }, (err) => {
+    if (err) {
+      console.error('Error deleting generated snapshots:', err);
+    }
+  });
 }
 
 export const generateAuth = (token, seconds) => {
