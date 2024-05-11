@@ -41,7 +41,7 @@ describe('Integrated test - Switcher:', function () {
     });
 
     it('should be valid', async function () {
-      // given API responding properly
+      // given API responses
       given(fetchStub, 0, { json: () => generateAuth('[auth_token]', 5), status: 200 });
       given(fetchStub, 1, { json: () => generateResult(true), status: 200 });
 
@@ -53,8 +53,23 @@ describe('Integrated test - Switcher:', function () {
       assert.isTrue(await switcher.isItOn());
     });
 
+    it('should NOT throw error when default result is provided using remote', async function () {
+      // given API responses
+      given(fetchStub, 0, { json: () => generateAuth('[auth_token]', 5), status: 200 });
+      given(fetchStub, 1, { error: 'ERROR', status: 404 });
+
+      // test
+      let asyncErrorMessage = null;
+      Client.buildContext(contextSettings);
+      Client.subscribeNotifyError((error) => asyncErrorMessage = error.message);
+      let switcher = Client.getSwitcher().defaultResult(true);
+
+      assert.isTrue(await switcher.isItOn('UNKNOWN_FEATURE'));
+      assert.equal(asyncErrorMessage, 'Something went wrong: [checkCriteria] failed with status 404');
+    });
+
     it('should NOT be valid - API returned 429 (too many requests)', async function () {
-      // given API responding properly
+      // given API responses
       given(fetchStub, 0, { error: 'Too many requests', status: 429 });
 
       // test
@@ -67,7 +82,7 @@ describe('Integrated test - Switcher:', function () {
     it('should be valid - throttle', async function () {
       this.timeout(2000);
 
-      // given API responding properly
+      // given API responses
       // first API call
       given(fetchStub, 0, { json: () => generateAuth('[auth_token]', 5), status: 200 });
       given(fetchStub, 1, { json: () => generateResult(true), status: 200 }); // sync
@@ -91,7 +106,7 @@ describe('Integrated test - Switcher:', function () {
     it('should be valid - throttle - with details', async function () {
       this.timeout(3000);
 
-      // given API responding properly
+      // given API responses
       // first API call
       given(fetchStub, 0, { json: () => generateAuth('[auth_token]', 5), status: 200 });
       given(fetchStub, 1, { json: () => generateResult(true), status: 200 }); // sync
@@ -114,7 +129,7 @@ describe('Integrated test - Switcher:', function () {
     it('should renew token when using throttle', async function () {
       this.timeout(3000);
 
-      // given API responding properly
+      // given API responses
       // first API call
       given(fetchStub, 0, { json: () => generateAuth('[auth_token]', 1), status: 200 });
       given(fetchStub, 1, { json: () => generateResult(true), status: 200 }); // sync
@@ -160,7 +175,7 @@ describe('Integrated test - Switcher:', function () {
     it('should not crash when async checkCriteria fails', async function () {
       this.timeout(5000);
 
-      // given API responding properly
+      // given API responses
       // first API call
       given(fetchStub, 0, { json: () => generateAuth('[auth_token]', 5), status: 200 });
       given(fetchStub, 1, { json: () => generateResult(true), status: 200 }); // sync call
@@ -219,7 +234,7 @@ describe('Integrated test - Switcher:', function () {
     });
 
     it('should return false - same switcher return false when remote', async function () {
-      // given API responding properly
+      // given API responses
       given(fetchStub, 0, { json: () => generateAuth('[auth_token]', 5), status: 200 });
       given(fetchStub, 1, { json: () => generateResult(false), status: 200 });
 
@@ -235,7 +250,7 @@ describe('Integrated test - Switcher:', function () {
     });
 
     it('should return true - including reason and metadata', async function () {
-      // given API responding properly
+      // given API responses
       given(fetchStub, 0, { json: () => generateAuth('[auth_token]', 5), status: 200 });
       given(fetchStub, 1, { json: () => generateDetailedResult({ 
         result: true, 
@@ -279,7 +294,7 @@ describe('Integrated test - Switcher:', function () {
     });
 
     it('should NOT be valid - API returned 429 (too many requests) at checkHealth/auth', async function () {
-      // given API responding properly
+      // given API responses
       given(fetchStub, 0, { status: 429 });
       given(fetchStub, 1, { error: 'Too many requests', status: 429 });
 
@@ -291,7 +306,7 @@ describe('Integrated test - Switcher:', function () {
     });
 
     it('should NOT be valid - API returned 429 (too many requests) at checkCriteria', async function () {
-      // given API responding properly
+      // given API responses
       given(fetchStub, 0, { json: () => generateAuth('[auth_token]', 5), status: 200 });
       given(fetchStub, 1, { error: 'Too many requests', status: 429 });
 
@@ -316,7 +331,7 @@ describe('Integrated test - Switcher:', function () {
     });
 
     it('should use silent mode when fail to check criteria', async function () {
-      // given API responding properly
+      // given API responses
       given(fetchStub, 0, { json: () => generateAuth('[auth_token]', 5), status: 200 });
       given(fetchStub, 1, { status: 429 });
 
@@ -346,7 +361,7 @@ describe('Integrated test - Switcher:', function () {
     });
 
     it('should be valid', async function () {
-      // given API responding properly
+      // given API responses
       given(fetchStub, 0, { json: () => generateAuth('[auth_token]', 5), status: 200 });
       given(fetchStub, 1, { json: () => generateResult(true), status: 200 });
 
@@ -432,7 +447,7 @@ describe('Integrated test - Switcher:', function () {
     it('should renew the token after expiration', async function () {
       this.timeout(3000);
 
-      // given API responding properly
+      // given API responses
       given(fetchStub, 0, { json: () => generateAuth('[auth_token]', 1), status: 200 });
 
       Client.buildContext(contextSettings);
@@ -462,7 +477,7 @@ describe('Integrated test - Switcher:', function () {
     });
 
     it('should be valid - when sending key without calling prepare', async function () {
-      // given API responding properly
+      // given API responses
       given(fetchStub, 0, { json: () => generateAuth('[auth_token]', 5), status: 200 });
       given(fetchStub, 1, { json: () => generateResult(true), status: 200 });
 
@@ -476,7 +491,7 @@ describe('Integrated test - Switcher:', function () {
     });
 
     it('should be valid - when preparing key and sending input strategy afterwards', async function () {
-      // given API responding properly
+      // given API responses
       given(fetchStub, 0, { json: () => generateAuth('[auth_token]', 5), status: 200 });
       given(fetchStub, 1, { json: () => generateResult(true), status: 200 });
 

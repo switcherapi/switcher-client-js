@@ -15,7 +15,7 @@ export class Switcher {
   /**
    * Checks API credentials and connectivity
    */
-  prepare(key: string): Promise<void>;
+  prepare(key?: string): Promise<void>;
 
   /**
    * Execute criteria
@@ -40,6 +40,11 @@ export class Switcher {
    * When enabled, isItOn will return a ResultDetail object
    */
   detail(showDetail?: boolean): Switcher;
+
+  /**
+   * Define a default result when the client enters in panic mode
+   */
+  defaultResult(defaultResult: boolean): Switcher;
 
   /**
    * Adds a strategy for validation
