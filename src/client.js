@@ -219,6 +219,10 @@ export class Client {
     return ExecutionLogger.getByKey(key);
   }
 
+  static getExecution(switcher) {
+    return ExecutionLogger.getExecution(switcher.key, switcher.input);
+  }
+
   static clearLogger() {
     ExecutionLogger.clearLogger();
   }

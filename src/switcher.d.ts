@@ -82,6 +82,11 @@ export class Switcher {
   checkPayload(input: string): Switcher;
 
   /**
+   * Return switcher key
+   */
+  get key(): string;
+
+  /**
    * Return switcher current strategy input
    */
   get input(): string[][] | undefined;

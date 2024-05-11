@@ -230,6 +230,10 @@ export class Switcher {
     return this.#delay == 0 || !ExecutionLogger.getExecution(this.#key, this.#input);
   }
 
+  get key() {
+    return this.#key;
+  }
+
   get input() {
     return this.#input;
   }

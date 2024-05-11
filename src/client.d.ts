@@ -91,9 +91,14 @@ export class Client {
   static forget(key: string): void;
 
   /**
-   * Retrieve execution log given a switcher key
+   * Retrieve all execution log given a switcher key
    */
   static getLogger(key: string): LoggerRecord[];
+
+  /**
+   * Retrieve execution log from a switcher
+   */
+  static getExecution(switcher: Switcher): LoggerRecord;
 
   /**
    * Clear all results from the execution log
