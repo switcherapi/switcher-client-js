@@ -219,7 +219,7 @@ describe('E2E test - Switcher local:', function () {
     assert.deepEqual(metadata, { value: 'something' });
   });
 
-  it('should be valid assuming unknown key to be true', async function () {
+  it('should be valid assuming unknown key to be true and throw error when forgetting', async function () {
     await switcher
       .checkValue('Japan')
       .checkNetwork('10.0.0.3')  
@@ -247,7 +247,7 @@ describe('E2E test - Switcher local:', function () {
     assert.isTrue(await switcher.isItOn('FF2FOR2020'));
   });
 
-  it('should be invalid - Offline mode cannot load snapshot from an invalid path', async function () {
+  it('should be invalid - Local mode cannot load snapshot from an invalid path', async function () {
     this.timeout(3000);
 
     Client.buildContext(contextSettings, {
@@ -260,7 +260,7 @@ describe('E2E test - Switcher local:', function () {
     await assertReject(assert, Client.loadSnapshot(), 'Something went wrong: It was not possible to load the file at //somewhere/');
   });
 
-  it('should be valid - Offline mode', async function () {
+  it('should be valid - Local mode', async function () {
     this.timeout(3000);
 
     Client.buildContext(contextSettings, {
@@ -272,6 +272,16 @@ describe('E2E test - Switcher local:', function () {
     await assertResolve(assert, Client.loadSnapshot());
     assert.isNotNull(Client.snapshot);
   });
+
+  it('should not throw error when a default result is provided', async function () {
+    Client.buildContext(contextSettings, {
+      local: true
+    });
+
+    const switcher = Client.getSwitcher('UNKNOWN_FEATURE').defaultResult(true);
+    assert.isTrue(await switcher.isItOn());
+  });
+
 });
 
 describe('Type placeholders:', function () {

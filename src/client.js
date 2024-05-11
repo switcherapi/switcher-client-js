@@ -193,7 +193,7 @@ export class Client {
   static async _checkSwitchersRemote(switcherKeys) {
     try {
       await Auth.auth();
-      await remote.checkSwitchers(Client.#context.url, Client.#context.token, switcherKeys);
+      await remote.checkSwitchers(switcherKeys);
     } catch (e) {
       if (Client.#options.silentMode) {
         checkSwitchersLocal(Client.#snapshot, switcherKeys);
