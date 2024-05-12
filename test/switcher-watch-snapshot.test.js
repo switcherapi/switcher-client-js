@@ -80,8 +80,8 @@ describe('E2E test - Switcher local - Watch Snapshot:', function () {
     initContext('watch2').then(() => {
       const switcher = Client.getSwitcher();
       Client.watchSnapshot({
-        success: () => {
-          const result = switcher.isItOn('FF2FOR2030');
+        success: async () => {
+          const result = await switcher.isItOn('FF2FOR2030');
           assert.isFalse(result);
           done();
         }
