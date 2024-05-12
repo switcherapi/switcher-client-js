@@ -170,7 +170,9 @@ export class Client {
     unwatchFile(snapshotFile);
   }
 
-  static scheduleSnapshotAutoUpdate(interval, callback) {
+  static scheduleSnapshotAutoUpdate(interval, callback = {}) {
+    const { success = () => {}, reject = () => {} } = callback;
+
     if (interval) {
         Client.#options.snapshotAutoUpdateInterval = interval;
     }
@@ -179,8 +181,8 @@ export class Client {
       SnapshotAutoUpdater.schedule(
         Client.#options.snapshotAutoUpdateInterval, 
         this.checkSnapshot, 
-        callback?.success, 
-        callback?.reject
+        success, 
+        reject
       );
     }
   }
