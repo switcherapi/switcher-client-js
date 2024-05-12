@@ -5,7 +5,7 @@ import { Switcher } from './switcher';
 *
 * 1. Use Client.buildContext() to define the arguments to connect to the API.
 * 2. Use Client.getSwitcher() to create a new instance of Switcher.
-* 3. Use the instance created to call isItOn to query the API.
+* 3. Use the instance created to call isItOn to execute criteria evaluation.
 */
 export class Client {
 
@@ -22,11 +22,8 @@ export class Client {
 
   /**
    * Read snapshot and load it into memory
-   *
-   * @param watchSnapshot when true, it will watch for snapshot file modifications
-   * @param fetchRemote when true, it will initialize the snapshot from the API
    */
-  static loadSnapshot(watchSnapshot?: boolean, fetchRemote?: boolean): Promise<void>;
+  static loadSnapshot(options?: LoadSnapshotOptions): Promise<void>;
 
   /**
    * Verifies if the current snapshot file is updated.
@@ -42,8 +39,12 @@ export class Client {
    * building context
    *
    * @param interval in ms
+   * @param success returns true if snapshot has been updated
    */
-  static scheduleSnapshotAutoUpdate(interval?: number, callback?: (updated: boolean, err: Error) => void): void;
+  static scheduleSnapshotAutoUpdate(interval?: number, callback?: {
+    success?: (updated: boolean) => void;
+    reject?: (err: Error) => void;
+  }): void;
 
   /**
    * Terminates Snapshot Auto Update
@@ -64,7 +65,10 @@ export class Client {
    * @param success when snapshot has successfully updated
    * @param error when any error has thrown when attempting to load snapshot
    */
-  static watchSnapshot(success?: () => void, error?: (err: any) => void): void;
+  static watchSnapshot(callback: {
+    success?: () => void | Promise<void>;
+    reject?: (err: Error) => void; 
+  }): void;
 
   /**
    * Terminate watching snapshot files
@@ -158,6 +162,17 @@ export type SwitcherOptions = {
   regexMaxBlackList?: number;
   regexMaxTimeLimit?: number;
   certPath?: string;
+}
+
+/**
+ * LoadSnapshotOptions defines the options to load a snapshot.
+ * 
+ * @param watchSnapshot when true, it will watch for snapshot file modifications
+ * @param fetchRemote when true, it will initialize the snapshot from the API
+ */
+export type LoadSnapshotOptions = {
+  watchSnapshot?: boolean;
+  fetchRemote?: boolean;
 }
 
 declare class Key {

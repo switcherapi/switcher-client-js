@@ -119,27 +119,29 @@ export class Client {
     return false;
   }
 
-  static async loadSnapshot(watchSnapshot = false, fetchRemote = false) {
+  static async loadSnapshot(options = { fetchRemote: false, watchSnapshot: false }) {
     Client.#snapshot = loadDomain(
       util.get(Client.#options.snapshotLocation, ''), 
       util.get(Client.#context.environment, DEFAULT_ENVIRONMENT)
     );
 
     if (Client.#snapshot.data.domain.version == 0 && 
-        (fetchRemote || !Client.#options.local)) {
+        (options.fetchRemote || !Client.#options.local)) {
       await Client.checkSnapshot();
     }
 
-    if (watchSnapshot) {
+    if (options.watchSnapshot) {
         Client.watchSnapshot();
     }
 
     return Client.#snapshot?.data.domain.version || 0;
   }
 
-  static watchSnapshot(success = () => {}, error = () => {}) {
+  static watchSnapshot(callback = {}) {
+    const { success = () => {}, reject = () => {} } = callback;
+
     if (Client.testEnabled || !Client.#options.snapshotLocation?.length) {
-      return error(new Error('Watch Snapshot cannot be used in test mode or without a snapshot location'));
+      return reject(new Error('Watch Snapshot cannot be used in test mode or without a snapshot location'));
     }
 
     const snapshotFile = `${Client.#options.snapshotLocation}/${Client.#context.environment}.json`;
@@ -151,7 +153,7 @@ export class Client {
           success();
         }
       } catch (e) {
-        error(e);
+        reject(e);
       } finally {
         lastUpdate = listener.ctime;
       }
@@ -174,7 +176,12 @@ export class Client {
     }
 
     if (Client.#options.snapshotAutoUpdateInterval && Client.#options.snapshotAutoUpdateInterval > 0) {
-      SnapshotAutoUpdater.schedule(Client.#options.snapshotAutoUpdateInterval, this.checkSnapshot, callback);
+      SnapshotAutoUpdater.schedule(
+        Client.#options.snapshotAutoUpdateInterval, 
+        this.checkSnapshot, 
+        callback?.success, 
+        callback?.reject
+      );
     }
   }
 

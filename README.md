@@ -40,7 +40,7 @@ https://github.com/switcherapi/switcher-api
 The context properties stores all information regarding connectivity.
 
 ```js
-import { Switcher } from 'switcher-client';
+import { Client } from 'switcher-client';
 
 const apiKey = '[API_KEY]';
 const environment = 'default';
@@ -200,9 +200,10 @@ Client.loadSnapshot();
 Activate and monitor snapshot changes using this feature. Optionally, you can implement any action based on the callback response.
 
 ```js
-Client.watchSnapshot(
-    () =>  console.log('In-memory snapshot updated'), 
-    (err) => console.log(err));
+Client.watchSnapshot({
+    success: () => console.log('In-memory snapshot updated'),
+    reject: (err) => console.log(err)
+});
 ```
 
 ## Snapshot version check
@@ -217,5 +218,8 @@ You can also schedule a snapshot update using the method below.<br>
 It allows you to run the Client SDK in local mode (zero latency) and still have the snapshot updated automatically.
 
 ```js
-Client.scheduleSnapshotAutoUpdate(1 * 60 * 60 * 24); // 24 hours
+Client.scheduleSnapshotAutoUpdate(3000, {
+    success: (updated) => console.log('Snapshot updated', updated),
+    reject: (err) => console.log(err)
+});
 ```
