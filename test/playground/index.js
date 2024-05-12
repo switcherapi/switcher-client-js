@@ -17,7 +17,7 @@ const snapshotLocation = './test/playground/snapshot/';
  */
 async function setupSwitcher(local) {
     Client.buildContext({ url, apiKey, domain, component, environment }, { local, logger: true });
-    await Client.loadSnapshot(false, local)
+    await Client.loadSnapshot({ watchSnapshot: false, fetchRemote: local })
         .then(version => console.log('Snapshot loaded - version:', version))
         .catch(() => console.log('Failed to load Snapshot'));
 }
@@ -131,15 +131,16 @@ const _testBypasser = async () => {
 // Requires remote API
 const _testWatchSnapshot = async () => {
     Client.buildContext({ url, apiKey, domain, component, environment }, { snapshotLocation, local: true, logger: true });
-    await Client.loadSnapshot(false, true)
+    await Client.loadSnapshot({ watchSnapshot: false, fetchRemote: true })
         .then(() => console.log('Snapshot loaded'))
         .catch(() => console.log('Failed to load Snapshot'));
 
     const switcher = Client.getSwitcher();
-
-    Client.watchSnapshot(
-        async () => console.log('In-memory snapshot updated', await switcher.isItOn(SWITCHER_KEY)), 
-        (err) => console.log(err));
+    
+    Client.watchSnapshot({
+        success: async () => console.log('In-memory snapshot updated', await switcher.isItOn(SWITCHER_KEY)),
+        reject: (err) => console.log(err)
+    });
 };
 
 // Requires remote API
@@ -147,12 +148,13 @@ const _testSnapshotAutoUpdate = async () => {
     Client.buildContext({ url, apiKey, domain, component, environment }, 
         { local: true, logger: true });
 
-    await Client.loadSnapshot(false, true);
+    await Client.loadSnapshot({ watchSnapshot: false, fetchRemote: true });
     const switcher = Client.getSwitcher();
 
-    Client.scheduleSnapshotAutoUpdate(3, 
-        (updated) => console.log('In-memory snapshot updated', updated), 
-        (err) => console.log(err));
+    Client.scheduleSnapshotAutoUpdate(1, {
+        success: (updated) => console.log('In-memory snapshot updated', updated),
+        reject: (err) => console.log(err)
+    });
 
     setInterval(async () => {
         const time = Date.now();

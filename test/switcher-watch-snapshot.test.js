@@ -79,10 +79,12 @@ describe('E2E test - Switcher local - Watch Snapshot:', function () {
 
     initContext('watch2').then(() => {
       const switcher = Client.getSwitcher();
-      Client.watchSnapshot(async () => {
-        const result = await switcher.isItOn('FF2FOR2030');
-        assert.isFalse(result);
-        done();
+      Client.watchSnapshot({
+        success: async () => {
+          const result = await switcher.isItOn('FF2FOR2030');
+          assert.isFalse(result);
+          done();
+        }
       });
 
       setTimeout(async () => {
@@ -98,9 +100,11 @@ describe('E2E test - Switcher local - Watch Snapshot:', function () {
 
     initContext('watch3').then(() => {
       const switcher = Client.getSwitcher();
-      Client.watchSnapshot(undefined, (err) => {
-        assert.equal(err.message, 'Something went wrong: It was not possible to load the file at generated-watch-snapshots/');
-        done();
+      Client.watchSnapshot({
+        reject: (err) => {
+          assert.equal(err.message, 'Something went wrong: It was not possible to load the file at generated-watch-snapshots/');
+          done();
+        }
       });
 
       setTimeout(() => {
@@ -118,9 +122,7 @@ describe('E2E test - Switcher local - Watch Snapshot:', function () {
     Client.testMode();
 
     let errorMessage;
-    Client.watchSnapshot(undefined, (err) => {
-      errorMessage = err.message;
-    });
+    Client.watchSnapshot({ reject: (err) => errorMessage = err.message });
     
     assert.equal(errorMessage, 'Watch Snapshot cannot be used in test mode or without a snapshot location');
     done();

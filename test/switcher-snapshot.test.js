@@ -56,7 +56,7 @@ describe('E2E test - Switcher local - Snapshot:', function () {
       regexSafe: false
     });
     
-    await Client.loadSnapshot(true);
+    await Client.loadSnapshot({ watchSnapshot: true });
     assert.isTrue(await Client.checkSnapshot());
 
     //restore state to avoid process leakage
@@ -79,7 +79,7 @@ describe('E2E test - Switcher local - Snapshot:', function () {
       regexSafe: false
     });
     
-    await Client.loadSnapshot(true);
+    await Client.loadSnapshot({ watchSnapshot: true });
     assert.isTrue(await Client.checkSnapshot());
     assert.isTrue(existsSync(`generated-snapshots/${environment}.json`));
 
@@ -102,7 +102,7 @@ describe('E2E test - Switcher local - Snapshot:', function () {
       regexSafe: false
     });
     
-    await Client.loadSnapshot(true, true);
+    await Client.loadSnapshot({ watchSnapshot: true, fetchRemote: true });
     assert.isTrue(existsSync(`generated-snapshots/${environment}.json`));
 
     //restore state to avoid process leakage
@@ -328,13 +328,11 @@ describe('E2E test - Snapshot AutoUpdater:', function () {
     });
 
     let snapshotUpdated = false;
-    Client.scheduleSnapshotAutoUpdate(1, (updated) => {
-      if (updated != undefined) {
-        snapshotUpdated = updated;
-      }
+    Client.scheduleSnapshotAutoUpdate(1, {
+      success: (updated) => snapshotUpdated = updated 
     });
     
-    await Client.loadSnapshot(false, true);
+    await Client.loadSnapshot({ watchSnapshot: false, fetchRemote: true });
 
     const switcher = Client.getSwitcher();
     assert.isFalse(await switcher.isItOn('FF2FOR2030'));
@@ -361,13 +359,11 @@ describe('E2E test - Snapshot AutoUpdater:', function () {
     });
 
     let error;
-    Client.scheduleSnapshotAutoUpdate(1, (updated, err) => {
-      if (err != undefined) {
-        error = err;
-      }
+    Client.scheduleSnapshotAutoUpdate(1, {
+      reject: (err) => error = err
     });
     
-    await Client.loadSnapshot(false, true);
+    await Client.loadSnapshot({ watchSnapshot: false, fetchRemote: true });
 
     //next call will fail
     givenError(fetchStub, 3, { errno: 'ECONNREFUSED' });

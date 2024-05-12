@@ -1,7 +1,7 @@
 export default class SnapshotAutoUpdater {
     static _worker = undefined;
 
-    static schedule(interval, checkSnapshot, callback) {
+    static schedule(interval, checkSnapshot, success, reject) {
         if (this._worker) {
             this.terminate();
         }
@@ -9,14 +9,10 @@ export default class SnapshotAutoUpdater {
         this._worker = setInterval(async () => {
             try {
                 const updated = await checkSnapshot();
-                if (callback) {
-                    callback(updated);
-                }
+                success(updated);
             } catch (err) {
-                if (callback) {
-                    this.terminate();
-                    callback(null, err);
-                }
+                this.terminate();
+                reject(err);
             }
         }, interval * 1000);
     }
