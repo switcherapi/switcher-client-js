@@ -11,7 +11,6 @@ export default class SnapshotAutoUpdater {
                 const updated = await checkSnapshot();
                 success(updated);
             } catch (err) {
-                this.terminate();
                 reject(err);
             }
         }, interval * 1000);
