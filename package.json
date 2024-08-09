@@ -30,9 +30,9 @@
     "src/"
   ],
   "devDependencies": {
-    "@babel/eslint-parser": "^7.24.8",
-    "@typescript-eslint/eslint-plugin": "^7.16.1",
-    "@typescript-eslint/parser": "^7.16.1",
+    "@babel/eslint-parser": "^7.25.1",
+    "@typescript-eslint/eslint-plugin": "^8.0.1",
+    "@typescript-eslint/parser": "^8.0.1",
     "c8": "^10.1.2",
     "chai": "^5.1.1",
     "eslint": "^8.57.0",
