@@ -1,6 +1,3 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable no-console */
-
 import { Client } from '../../switcher-client.js';
 import { sleep } from '../helper/utils.js';
 

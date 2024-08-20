@@ -77,7 +77,7 @@ export async function checkAPIHealth(url) {
     try {
         const response = await FetchFacade.fetch(`${url}/check`, { method: 'get', agent: httpClient });
         return response.status == 200;
-    } catch (e) {
+    } catch {
         return false;
     }
 }
@@ -116,8 +116,9 @@ export async function checkSwitchers(switcherKeys) {
         }
         
         const json = response.json();
-        if (json.not_found.length)
+        if (json.not_found.length) {
             throw new CheckSwitcherError(json.not_found);
+        }
     } catch (e) {
         throw new CriteriaError(e.errno ? getConnectivityError(e.errno) : e.message);
     }
