@@ -24,7 +24,7 @@ const loadDomain = (snapshotLocation, environment) => {
 
         const dataJSON = dataBuffer.toString();
         return JSON.parse(dataJSON);
-    } catch (e) {
+    } catch {
         throw new Error(`Something went wrong: It was not possible to load the file at ${snapshotLocation}`);
     }
 };

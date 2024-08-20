@@ -1,6 +1,5 @@
 import fs from 'node:fs';
 
-/* eslint-disable no-console */
 export function given(fetchStub, order, expect) {
   fetchStub.onCall(order).returns(Promise.resolve(expect));
 }
