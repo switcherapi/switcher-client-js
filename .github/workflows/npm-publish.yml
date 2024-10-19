@@ -16,6 +16,8 @@ jobs:
           node-version: 20
       - run: npm install
       - run: npm test
+        env:
+          SWITCHER_API_KEY: ${{ secrets.SWITCHER_API_KEY }}
 
   publish-npm:
     name: Publish to NPM

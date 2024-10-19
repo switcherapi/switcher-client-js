@@ -25,6 +25,8 @@ jobs:
       - run: npm install
       - run: npm run lint
       - run: npm test
+        env:
+          SWITCHER_API_KEY: ${{ secrets.SWITCHER_API_KEY }}
 
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
