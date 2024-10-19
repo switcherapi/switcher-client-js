@@ -19,7 +19,8 @@
   "license": "MIT",
   "scripts": {
     "lint": "eslint ./src/**/*.js ./test/**/*.js",
-    "test": "env-cmd npm run coverage \"./test/**/*.test.js\"",
+    "test": "npm run coverage \"./test/**/*.test.js\"",
+    "test-local": "env-cmd npm run coverage \"./test/**/*.test.js\"",
     "coverage": "c8 --include='src/**/*.js' mocha",
     "play": "env-cmd node ./test/playground/index.js"
   },
