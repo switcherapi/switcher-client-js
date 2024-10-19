@@ -31,3 +31,5 @@ jobs:
 
       - run: npm install
       - run: npm test
+        env:
+          SWITCHER_API_KEY: ${{ secrets.SWITCHER_API_KEY }}

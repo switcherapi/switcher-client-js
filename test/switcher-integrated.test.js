@@ -10,7 +10,7 @@ describe('Switcher integrated test', () => {
         // given context build
         Client.buildContext({
             url: 'https://api.switcherapi.com',
-            apiKey: 'JDJiJDA4JEFweTZjSTR2bE9pUjNJOUYvRy9raC4vRS80Q2tzUnk1d3o1aXFmS2o5eWJmVW11cjR0ODNT',
+            apiKey: process.env.SWITCHER_API_KEY,
             domain: 'Playground',
             component: 'switcher-playground'
         });
