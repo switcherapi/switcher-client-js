@@ -46,7 +46,7 @@ const apiKey = '[API_KEY]';
 const environment = 'default';
 const domain = 'My Domain';
 const component = 'MyApp';
-const url = 'https://switcherapi.com/api';
+const url = 'https://api.switcherapi.com';
 ```
 
 - **domain**: Domain name.
@@ -148,13 +148,13 @@ Client.subscribeNotifyError((error) => {
 6. **Hybrid mode**
 Forcing Switchers to resolve remotely can help you define exclusive features that cannot be resolved locally.
 This feature is ideal if you want to run the SDK in local mode but still want to resolve a specific switcher remotely.
-```ts
+```js
 const switcher = Client.getSwitcher();
 await switcher.remote().isItOn('FEATURE01');
 ```
 
 ## Built-in mock feature
-You can also bypass your switcher configuration by invoking 'Client.assume'. This is perfect for your test code where you want to test both scenarios when the switcher is true and false.
+You can also bypass your switcher configuration by invoking 'Client.assume'. This is perfect for your test code where you want to validate both scenarios when the switcher is true and false.
 
 ```js
 Client.assume('FEATURE01').true();
@@ -166,6 +166,12 @@ switcher.isItOn('FEATURE01'); // Now, it's going to return the result retrieved 
 Client.assume('FEATURE01').false().withMetadata({ message: 'Feature is disabled' }); // Include metadata to emulate Relay response
 const response = await switcher.detail().isItOn('FEATURE01'); // false
 console.log(response.metadata.message); // Feature is disabled
+
+Client.assume('FEATURE01').true().when(StrategiesType.VALUE, 'USER_1');
+switcher.checkValue('USER_1').isItOn('FEATURE01'); // true when the value is 'USER_1'
+
+Client.assume('FEATURE01').true().when(StrategiesType.NETWORK, ['USER_2', 'USER_3']);
+switcher.checkValue('USER_1').isItOn('FEATURE01'); // false as the value is not in the list
 ```
 
 **Enabling Test Mode**
