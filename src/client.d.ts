@@ -123,8 +123,22 @@ export class Client {
  */
 export type ResultDetail = {
   result: boolean;
-  reason: string;
-  metadata: any;
+  reason: string | undefined;
+  metadata: object | undefined;
+}
+
+/**
+ * Criteria defines the condition(s) to evaluate the switcher when using Client.assume(key)
+ */
+export type Criteria = {
+
+  /**
+   * Add a new strategy/input to the criteria
+   * 
+   * @param strategy (StrategiesType) value to be evaluated
+   */
+  and(strategy: string, input: string | string[]): this;
+
 }
 
 /**
@@ -200,7 +214,14 @@ declare class Key {
   withMetadata(metadata: any): Key;
 
   /**
+   * Conditionally set result based on strategy
+   * 
+   * @param strategy (StrategiesType) value to be evaluated
+   */
+  when(strategy: string, input: string | string[]): Criteria;
+
+  /**
    * Return key response
    */
-  getResponse(): ResultDetail;
+  getResponse(input?: string[][]): ResultDetail;
 }

@@ -4,26 +4,26 @@ import { assert } from 'chai';
 import { Client, ResultDetail, SwitcherContext, SwitcherOptions } from '../switcher-client.js';
 import { StrategiesType } from '../src/lib/snapshot.js';
 import { assertReject, assertResolve, deleteGeneratedSnapshot } from './helper/utils.js';
+import TimedMatch from '../src/lib/utils/timed-match/index.js';
+
+let switcher;
+const contextSettings = {
+  apiKey: '[api_key]',
+  domain: 'Business',
+  component: 'business-service',
+  environment: 'default',
+  url: 'http://localhost:3000'
+};
+
+const options = {
+  snapshotLocation: './test/snapshot/',
+  local: true, 
+  logger: true, 
+  regexMaxBlackList: 1, 
+  regexMaxTimeLimit: 500
+};
 
 describe('E2E test - Switcher local:', function () {
-  let switcher;
-
-  const contextSettings = {
-    apiKey: '[api_key]',
-    domain: 'Business',
-    component: 'business-service',
-    environment: 'default',
-    url: 'http://localhost:3000'
-  };
-
-  const options = {
-    snapshotLocation: './test/snapshot/',
-    local: true, 
-    logger: true, 
-    regexMaxBlackList: 1, 
-    regexMaxTimeLimit: 500
-  };
-
   this.beforeAll(async function() {
     Client.buildContext(contextSettings, options);
 
@@ -96,7 +96,7 @@ describe('E2E test - Switcher local:', function () {
     assert.isTrue(result);
   });
 
-  it('should be valid - Switcher strategy disabled', async function () {
+  it('should be valid - Client strategy disabled', async function () {
     const result = await switcher
       .checkNetwork('192.168.0.1')
       .isItOn('FF2FOR2021');
@@ -104,7 +104,7 @@ describe('E2E test - Switcher local:', function () {
     assert.isTrue(result);
   });
 
-  it('should be valid - No Switcher strategy', async function () {
+  it('should be valid - No Client strategy', async function () {
     const result = await switcher.isItOn('FF2FOR2022');
     assert.isTrue(result);
   });
@@ -188,6 +188,62 @@ describe('E2E test - Switcher local:', function () {
       'Group disabled');
   });
 
+  it('should be valid - Local mode', async function () {
+    this.timeout(3000);
+
+    Client.buildContext(contextSettings, {
+      local: true,
+      regexSafe: false,
+      snapshotLocation: 'generated-snapshots/'
+    });
+
+    await assertResolve(assert, Client.loadSnapshot());
+    assert.isNotNull(Client.snapshot);
+  });
+
+  it('should be invalid - Local mode cannot load snapshot from an invalid path', async function () {
+    this.timeout(3000);
+
+    Client.buildContext(contextSettings, {
+      local: true,
+      regexSafe: false,
+      snapshotLocation: '//somewhere/'
+    });
+
+    Client.testMode();
+    await assertReject(assert, Client.loadSnapshot(), 'Something went wrong: It was not possible to load the file at //somewhere/');
+  });
+
+  it('should not throw error when a default result is provided', async function () {
+    Client.buildContext(contextSettings, {
+      local: true
+    });
+
+    const switcher = Client.getSwitcher('UNKNOWN_FEATURE').defaultResult(true);
+    assert.isTrue(await switcher.isItOn());
+  });
+
+});
+
+describe('E2E test - Client testing (assume) feature:', function () {
+  this.beforeAll(async function() {
+    Client.buildContext(contextSettings, options);
+
+    await Client.loadSnapshot();
+    switcher = Client.getSwitcher();
+  });
+
+  this.afterAll(function() {
+    Client.unloadSnapshot();
+    TimedMatch.terminateWorker();
+  });
+
+  this.beforeEach(function() {
+    Client.clearLogger();
+    Client.forget('FF2FOR2020');
+    switcher = Client.getSwitcher();
+  });
+
   it('should be valid assuming key to be false and then forgetting it', async function () {
     await switcher
       .checkValue('Japan')
@@ -232,54 +288,32 @@ describe('E2E test - Switcher local:', function () {
     await assertReject(assert, switcher.isItOn(), 'Something went wrong: {"error":"Unable to load a key UNKNOWN"}');
   });
 
-  it('should enable test mode which will prevent a snapshot to be watchable', async function () {
-    //given
-    Client.buildContext(contextSettings, {
-      local: true, logger: true, regexSafe: false
-    });
-
-    switcher = Client.getSwitcher();
+  it('should return true using Client.assume only when Strategy input values match', async function () {
+    await switcher
+      .checkValue('Canada') // result to be false
+      .checkNetwork('10.0.0.3')
+      .prepare('FF2FOR2020');
     
-    //test
-    Client.assume('FF2FOR2020').false();
-    assert.isFalse(await switcher.isItOn('FF2FOR2020'));
-    Client.assume('FF2FOR2020').true();
-    assert.isTrue(await switcher.isItOn('FF2FOR2020'));
-  });
-
-  it('should be invalid - Local mode cannot load snapshot from an invalid path', async function () {
-    this.timeout(3000);
-
-    Client.buildContext(contextSettings, {
-      local: true,
-      regexSafe: false,
-      snapshotLocation: '//somewhere/'
-    });
-
-    Client.testMode();
-    await assertReject(assert, Client.loadSnapshot(), 'Something went wrong: It was not possible to load the file at //somewhere/');
-  });
-
-  it('should be valid - Local mode', async function () {
-    this.timeout(3000);
-
-    Client.buildContext(contextSettings, {
-      local: true,
-      regexSafe: false,
-      snapshotLocation: 'generated-snapshots/'
-    });
-
-    await assertResolve(assert, Client.loadSnapshot());
-    assert.isNotNull(Client.snapshot);
-  });
-
-  it('should not throw error when a default result is provided', async function () {
-    Client.buildContext(contextSettings, {
-      local: true
-    });
-
-    const switcher = Client.getSwitcher('UNKNOWN_FEATURE').defaultResult(true);
+    assert.isFalse(await switcher.isItOn());
+    Client.assume('FF2FOR2020').true()
+      .when(StrategiesType.VALUE, 'Canada') // manipulate the condition to result to true
+      .and(StrategiesType.NETWORK, '10.0.0.3');
+      
     assert.isTrue(await switcher.isItOn());
+  });
+
+  it('should NOT return true using Client.assume when Strategy input values does not match', async function () {
+    await switcher
+      .checkValue('Japan')
+      .checkNetwork('10.0.0.3')
+      .prepare('FF2FOR2020');
+    
+    assert.isTrue(await switcher.isItOn());
+    Client.assume('FF2FOR2020').true()
+      .when(StrategiesType.VALUE, ['Brazil', 'Japan'])
+      .and(StrategiesType.NETWORK, ['10.0.0.4', '192.168.0.1']);
+      
+    assert.isFalse(await switcher.isItOn());
   });
 
 });

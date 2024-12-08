@@ -17,3 +17,4 @@
 
 export { Client, ResultDetail, SwitcherContext, SwitcherOptions } from './src/client.js';
 export { Switcher } from './src/switcher.js';
+export { StrategiesType } from './src/lib/snapshot.js';

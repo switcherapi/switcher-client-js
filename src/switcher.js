@@ -54,7 +54,7 @@ export class Switcher {
     // verify if query from Bypasser
     const bypassKey = Bypasser.searchBypassed(this.#key);
     if (bypassKey) {
-      const response = bypassKey.getResponse();
+      const response = bypassKey.getResponse(util.get(this.#input, []));
       return this.#showDetail ? response : response.result;
     }
 

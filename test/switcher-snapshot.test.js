@@ -368,7 +368,7 @@ describe('E2E test - Snapshot AutoUpdater:', function () {
     //next call will fail
     givenError(fetchStub, 3, { errno: 'ECONNREFUSED' });
     
-    await sleep(2000);
+    await sleep(1000);
 
     assert.exists(error);
     assert.equal(error.message, 'Something went wrong: Connection has been refused - ECONNREFUSED');
