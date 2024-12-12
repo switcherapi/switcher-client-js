@@ -7,7 +7,7 @@ on:
       node:
         description: 'Node version'
         required: true
-        default: '20.x'
+        default: '22.x'
       os:
         description: 'Operating System (ubuntu-20.04, ubuntu-latest, windows-latest)'
         required: true
