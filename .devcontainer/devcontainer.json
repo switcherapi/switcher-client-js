@@ -1,0 +1,16 @@
+{
+    "name": "Switcher Client JS Dev Container",
+    "dockerComposeFile": [
+        "docker-compose.yml"
+    ],
+    "service": "switcherclientjs",
+    "workspaceFolder": "/workspace",
+	"customizations":{
+		"vscode": {
+			"extensions": ["dbaeumer.vscode-eslint"],
+			"settings": {
+				"terminal.integrated.shell.linux": "/bin/bash"
+			}
+		}
+	}
+}

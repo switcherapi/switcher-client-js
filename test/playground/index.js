@@ -1,10 +1,10 @@
 import { Client } from '../../switcher-client.js';
 import { sleep } from '../helper/utils.js';
 
-const SWITCHER_KEY = 'MY_SWITCHER';
+const SWITCHER_KEY = 'CLIENT_JS_FEATURE';
 const apiKey = process.env.SWITCHER_API_KEY;
-const domain = 'Playground';
-const component = 'switcher-playground';
+const domain = 'Switcher API';
+const component = 'switcher-client-js';
 const environment = 'default';
 const url = 'https://api.switcherapi.com';
 const snapshotLocation = './test/playground/snapshot/';

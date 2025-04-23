@@ -11,13 +11,13 @@ describe('Switcher integrated test', () => {
         Client.buildContext({
             url: 'https://api.switcherapi.com',
             apiKey: process.env.SWITCHER_API_KEY,
-            domain: 'Playground',
-            component: 'switcher-playground'
+            domain: 'Switcher API',
+            component: 'switcher-client-js'
         });
 
         // test
         const switcher = Client.getSwitcher().detail();
-        const result = await switcher.isItOn('CLIENT_JS_FEATURE_1');
+        const result = await switcher.isItOn('CLIENT_JS_FEATURE');
 
         assert.isNotNull(result);
     });

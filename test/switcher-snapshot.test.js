@@ -6,6 +6,12 @@ import { Client } from '../switcher-client.js';
 import FetchFacade from '../src/lib/utils/fetchFacade.js';
 import { given, givenError, generateAuth, generateStatus, assertReject, assertResolve, sleep, deleteGeneratedSnapshot } from './helper/utils.js';
 
+const restoreStub = (fetchStub) => {
+  if (fetchStub) {
+    fetchStub.restore();
+  }
+}
+
 describe('E2E test - Switcher local - Snapshot:', function () {
   const apiKey = '[api_key]';
   const domain = 'Business';
@@ -17,14 +23,9 @@ describe('E2E test - Switcher local - Snapshot:', function () {
   const dataJSON = dataBuffer.toString();
 
   let fetchStub;
-  let fsStub;
 
   afterEach(function() {
-    if (fetchStub != undefined)
-      fetchStub.restore();
-
-    if (fsStub != undefined)
-      fsStub.restore();
+    restoreStub(fetchStub);
   });
 
   beforeEach(function() {
@@ -216,14 +217,9 @@ describe('E2E test - Fail response - Snapshot:', function () {
   const url = 'http://localhost:3000';
 
   let fetchStub;
-  let fsStub;
 
   afterEach(function() {
-    if (fetchStub != undefined)
-      fetchStub.restore();
-
-    if (fsStub != undefined)
-      fsStub.restore();
+    restoreStub(fetchStub);
   });
 
   beforeEach(function() {
@@ -285,20 +281,13 @@ describe('E2E test - Snapshot AutoUpdater:', function () {
   const dataJSONV2 = dataBufferV2.toString();
 
   let fetchStub;
-  let fsStub;
 
   afterEach(function() {
-    if (fetchStub != undefined)
-      fetchStub.restore();
-
-    if (fsStub != undefined)
-      fsStub.restore();
+    restoreStub(fetchStub);
   });
 
   beforeEach(function() {
-    Client.buildContext({ url, apiKey, domain, component, environment }, {
-      local: true
-    });
+    Client.buildContext({ url, apiKey, domain, component, environment }, { local: true });
     Client.testMode();
   });
 
