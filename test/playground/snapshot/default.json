@@ -1,21 +1,21 @@
 {
     "data": {
         "domain": {
-            "name": "Playground",
-            "version": 1653971338700,
+            "name": "Switcher API",
+            "version": 1,
             "activated": true,
             "group": [
                 {
-                    "name": "Release 1",
+                    "name": "Test Project",
                     "activated": true,
                     "config": [
                         {
-                            "key": "MY_SWITCHER",
+                            "key": "CLIENT_JS_FEATURE",
                             "activated": true,
                             "strategies": [
                                 {
                                     "strategy": "VALUE_VALIDATION",
-                                    "activated": true,
+                                    "activated": false,
                                     "operation": "EXIST",
                                     "values": [
                                         "user_1"
@@ -23,7 +23,7 @@
                                 }
                             ],
                             "components": [
-                                "switcher-playground"
+                                "switcher-client-js"
                             ]
                         }
                     ]

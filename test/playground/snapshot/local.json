@@ -1,18 +1,21 @@
 {
     "data": {
         "domain": {
-            "name": "Local Playground",
+            "name": "Switcher API",
             "version": 1,
             "activated": true,
             "group": [
                 {
-                    "name": "My Features",
+                    "name": "Test Project",
                     "activated": true,
                     "config": [
                         {
-                            "key": "MY_SWITCHER",
+                            "key": "CLIENT_JS_FEATURE",
                             "activated": true,
-                            "strategies": []
+                            "strategies": [],
+                            "components": [
+                                "switcher-client-js"
+                            ]
                         }
                     ]
                 }

@@ -1,5 +1,5 @@
 export function payloadReader(payload) {
-    let payloadRead = payload + '' === payload || payload || 0;
+    let payloadRead = payload + '' === payload || payload;
     if (Array.isArray(payloadRead)) {
         return payloadRead.flatMap(p => payloadReader(p));
     }

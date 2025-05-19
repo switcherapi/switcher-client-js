@@ -2,10 +2,12 @@ import Bypasser from './lib/bypasser/index.js';
 import ExecutionLogger from './lib/utils/executionLogger.js';
 import checkCriteriaLocal from './lib/resolver.js';
 import { StrategiesType } from './lib/snapshot.js';
-import { Client } from './client.js';
 import * as remote from './lib/remote.js';
 import * as util from './lib/utils/index.js';
-import { Auth } from './lib/remote-auth.js';
+import { Auth } from './lib/remoteAuth.js';
+import { GlobalAuth } from './lib/globals/globalAuth.js';
+import { GlobalOptions } from './lib/globals/globalOptions.js';
+import { GlobalSnapshot } from './lib/globals/globalSnapshot.js';
 
 export class Switcher {
   #delay = 0;
@@ -23,7 +25,7 @@ export class Switcher {
   async prepare(key) {
     this.#validateArgs(key);
 
-    if (!Client.options.local || this.#forceRemote) {
+    if (!GlobalOptions.local || this.#forceRemote) {
       await Auth.auth();
     }
   }
@@ -38,7 +40,7 @@ export class Switcher {
     }
 
     await this.#executeApiValidation();
-    if (!Auth.getToken()) {
+    if (!GlobalAuth.token) {
       errors.push('Missing token field');
     }
 
@@ -60,13 +62,13 @@ export class Switcher {
 
     try {
       // verify if query from local snapshot
-      if (Client.options.local && !this.#forceRemote) {
+      if (GlobalOptions.local && !this.#forceRemote) {
         return await this._executeLocalCriteria();
       }
 
       // otherwise, execute remote criteria or local snapshot when silent mode is enabled
       await this.validate();
-      if (Auth.getToken() === 'SILENT') {
+      if (GlobalAuth.token === 'SILENT') {
         result = await this._executeLocalCriteria();
       } else {
         result = await this._executeRemoteCriteria();
@@ -74,7 +76,7 @@ export class Switcher {
     } catch (err) {
       this.#notifyError(err);
       
-      if (Client.options.silentMode) {
+      if (GlobalOptions.silentMode) {
         Auth.updateSilentToken();
         return this._executeLocalCriteria();
       }
@@ -89,14 +91,14 @@ export class Switcher {
     this.#delay = delay;
 
     if (delay > 0) {
-      Client.options.logger = true;
+      GlobalOptions.updateOptions({ logger: true });
     }
 
     return this;
   }
 
   remote(forceRemote = true) {
-    if (!Client.options.local) {
+    if (!GlobalOptions.local) {
       throw new Error('Local mode is not enabled');
     }
     
@@ -165,7 +167,7 @@ export class Switcher {
         responseCriteria = this.#getDefaultResultOrThrow(err);
       }
       
-      if (Client.options.logger && this.#key) {
+      if (GlobalOptions.logger && this.#key) {
         ExecutionLogger.add(responseCriteria, this.#key, this.#input);
       }
     } else {
@@ -219,13 +221,13 @@ export class Switcher {
       response = await checkCriteriaLocal(
         util.get(this.#key, ''), 
         util.get(this.#input, []), 
-        Client.snapshot
+        GlobalSnapshot.snapshot
       );
     } catch (err) {
       response = this.#getDefaultResultOrThrow(err);
     }
 
-    if (Client.options.logger) {
+    if (GlobalOptions.logger) {
       ExecutionLogger.add(response, this.#key, this.#input);
     }
 

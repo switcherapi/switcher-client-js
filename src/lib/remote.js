@@ -3,8 +3,8 @@ import { Agent } from 'node:https';
 
 import { AuthError, CheckSwitcherError, CriteriaError, SnapshotServiceError } from './exceptions/index.js';
 import FetchFacade from './utils/fetchFacade.js';
-import { Auth } from './remote-auth.js';
 import * as util from './utils/index.js';
+import { GlobalAuth } from './globals/globalAuth.js';
 
 let httpClient;
 
@@ -85,10 +85,10 @@ export async function checkAPIHealth(url) {
 export async function checkCriteria(key, input, showDetail = false) {
     try {
         const entry = getEntry(input);
-        const response = await FetchFacade.fetch(`${Auth.getURL()}/criteria?showReason=${showDetail}&key=${key}`, {
+        const response = await FetchFacade.fetch(`${GlobalAuth.url}/criteria?showReason=${showDetail}&key=${key}`, {
             method: 'post',
             body: JSON.stringify({ entry }),
-            headers: getHeader(Auth.getToken()),
+            headers: getHeader(GlobalAuth.token),
             agent: httpClient
         });
 
@@ -104,10 +104,10 @@ export async function checkCriteria(key, input, showDetail = false) {
 
 export async function checkSwitchers(switcherKeys) {
     try {
-        const response = await FetchFacade.fetch(`${Auth.getURL()}/criteria/switchers_check`, {
+        const response = await FetchFacade.fetch(`${GlobalAuth.url}/criteria/switchers_check`, {
             method: 'post',
             body: JSON.stringify({ switchers: switcherKeys }),
-            headers: getHeader(Auth.getToken()),
+            headers: getHeader(GlobalAuth.token),
             agent: httpClient
         });
 
@@ -126,9 +126,9 @@ export async function checkSwitchers(switcherKeys) {
 
 export async function checkSnapshotVersion(version) {
     try {
-        const response = await FetchFacade.fetch(`${Auth.getURL()}/criteria/snapshot_check/${version}`, {
+        const response = await FetchFacade.fetch(`${GlobalAuth.url}/criteria/snapshot_check/${version}`, {
             method: 'get',
-            headers: getHeader(Auth.getToken()),
+            headers: getHeader(GlobalAuth.token),
             agent: httpClient
         });
 
@@ -159,10 +159,10 @@ export async function resolveSnapshot(domain, environment, component) {
         };
 
     try {
-        const response = await FetchFacade.fetch(`${Auth.getURL()}/graphql`, {
+        const response = await FetchFacade.fetch(`${GlobalAuth.url}/graphql`, {
             method: 'post',
             body: JSON.stringify(data),
-            headers: getHeader(Auth.getToken()),
+            headers: getHeader(GlobalAuth.token),
             agent: httpClient
         });
         
