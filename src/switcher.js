@@ -6,6 +6,7 @@ import { Client } from './client.js';
 import * as remote from './lib/remote.js';
 import * as util from './lib/utils/index.js';
 import { Auth } from './lib/remote-auth.js';
+import { GlobalAuth } from './lib/globals/globalAuth.js';
 
 export class Switcher {
   #delay = 0;
@@ -38,7 +39,7 @@ export class Switcher {
     }
 
     await this.#executeApiValidation();
-    if (!Auth.getToken()) {
+    if (!GlobalAuth.token) {
       errors.push('Missing token field');
     }
 
@@ -66,7 +67,7 @@ export class Switcher {
 
       // otherwise, execute remote criteria or local snapshot when silent mode is enabled
       await this.validate();
-      if (Auth.getToken() === 'SILENT') {
+      if (GlobalAuth.token === 'SILENT') {
         result = await this._executeLocalCriteria();
       } else {
         result = await this._executeRemoteCriteria();
