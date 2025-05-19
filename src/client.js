@@ -18,28 +18,28 @@ import SnapshotAutoUpdater from './lib/utils/snapshotAutoUpdater.js';
 import { SnapshotNotFoundError } from './lib/exceptions/index.js';
 import { loadDomain, validateSnapshot, checkSwitchersLocal } from './lib/snapshot.js';
 import { Switcher } from './switcher.js';
-import { Auth } from './lib/remote-auth.js';
+import { Auth } from './lib/remoteAuth.js';
+import { GlobalOptions } from './lib/globals/globalOptions.js';
+import { GlobalSnapshot } from './lib/globals/globalSnapshot.js';
 
 export class Client {
 
-  static #options;
   static #context;
-  static #snapshot;
 
   static buildContext(context, options) {
     this.testEnabled = DEFAULT_TEST_MODE;
 
-    this.#snapshot = undefined;
     this.#context = context;
     this.#context.environment = util.get(context.environment, DEFAULT_ENVIRONMENT);
 
     // Default values
-    this.#options = {
+    GlobalSnapshot.clear();
+    GlobalOptions.init({
       snapshotAutoUpdateInterval: 0,
       snapshotLocation: options?.snapshotLocation,
       local: util.get(options?.local, DEFAULT_LOCAL),
       logger: util.get(options?.logger, DEFAULT_LOGGER)
-    };
+    });
 
     if (options) {
         Client.#buildOptions(options);
@@ -60,7 +60,7 @@ export class Client {
     }
 
     if (SWITCHER_OPTIONS.SNAPSHOT_AUTO_UPDATE_INTERVAL in options) {
-      this.#options.snapshotAutoUpdateInterval = options.snapshotAutoUpdateInterval;
+      GlobalOptions.updateOptions({ snapshotAutoUpdateInterval: options.snapshotAutoUpdateInterval });
       this.scheduleSnapshotAutoUpdate();
     }
 
@@ -70,7 +70,7 @@ export class Client {
   static #initSilentMode(silentMode) {
     Auth.setRetryOptions(silentMode);
 
-    Client.#options.silentMode = silentMode;
+    GlobalOptions.updateOptions({ silentMode });
     Client.loadSnapshot();
   }
   
@@ -94,7 +94,7 @@ export class Client {
   }
 
   static async checkSnapshot() {
-    if (!Client.#snapshot) {
+    if (!GlobalSnapshot.snapshot) {
       throw new SnapshotNotFoundError('Snapshot is not loaded. Use Client.loadSnapshot()');
     }
 
@@ -104,15 +104,15 @@ export class Client {
     
     const snapshot = await validateSnapshot(
         Client.#context,
-        Client.#snapshot.data.domain.version
+        GlobalSnapshot.snapshot.data.domain.version
     );
     
     if (snapshot) {
-      if (Client.#options.snapshotLocation?.length) {
-        writeFileSync(`${Client.#options.snapshotLocation}/${Client.#context.environment}.json`, snapshot);
+      if (GlobalOptions.snapshotLocation?.length) {
+        writeFileSync(`${GlobalOptions.snapshotLocation}/${Client.#context.environment}.json`, snapshot);
       }
 
-      Client.#snapshot = JSON.parse(snapshot);
+      GlobalSnapshot.init(JSON.parse(snapshot));
       return true;
     }
 
@@ -120,13 +120,13 @@ export class Client {
   }
 
   static async loadSnapshot(options = { fetchRemote: false, watchSnapshot: false }) {
-    Client.#snapshot = loadDomain(
-      util.get(Client.#options.snapshotLocation, ''), 
+    GlobalSnapshot.init(loadDomain(
+      util.get(GlobalOptions.snapshotLocation, ''), 
       util.get(Client.#context.environment, DEFAULT_ENVIRONMENT)
-    );
+    ));
 
-    if (Client.#snapshot.data.domain.version == 0 && 
-        (options.fetchRemote || !Client.#options.local)) {
+    if (GlobalSnapshot.snapshot.data.domain.version == 0 && 
+        (options.fetchRemote || !GlobalOptions.local)) {
       await Client.checkSnapshot();
     }
 
@@ -134,22 +134,22 @@ export class Client {
         Client.watchSnapshot();
     }
 
-    return Client.#snapshot?.data.domain.version || 0;
+    return GlobalSnapshot.snapshot?.data.domain.version || 0;
   }
 
   static watchSnapshot(callback = {}) {
     const { success = () => {}, reject = () => {} } = callback;
 
-    if (Client.testEnabled || !Client.#options.snapshotLocation?.length) {
+    if (Client.testEnabled || !GlobalOptions.snapshotLocation?.length) {
       return reject(new Error('Watch Snapshot cannot be used in test mode or without a snapshot location'));
     }
 
-    const snapshotFile = `${Client.#options.snapshotLocation}/${Client.#context.environment}.json`;
+    const snapshotFile = `${GlobalOptions.snapshotLocation}/${Client.#context.environment}.json`;
     let lastUpdate;
     watchFile(snapshotFile, (listener) => {
       try {
         if (!lastUpdate || listener.ctime > lastUpdate) {
-            Client.#snapshot = loadDomain(Client.#options.snapshotLocation, Client.#context.environment);
+          GlobalSnapshot.init(loadDomain(GlobalOptions.snapshotLocation, Client.#context.environment));
           success();
         }
       } catch (e) {
@@ -165,8 +165,8 @@ export class Client {
       return;
     }
 
-    const snapshotFile = `${Client.#options.snapshotLocation}${Client.#context.environment}.json`;
-    Client.#snapshot = undefined;
+    const snapshotFile = `${GlobalOptions.snapshotLocation}${Client.#context.environment}.json`;
+    GlobalSnapshot.clear();
     unwatchFile(snapshotFile);
   }
 
@@ -174,12 +174,12 @@ export class Client {
     const { success = () => {}, reject = () => {} } = callback;
 
     if (interval) {
-        Client.#options.snapshotAutoUpdateInterval = interval;
+      GlobalOptions.updateOptions({ snapshotAutoUpdateInterval: interval });
     }
 
-    if (Client.#options.snapshotAutoUpdateInterval && Client.#options.snapshotAutoUpdateInterval > 0) {
+    if (GlobalOptions.snapshotAutoUpdateInterval && GlobalOptions.snapshotAutoUpdateInterval > 0) {
       SnapshotAutoUpdater.schedule(
-        Client.#options.snapshotAutoUpdateInterval, 
+        GlobalOptions.snapshotAutoUpdateInterval, 
         this.checkSnapshot, 
         success, 
         reject
@@ -192,8 +192,8 @@ export class Client {
   }
 
   static async checkSwitchers(switcherKeys) {
-    if (Client.#options.local && Client.#snapshot) {
-      checkSwitchersLocal(Client.#snapshot, switcherKeys);
+    if (GlobalOptions.local && GlobalSnapshot.snapshot) {
+      checkSwitchersLocal(GlobalSnapshot.snapshot, switcherKeys);
     } else {
       await Client._checkSwitchersRemote(switcherKeys);
     }
@@ -204,8 +204,8 @@ export class Client {
       await Auth.auth();
       await remote.checkSwitchers(switcherKeys);
     } catch (e) {
-      if (Client.#options.silentMode) {
-        checkSwitchersLocal(Client.#snapshot, switcherKeys);
+      if (GlobalOptions.silentMode) {
+        checkSwitchersLocal(GlobalSnapshot.snapshot, switcherKeys);
       } else {
         throw e;
       }
@@ -239,15 +239,6 @@ export class Client {
   static testMode(testEnabled = true) {
     Client.testEnabled = testEnabled;
   }
-
-  static get options() {
-    return Client.#options;
-  }
-
-  static get snapshot() {
-    return Client.#snapshot;
-  }
-
 }
 
 // Type export placeholders
