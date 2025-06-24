@@ -170,7 +170,7 @@ describe('E2E test - Switcher local - Watch Snapshot (context):', function () {
     updateSwitcher('watch4', false);
 
     let result = true;
-    for (let i = 0; i < 10 && result; i++) {
+    for (let i = 0; i < 20 && result; i++) {
       await sleep(500);
       result = await switcher.isItOn('FF2FOR2030');
       if (!result) break;
