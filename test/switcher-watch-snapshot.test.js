@@ -2,8 +2,7 @@ import { assert } from 'chai';
 import { writeFileSync, existsSync, mkdirSync, readFileSync, unlinkSync } from 'fs';
 
 import { Client } from '../switcher-client.js';
-import { deleteGeneratedSnapshot, sleep } from './helper/utils.js';
-
+import { deleteGeneratedSnapshot, getSwitcherResulUntil } from './helper/utils.js';
 
 const domain = 'Business';
 const component = 'business-service';
@@ -169,12 +168,6 @@ describe('E2E test - Switcher local - Watch Snapshot (context):', function () {
     assert.isTrue(await switcher.isItOn('FF2FOR2030'));
     updateSwitcher('watch4', false);
 
-    let result = true;
-    for (let i = 0; i < 20 && result; i++) {
-      await sleep(500);
-      result = await switcher.isItOn('FF2FOR2030');
-      if (!result) break;
-    }
-    assert.isFalse(result);
+    assert.isFalse(await getSwitcherResulUntil(switcher, 'FF2FOR2030', false));
   });
 });

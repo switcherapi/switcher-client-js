@@ -30,10 +30,6 @@ export class GlobalOptions {
     return this.#options.snapshotAutoUpdateInterval;
   }
 
-  static get snapshotWatcher() {
-    return this.#options.snapshotWatcher;
-  }
-
   static get silentMode() {
     return this.#options.silentMode;
   }

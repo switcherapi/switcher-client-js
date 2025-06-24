@@ -54,6 +54,21 @@ export async function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+export async function getSwitcherResulUntil(switcher, key, expectToBe, retries = 20) {
+  let result;
+
+  for (let i = 0; i < retries; i++) {
+    await sleep(500);
+    result = await switcher.isItOn(key);
+
+    if (result === expectToBe) { 
+      break;
+    }
+  }
+
+  return result;
+};
+
 export function deleteGeneratedSnapshot(dirname) {
   if (!fs.existsSync(dirname)) {
     return;
