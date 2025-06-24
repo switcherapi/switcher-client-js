@@ -137,7 +137,7 @@ export type Criteria = {
    * 
    * @param strategy (StrategiesType) value to be evaluated
    */
-  and(strategy: string, input: string | string[]): this;
+  and(strategy: string, input: string | string[]): Criteria;
 
 }
 
@@ -156,10 +156,29 @@ export type LoggerRecord = {
  * SwitcherContext is required to build the context to communicate with the API.
  */
 export type SwitcherContext = {
+  /**
+   * The API URL, e.g. https://api.switcherapi.com
+   */
   url?: string;
+
+  /**
+   * The API key provided for the component
+   */
   apiKey?: string;
+
+  /**
+   * The domain name of the Switcher API account
+   */
   domain: string;
+
+  /**
+   * The component name registered in the Switcher API account
+   */
   component?: string;
+
+  /**
+   * The environment name registered in the Switcher API account
+   */
   environment?: string;
 }
 
@@ -167,14 +186,63 @@ export type SwitcherContext = {
  * SwitcherOptions is optional to build the context to communicate with the API.
  */
 export type SwitcherOptions = {
+  /**
+   * When enabled it will use the local snapshot (file or in-memory)
+   * If not set, it will use the remote API
+   */
   local?: boolean;
+
+  /**
+   * When enabled it allows inspecting the result details with Client.getLogger(key)
+   * If not set, it will not log the result details
+   */
   logger?: boolean;
+
+  /**
+   * The location of the snapshot file
+   * If not set, it will use the in-memory snapshot
+   */
   snapshotLocation?: string;
+
+  /**
+   * The interval in milliseconds to auto-update the snapshot
+   * If not set, it will not auto-update the snapshot
+   */
   snapshotAutoUpdateInterval?: number;
+
+  /**
+   * When enabled it will watch the snapshot file for changes
+   */
+  snapshotWatcher?: boolean;
+
+  /**
+   * When defined it will switch to local during the specified time before it switches back to remote
+   * e.g. 5s (s: seconds - m: minutes - h: hours)
+   */
   silentMode?: string;
+
+  /**
+   * When enabled it will check Regex strategy using background workers
+   * If not set, it will check Regex strategy synchronously
+   */
   regexSafe?: boolean;
+
+  /**
+   * The regex max black list
+   * If not set, it will use the default value
+   */
   regexMaxBlackList?: number;
+
+  /**
+   * The regex max time limit in milliseconds
+   * If not set, it will use the default value
+   */
   regexMaxTimeLimit?: number;
+
+  /**
+   * The certificate path for secure connections
+   * If not set, it will use the default certificate
+   */
   certPath?: string;
 }
 
@@ -185,7 +253,14 @@ export type SwitcherOptions = {
  * @param fetchRemote when true, it will initialize the snapshot from the API
  */
 export type LoadSnapshotOptions = {
+  /**
+   * When enabled it will watch the snapshot file for changes
+   */
   watchSnapshot?: boolean;
+
+  /**
+   * When enabled it will fetch the remote API
+   */
   fetchRemote?: boolean;
 }
 

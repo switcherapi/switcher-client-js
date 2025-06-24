@@ -51,18 +51,25 @@ export class Client {
 
   static #buildOptions(options) {
     remote.removeAgent();
-    if (SWITCHER_OPTIONS.CERT_PATH in options && options.certPath) {
-      remote.setCerts(options.certPath);
-    }
+    
+    const optionsHandler = {
+      [SWITCHER_OPTIONS.CERT_PATH]: (val) => val && remote.setCerts(val),
+      [SWITCHER_OPTIONS.SILENT_MODE]: (val) => val && this.#initSilentMode(val),
+      [SWITCHER_OPTIONS.SNAPSHOT_AUTO_UPDATE_INTERVAL]: (val) => {
+        GlobalOptions.updateOptions({ snapshotAutoUpdateInterval: val });
+        this.scheduleSnapshotAutoUpdate();
+      },
+      [SWITCHER_OPTIONS.SNAPSHOT_WATCHER]: (val) => {
+        GlobalOptions.updateOptions({ snapshotWatcher: val });
+        this.watchSnapshot();
+      }
+    };
 
-    if (SWITCHER_OPTIONS.SILENT_MODE in options && options.silentMode) {
-      this.#initSilentMode(options.silentMode);
-    }
-
-    if (SWITCHER_OPTIONS.SNAPSHOT_AUTO_UPDATE_INTERVAL in options) {
-      GlobalOptions.updateOptions({ snapshotAutoUpdateInterval: options.snapshotAutoUpdateInterval });
-      this.scheduleSnapshotAutoUpdate();
-    }
+    Object.entries(optionsHandler).forEach(([key, handler]) => {
+      if (key in options) {
+        handler(options[key]);
+      }
+    });
 
     this.#initTimedMatch(options);
   }
