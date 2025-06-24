@@ -2,14 +2,58 @@ import { assert } from 'chai';
 import { writeFileSync, existsSync, mkdirSync, readFileSync, unlinkSync } from 'fs';
 
 import { Client } from '../switcher-client.js';
-import { deleteGeneratedSnapshot } from './helper/utils.js';
+import { deleteGeneratedSnapshot, getSwitcherResulUntil } from './helper/utils.js';
 
-describe('E2E test - Switcher local - Watch Snapshot:', function () {
-  const domain = 'Business';
-  const component = 'business-service';
-  let devJSON;
+const domain = 'Business';
+const component = 'business-service';
+let devJSON;
+
+const updateSwitcher = (environment, status) => {
+  const copyOfDevJSON = JSON.parse(JSON.stringify(devJSON));
+  copyOfDevJSON.data.domain.group[0].config[0].activated = status;
+  writeFileSync(`generated-watch-snapshots/${environment}.json`, JSON.stringify(copyOfDevJSON, null, 4));
+};
+
+const invalidateJSON = (environment) => {
+  writeFileSync(`generated-watch-snapshots/${environment}.json`, '[INVALID]');
+};
+
+const beforeAll = () => {
+  if (!existsSync('generated-watch-snapshots/')) {
+    mkdirSync('generated-watch-snapshots/', { recursive: true });
+  }
+
+  const dataBuffer = readFileSync('./test/snapshot/dev.json');
+  devJSON = JSON.parse(dataBuffer.toString());
+  devJSON.data.domain.group[0].config[0].activated = true;
+};
+
+const afterAll = () => {
+  for (let i = 1; i <= 4; i++) {
+    const filePath = `generated-watch-snapshots/watch${i}.json`;
+    if (existsSync(filePath)) {
+      unlinkSync(filePath);
+    }
+  }
+
+  Client.unloadSnapshot();
+  setTimeout(() => deleteGeneratedSnapshot('./generated-watch-snapshots'), 0);
+};
+
+const afterEach = () => {
+  Client.unloadSnapshot();
+};
+
+describe('E2E test - Switcher local - Watch Snapshot (watchSnapshot):', function () {
+  this.beforeAll(beforeAll);
+  this.afterAll(afterAll);
+  this.afterEach(afterEach);
 
   const initContext = async (environment) => {
+    if (!existsSync('generated-watch-snapshots/')) {
+      mkdirSync('generated-watch-snapshots/', { recursive: true });
+    }
+
     writeFileSync(`generated-watch-snapshots/${environment}.json`, JSON.stringify(devJSON, null, 4));
 
     Client.buildContext({ domain, component, environment }, {
@@ -20,44 +64,6 @@ describe('E2E test - Switcher local - Watch Snapshot:', function () {
 
     await Client.loadSnapshot();
   };
-
-  const updateSwitcher = (environment, status) => {
-    const copyOfDevJSON = JSON.parse(JSON.stringify(devJSON));
-    copyOfDevJSON.data.domain.group[0].config[0].activated = status;
-    writeFileSync(`generated-watch-snapshots/${environment}.json`, JSON.stringify(copyOfDevJSON, null, 4));
-  };
-  
-  const invalidateJSON = (environment) => {
-    writeFileSync(`generated-watch-snapshots/${environment}.json`, '[INVALID]');
-  };
-
-  this.beforeAll(function() {
-    if (!existsSync('generated-watch-snapshots/')) {
-      mkdirSync('generated-watch-snapshots/', { recursive: true });
-    }
-
-    const dataBuffer = readFileSync('./test/snapshot/dev.json');
-    devJSON = JSON.parse(dataBuffer.toString());
-    devJSON.data.domain.group[0].config[0].activated = true;
-  });
-
-  this.afterEach(function() {
-    Client.unloadSnapshot();
-  });
-
-  this.afterAll(function() {
-    if (existsSync('generated-watch-snapshots/watch1.json'))
-      unlinkSync('generated-watch-snapshots/watch1.json');
-
-    if (existsSync('generated-watch-snapshots/watch2.json'))
-      unlinkSync('generated-watch-snapshots/watch2.json');
-
-    if (existsSync('generated-watch-snapshots/watch3.json'))
-      unlinkSync('generated-watch-snapshots/watch3.json');
-
-    Client.unloadSnapshot();
-    deleteGeneratedSnapshot('./generated-watch-snapshots');
-  });
 
   it('should read from snapshot - without watching', function (done) {
     this.timeout(10000);
@@ -129,4 +135,39 @@ describe('E2E test - Switcher local - Watch Snapshot:', function () {
     Client.testMode(false);
   });
 
+});
+
+describe('E2E test - Switcher local - Watch Snapshot (context):', function () {
+  this.beforeAll(beforeAll);
+  this.afterAll(afterAll);
+  this.afterEach(afterEach);
+
+  const initContext = async (environment) => {
+    if (!existsSync('generated-watch-snapshots/')) {
+      mkdirSync('generated-watch-snapshots/', { recursive: true });
+    }
+
+    writeFileSync(`generated-watch-snapshots/${environment}.json`, JSON.stringify(devJSON, null, 4));
+
+    Client.buildContext({ domain, component, environment }, {
+      snapshotLocation: 'generated-watch-snapshots/',
+      snapshotWatcher: true,
+      local: true,
+      regexSafe: false
+    });
+
+    await Client.loadSnapshot();
+  };
+  
+  it('should read from updated snapshot', async function () {
+    this.timeout(10000);
+
+    await initContext('watch4');
+
+    const switcher = Client.getSwitcher();
+    assert.isTrue(await switcher.isItOn('FF2FOR2030'));
+    updateSwitcher('watch4', false);
+
+    assert.isFalse(await getSwitcherResulUntil(switcher, 'FF2FOR2030', false));
+  });
 });
