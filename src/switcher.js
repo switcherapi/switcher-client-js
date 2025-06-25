@@ -1,31 +1,24 @@
 import Bypasser from './lib/bypasser/index.js';
 import ExecutionLogger from './lib/utils/executionLogger.js';
 import checkCriteriaLocal from './lib/resolver.js';
-import { StrategiesType } from './lib/snapshot.js';
 import * as remote from './lib/remote.js';
 import * as util from './lib/utils/index.js';
 import { Auth } from './lib/remoteAuth.js';
 import { GlobalAuth } from './lib/globals/globalAuth.js';
 import { GlobalOptions } from './lib/globals/globalOptions.js';
 import { GlobalSnapshot } from './lib/globals/globalSnapshot.js';
+import { SwitcherRequest } from './switcherRequest.js';
 
-export class Switcher {
-  #delay = 0;
-  #nextRun = 0;
-  #input;
-  #key = '';
-  #defaultResult;
-  #forceRemote = false;
-  #showDetail = false;
-
+export class Switcher extends SwitcherRequest {
   constructor(key) {
+    super();
     this.#validateArgs(key);
   }
 
   async prepare(key) {
     this.#validateArgs(key);
 
-    if (!GlobalOptions.local || this.#forceRemote) {
+    if (!GlobalOptions.local || this._forceRemote) {
       await Auth.auth();
     }
   }
@@ -35,7 +28,7 @@ export class Switcher {
 
     Auth.isValid();
 
-    if (!this.#key) {
+    if (!this._key) {
       errors.push('Missing key field');
     }
 
@@ -54,15 +47,15 @@ export class Switcher {
     this.#validateArgs(key);
     
     // verify if query from Bypasser
-    const bypassKey = Bypasser.searchBypassed(this.#key);
+    const bypassKey = Bypasser.searchBypassed(this._key);
     if (bypassKey) {
-      const response = bypassKey.getResponse(util.get(this.#input, []));
-      return this.#showDetail ? response : response.result;
+      const response = bypassKey.getResponse(util.get(this._input, []));
+      return this._showDetail ? response : response.result;
     }
 
     try {
       // verify if query from local snapshot
-      if (GlobalOptions.local && !this.#forceRemote) {
+      if (GlobalOptions.local && !this._forceRemote) {
         return await this._executeLocalCriteria();
       }
 
@@ -87,102 +80,36 @@ export class Switcher {
     return result;
   }
 
-  throttle(delay) {
-    this.#delay = delay;
-
-    if (delay > 0) {
-      GlobalOptions.updateOptions({ logger: true });
-    }
-
-    return this;
-  }
-
-  remote(forceRemote = true) {
-    if (!GlobalOptions.local) {
-      throw new Error('Local mode is not enabled');
-    }
-    
-    this.#forceRemote = forceRemote;
-    return this;
-  }
-
-  detail(showDetail = true) {
-    this.#showDetail = showDetail;
-    return this;
-  }
-
-  defaultResult(defaultResult) {
-    this.#defaultResult = defaultResult;
-    return this;
-  }
-
-  check(startegyType, input) {
-    if (!this.#input) {
-      this.#input = [];
-    }
-
-    this.#input.push([startegyType, input]);
-    return this;
-  }
-
-  checkValue(input) {
-    return this.check(StrategiesType.VALUE, input);
-  }
-
-  checkNumeric(input) {
-    return this.check(StrategiesType.NUMERIC, input);
-  }
-
-  checkNetwork(input) {
-    return this.check(StrategiesType.NETWORK, input);
-  }
-
-  checkDate(input) {
-    return this.check(StrategiesType.DATE, input);
-  }
-
-  checkTime(input) {
-    return this.check(StrategiesType.TIME, input);
-  }
-
-  checkRegex(input) {
-    return this.check(StrategiesType.REGEX, input);
-  }
-  
-  checkPayload(input) {
-    return this.check(StrategiesType.PAYLOAD, input);
-  }
-
   async _executeRemoteCriteria() {
     let responseCriteria;
 
     if (this.#useSync()) {
       try {
         responseCriteria = await remote.checkCriteria(
-          this.#key, 
-          this.#input, 
-          this.#showDetail
+          this._key, 
+          this._input, 
+          this._showDetail
         );
       } catch (err) {
         responseCriteria = this.#getDefaultResultOrThrow(err);
       }
       
-      if (GlobalOptions.logger && this.#key) {
-        ExecutionLogger.add(responseCriteria, this.#key, this.#input);
+      if (GlobalOptions.logger && this._key) {
+        ExecutionLogger.add(responseCriteria, this._key, this._input);
       }
     } else {
       responseCriteria = this._executeAsyncRemoteCriteria();
     }
     
-    return this.#showDetail ? responseCriteria : responseCriteria.result;
+    return this._showDetail ? responseCriteria : responseCriteria.result;
   }
 
   _executeAsyncRemoteCriteria() {
-    if (this.#nextRun < Date.now()) {
-      this.#nextRun = Date.now() + this.#delay;
+    if (this._nextRun < Date.now()) {
+      this._nextRun = Date.now() + this._delay;
 
       if (Auth.isTokenExpired()) {
-        this.prepare(this.#key)
+        this.prepare(this._key)
           .then(() => this.#executeAsyncCheckCriteria())
           .catch(err => this.#notifyError(err));
       } else {
@@ -190,13 +117,13 @@ export class Switcher {
       }
     }
 
-    const executionLog = ExecutionLogger.getExecution(this.#key, this.#input);
+    const executionLog = ExecutionLogger.getExecution(this._key, this._input);
     return executionLog.response;
   }
 
   #executeAsyncCheckCriteria() {
-    remote.checkCriteria(this.#key, this.#input, this.#showDetail)
-      .then(response => ExecutionLogger.add(response, this.#key, this.#input))
+    remote.checkCriteria(this._key, this._input, this._showDetail)
+      .then(response => ExecutionLogger.add(response, this._key, this._input))
       .catch(err => this.#notifyError(err));
   }
 
@@ -211,27 +138,23 @@ export class Switcher {
 
     Auth.checkHealth();
     if (Auth.isTokenExpired()) {
-      await this.prepare(this.#key);
+      await this.prepare(this._key);
     }
   }
 
   async _executeLocalCriteria() {
     let response;
     try {
-      response = await checkCriteriaLocal(
-        util.get(this.#key, ''), 
-        util.get(this.#input, []), 
-        GlobalSnapshot.snapshot
-      );
+      response = await checkCriteriaLocal(GlobalSnapshot.snapshot, this);
     } catch (err) {
       response = this.#getDefaultResultOrThrow(err);
     }
 
     if (GlobalOptions.logger) {
-      ExecutionLogger.add(response, this.#key, this.#input);
+      ExecutionLogger.add(response, this._key, this._input);
     }
 
-    if (this.#showDetail) {
+    if (this._showDetail) {
       return response;
     }
 
@@ -240,34 +163,26 @@ export class Switcher {
 
   #validateArgs(key) {
     if (key) { 
-      this.#key = key; 
+      this._key = key; 
     }
   }
 
   #useSync() {
-    return this.#delay == 0 || !ExecutionLogger.getExecution(this.#key, this.#input);
+    return this._delay == 0 || !ExecutionLogger.getExecution(this._key, this._input);
   }
 
   #getDefaultResultOrThrow(err) {
-    if (this.#defaultResult === undefined) {
+    if (this._defaultResult === undefined) {
       throw err;
     }
 
     const response = {
-      result: this.#defaultResult,
+      result: this._defaultResult,
       reason: 'Default result'
     };
 
     this.#notifyError(err);
     return response;
-  }
-
-  get key() {
-    return this.#key;
-  }
-
-  get input() {
-    return this.#input;
   }
 
 }
