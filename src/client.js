@@ -55,6 +55,9 @@ export class Client {
     const optionsHandler = {
       [SWITCHER_OPTIONS.CERT_PATH]: (val) => val && remote.setCerts(val),
       [SWITCHER_OPTIONS.SILENT_MODE]: (val) => val && this.#initSilentMode(val),
+      [SWITCHER_OPTIONS.RESTRICT_RELAY]: (val) => {
+        GlobalOptions.updateOptions({ restrictRelay: val });
+      },
       [SWITCHER_OPTIONS.SNAPSHOT_AUTO_UPDATE_INTERVAL]: (val) => {
         GlobalOptions.updateOptions({ snapshotAutoUpdateInterval: val });
         this.scheduleSnapshotAutoUpdate();
@@ -97,7 +100,8 @@ export class Client {
   }
 
   static getSwitcher(key) {
-    return new Switcher(util.get(key, ''));
+    return new Switcher(util.get(key, ''))
+      .restrictRelay(GlobalOptions.restrictRelay);
   }
 
   static async checkSnapshot() {

@@ -23,7 +23,7 @@ const beforeAll = () => {
     mkdirSync('generated-watch-snapshots/', { recursive: true });
   }
 
-  const dataBuffer = readFileSync('./test/snapshot/dev.json');
+  const dataBuffer = readFileSync('./tests/snapshot/dev.json');
   devJSON = JSON.parse(dataBuffer.toString());
   devJSON.data.domain.group[0].config[0].activated = true;
 };

@@ -65,10 +65,12 @@ const snapshotLocation = './snapshot/';
 const snapshotAutoUpdateInterval = 3;
 const snapshotWatcher = true;
 const silentMode = '5m';
+const restrictRelay = true;
 const certPath = './certs/ca.pem';
 
 Client.buildContext({ url, apiKey, domain, component, environment }, {
-    local, logger, snapshotLocation, snapshotAutoUpdateInterval, snapshotWatcher, silentMode, certPath
+    local, logger, snapshotLocation, snapshotAutoUpdateInterval, 
+    snapshotWatcher, silentMode, restrictRelay, certPath
 });
 
 const switcher = Client.getSwitcher();
@@ -76,14 +78,15 @@ const switcher = Client.getSwitcher();
 
 - **local**: If activated, the client will only fetch the configuration inside your snapshot file. The default value is 'false'
 - **logger**: If activated, it is possible to retrieve the last results from a given Switcher key using Client.getLogger('KEY')
-- **snapshotLocation**: Location of snapshot files. The default value is './snapshot/'
-- **snapshotAutoUpdateInterval**: Enable Snapshot Auto Update given an interval in seconds (default: 0 disabled).
-- **snapshotWatcher**: Enable Snapshot Watcher to monitor changes in the snapshot file (default: false).
+- **snapshotLocation**: Location of snapshot files
+- **snapshotAutoUpdateInterval**: Enable Snapshot Auto Update given an interval in seconds (default: 0 disabled)
+- **snapshotWatcher**: Enable Snapshot Watcher to monitor changes in the snapshot file (default: false)
 - **silentMode**: Enable contigency given the time for the client to retry - e.g. 5s (s: seconds - m: minutes - h: hours)
-- **regexSafe**: Enable REGEX Safe mode - Prevent agaist reDOS attack (default: true).
+- **restrictRelay**: Enable Relay Restriction - Allow managing Relay restrictions when running in local mode (default: true)
+- **regexSafe**: Enable REGEX Safe mode - Prevent agaist reDOS attack (default: true)
 - **regexMaxBlackList**: Number of entries cached when REGEX Strategy fails to perform (reDOS safe) - default: 50
 - **regexMaxTimeLimit**: Time limit (ms) used by REGEX workers (reDOS safe) - default - 3000ms
-- **certPath**: Path to the certificate file used to establish a secure connection with the API.
+- **certPath**: Path to the certificate file used to establish a secure connection with the API
 
 (*) regexSafe is a feature that prevents your application from being exposed to a reDOS attack. It is recommended to keep this feature enabled.<br>
 

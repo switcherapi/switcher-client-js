@@ -16,29 +16,29 @@ const contextSettings = {
 };
 
 const options = {
-  snapshotLocation: './test/snapshot/',
-  local: true, 
-  logger: true, 
-  regexMaxBlackList: 1, 
+  snapshotLocation: './tests/snapshot/',
+  local: true,
+  logger: true,
+  regexMaxBlackList: 1,
   regexMaxTimeLimit: 500
 };
 
 describe('E2E test - Switcher local:', function () {
-  this.beforeAll(async function() {
+  this.beforeAll(async function () {
     Client.buildContext(contextSettings, options);
 
     await Client.loadSnapshot();
     switcher = Client.getSwitcher();
   });
 
-  this.afterAll(function() {
+  this.afterAll(function () {
     Client.unloadSnapshot();
     rmdir('//somewhere/', () => {
       return;
     });
   });
 
-  this.beforeEach(function() {
+  this.beforeEach(function () {
     Client.clearLogger();
     switcher = Client.getSwitcher();
   });
@@ -62,11 +62,11 @@ describe('E2E test - Switcher local:', function () {
 
     await switcher.isItOn('FF2FOR2020');
     const log = Client.getExecution(switcher);
-    
+
     assert.equal(log.key, 'FF2FOR2020');
     assert.sameDeepMembers(log.input, [
-      [ 'VALUE_VALIDATION', 'Japan' ],
-      [ 'NETWORK_VALIDATION', '10.0.0.3' ]]);
+      ['VALUE_VALIDATION', 'Japan'],
+      ['NETWORK_VALIDATION', '10.0.0.3']]);
     assert.equal(log.response.reason, 'Success');
     assert.equal(log.response.result, true);
   });
@@ -151,40 +151,40 @@ describe('E2E test - Switcher local:', function () {
 
     const result = await switcher.isItOn();
     assert.isFalse(result);
-    assert.equal(Client.getLogger('FF2FOR2023')[0].response.reason, 
+    assert.equal(Client.getLogger('FF2FOR2023')[0].response.reason,
       `Strategy '${StrategiesType.PAYLOAD}' does not agree`);
   });
 
   it('should be invalid - Input (IP) does not match', async function () {
     await switcher
       .checkValue('Japan')
-      .checkNetwork('192.168.0.2')  
+      .checkNetwork('192.168.0.2')
       .prepare('FF2FOR2020');
 
     const result = await switcher.isItOn();
     assert.isFalse(result);
-    assert.equal(Client.getLogger('FF2FOR2020')[0].response.reason, 
+    assert.equal(Client.getLogger('FF2FOR2020')[0].response.reason,
       `Strategy '${StrategiesType.NETWORK}' does not agree`);
   });
 
   it('should be invalid - Input not provided', async function () {
     const result = await switcher.isItOn('FF2FOR2020');
     assert.isFalse(result);
-    assert.equal(Client.getLogger('FF2FOR2020')[0].response.reason, 
+    assert.equal(Client.getLogger('FF2FOR2020')[0].response.reason,
       `Strategy '${StrategiesType.NETWORK}' did not receive any input`);
   });
 
   it('should be invalid - Switcher config disabled', async function () {
     const result = await switcher.isItOn('FF2FOR2031');
     assert.isFalse(result);
-    assert.equal(Client.getLogger('FF2FOR2031')[0].response.reason, 
+    assert.equal(Client.getLogger('FF2FOR2031')[0].response.reason,
       'Config disabled');
   });
 
   it('should be invalid - Switcher group disabled', async function () {
     const result = await switcher.isItOn('FF2FOR2040');
     assert.isFalse(result);
-    assert.equal(Client.getLogger('FF2FOR2040')[0].response.reason, 
+    assert.equal(Client.getLogger('FF2FOR2040')[0].response.reason,
       'Group disabled');
   });
 
@@ -226,19 +226,19 @@ describe('E2E test - Switcher local:', function () {
 });
 
 describe('E2E test - Client testing (assume) feature:', function () {
-  this.beforeAll(async function() {
+  this.beforeAll(async function () {
     Client.buildContext(contextSettings, options);
 
     await Client.loadSnapshot();
     switcher = Client.getSwitcher();
   });
 
-  this.afterAll(function() {
+  this.afterAll(function () {
     Client.unloadSnapshot();
     TimedMatch.terminateWorker();
   });
 
-  this.beforeEach(function() {
+  this.beforeEach(function () {
     Client.clearLogger();
     Client.forget('FF2FOR2020');
     switcher = Client.getSwitcher();
@@ -249,11 +249,11 @@ describe('E2E test - Client testing (assume) feature:', function () {
       .checkValue('Japan')
       .checkNetwork('10.0.0.3')
       .prepare('FF2FOR2020');
-    
+
     assert.isTrue(await switcher.isItOn());
     Client.assume('FF2FOR2020').false();
     assert.isFalse(await switcher.isItOn());
-    
+
     Client.forget('FF2FOR2020');
     assert.isTrue(await switcher.isItOn());
   });
@@ -278,9 +278,9 @@ describe('E2E test - Client testing (assume) feature:', function () {
   it('should be valid assuming unknown key to be true and throw error when forgetting', async function () {
     await switcher
       .checkValue('Japan')
-      .checkNetwork('10.0.0.3')  
+      .checkNetwork('10.0.0.3')
       .prepare('UNKNOWN');
-    
+
     Client.assume('UNKNOWN').true();
     assert.isTrue(await switcher.isItOn());
 
@@ -293,12 +293,12 @@ describe('E2E test - Client testing (assume) feature:', function () {
       .checkValue('Canada') // result to be false
       .checkNetwork('10.0.0.3')
       .prepare('FF2FOR2020');
-    
+
     assert.isFalse(await switcher.isItOn());
     Client.assume('FF2FOR2020').true()
       .when(StrategiesType.VALUE, 'Canada') // manipulate the condition to result to true
       .and(StrategiesType.NETWORK, '10.0.0.3');
-      
+
     assert.isTrue(await switcher.isItOn());
   });
 
@@ -307,20 +307,20 @@ describe('E2E test - Client testing (assume) feature:', function () {
       .checkValue('Japan')
       .checkNetwork('10.0.0.3')
       .prepare('FF2FOR2020');
-    
+
     assert.isTrue(await switcher.isItOn());
     Client.assume('FF2FOR2020').true()
       .when(StrategiesType.VALUE, ['Brazil', 'Japan'])
       .and(StrategiesType.NETWORK, ['10.0.0.4', '192.168.0.1']);
-      
+
     assert.isFalse(await switcher.isItOn());
   });
 
 });
 
 describe('Type placeholders:', function () {
-  
-  this.afterAll(function() {
+
+  this.afterAll(function () {
     deleteGeneratedSnapshot('./generated-snapshots');
   });
 
@@ -337,4 +337,55 @@ describe('Type placeholders:', function () {
     assert.isNotNull(switcherContext);
     assert.isNotNull(switcherOptions);
   });
+});
+
+describe('E2E test - Restrict Relay:', function () {
+  this.beforeAll(async function () {
+    Client.buildContext(contextSettings, options);
+
+    await Client.loadSnapshot();
+  });
+
+  this.afterAll(function () {
+    Client.unloadSnapshot();
+    TimedMatch.terminateWorker();
+  });
+
+  this.beforeEach(function () {
+    Client.clearLogger();
+  });
+
+  it('should return false when Relay is enabled (restrict default: true)', async function () {
+    Client.buildContext(contextSettings, {
+      snapshotLocation: options.snapshotLocation, local: true
+    });
+
+    await Client.loadSnapshot();
+
+    switcher = Client.getSwitcher();
+    assert.isFalse(await switcher.isItOn('USECASE103'));
+  });
+
+  it('should return true when Relay is enabled (restrict: false)', async function () {
+    Client.buildContext(contextSettings, {
+      snapshotLocation: options.snapshotLocation, local: true, restrictRelay: false
+    });
+
+    await Client.loadSnapshot();
+
+    switcher = Client.getSwitcher();
+    assert.isTrue(await switcher.isItOn('USECASE103'));
+  });
+
+  it('should return true when Relay is disabled (restrict: true)', async function () {
+    Client.buildContext(contextSettings, {
+      snapshotLocation: options.snapshotLocation, local: true, restrictRelay: true
+    });
+
+    await Client.loadSnapshot();
+
+    switcher = Client.getSwitcher();
+    assert.isTrue(await switcher.isItOn('USECASE104'));
+  });
+
 });

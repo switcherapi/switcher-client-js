@@ -9,6 +9,7 @@ export const SWITCHER_OPTIONS = Object.freeze({
     SNAPSHOT_LOCATION: 'snapshotLocation',
     SNAPSHOT_AUTO_UPDATE_INTERVAL: 'snapshotAutoUpdateInterval',
     SNAPSHOT_WATCHER: 'snapshotWatcher',
+    RESTRICT_RELAY: 'restrictRelay',
     SILENT_MODE: 'silentMode',
     REGEX_SAFE: 'regexSafe',
     REGEX_MAX_BLACK_LIST: 'regexMaxBlackList',

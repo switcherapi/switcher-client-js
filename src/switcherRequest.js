@@ -14,4 +14,11 @@ export class SwitcherRequest extends SwitcherBuilder {
   get input() {
     return this._input;
   }
+
+  /**
+   * Return Relay restriction value
+   */
+  get isRelayRestricted() {
+    return this._restrictRelay;
+  }
 }

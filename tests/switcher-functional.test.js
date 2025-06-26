@@ -12,7 +12,7 @@ describe('Integrated test - Switcher:', function () {
   let contextSettings;
 
   this.afterAll(function() {
-    unwatchFile('./test/snapshot/default.json');
+    unwatchFile('./tests/snapshot/default.json');
   });
 
   this.beforeEach(function() {
@@ -213,7 +213,7 @@ describe('Integrated test - Switcher:', function () {
     
     const forceRemoteOptions = { 
       local: true, 
-      snapshotLocation: './test/snapshot/',
+      snapshotLocation: './tests/snapshot/',
       regexSafe: false
     };
 
@@ -322,7 +322,7 @@ describe('Integrated test - Switcher:', function () {
       given(fetchStub, 0, { status: 429 });
 
       //test
-      Client.buildContext(contextSettings, { silentMode: '5m', regexSafe: false, snapshotLocation: './test/snapshot/' });
+      Client.buildContext(contextSettings, { silentMode: '5m', regexSafe: false, snapshotLocation: './tests/snapshot/' });
       await Client.checkSwitchers(['FEATURE01', 'FEATURE02']).catch(e => {
         assert.equal(e.message, 'Something went wrong: [FEATURE01,FEATURE02] not found');
       });
@@ -337,7 +337,7 @@ describe('Integrated test - Switcher:', function () {
 
       // test
       let asyncErrorMessage = null;
-      Client.buildContext(contextSettings, { silentMode: '5m', regexSafe: false, snapshotLocation: './test/snapshot/' });
+      Client.buildContext(contextSettings, { silentMode: '5m', regexSafe: false, snapshotLocation: './tests/snapshot/' });
       Client.subscribeNotifyError((error) => asyncErrorMessage = error.message);
 
       const switcher = Client.getSwitcher();
@@ -441,7 +441,7 @@ describe('Integrated test - Switcher:', function () {
     });
 
     it('should NOT throw when certPath is valid', function() {
-      assert.doesNotThrow(() => Client.buildContext(contextSettings, { certPath: './test/helper/dummy-cert.pem' }));
+      assert.doesNotThrow(() => Client.buildContext(contextSettings, { certPath: './tests/helper/dummy-cert.pem' }));
     });
     
     it('should renew the token after expiration', async function () {
@@ -589,7 +589,7 @@ describe('Integrated test - Switcher:', function () {
 
       // setup context to read the snapshot in case the API does not respond
       Client.buildContext(contextSettings, {
-        snapshotLocation: './test/snapshot/',
+        snapshotLocation: './tests/snapshot/',
         regexSafe: false,
         silentMode: '2s'
       });
@@ -641,7 +641,7 @@ describe('Integrated test - Switcher:', function () {
 
       // test
       Client.buildContext(contextSettings, {
-        snapshotLocation: './test/snapshot/',
+        snapshotLocation: './tests/snapshot/',
         regexSafe: false,
         silentMode: '5m'
       });

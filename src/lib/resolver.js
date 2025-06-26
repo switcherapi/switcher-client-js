@@ -72,6 +72,10 @@ async function checkConfig(group, config, switcher) {
         throw new CriteriaFailed('Config disabled');
     }
 
+    if (hasRelayEnabled(config) && switcher.isRelayRestricted) {
+        throw new CriteriaFailed(`Config '${config.key}' is restricted to relay`);
+    }
+
     if (config.strategies) {
         return await checkStrategy(config, util.get(switcher.input, []));
     }
@@ -103,6 +107,10 @@ async function checkStrategyInput(entry, { strategy, operation, values }) {
     } else {
         throw new CriteriaFailed(`Strategy '${strategy}' did not receive any input`);
     }
+}
+
+function hasRelayEnabled(config) {
+    return config.relay?.activated;
 }
 
 export default async function checkCriteriaLocal(snapshot, switcher) {

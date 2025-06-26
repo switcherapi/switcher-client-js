@@ -7,7 +7,7 @@ const domain = 'Switcher API';
 const component = 'switcher-client-js';
 const environment = 'default';
 const url = 'https://api.switcherapi.com';
-const snapshotLocation = './test/playground/snapshot/';
+const snapshotLocation = './tests/playground/snapshot/';
 
 /**
  * Playground environment for showcasing the API
@@ -23,14 +23,14 @@ async function setupSwitcher(local) {
  * This code snippet is a minimal example of how to configure and use Switcher4Deno locally.
  * No remote API account is required.
  * 
- * Snapshot is loaded from file at test/playground/snapshot/local.json
+ * Snapshot is loaded from file at tests/playground/snapshot/local.json
  */
 const _testLocal = async () => {
     Client.buildContext({ 
         domain: 'Local Playground', 
         environment: 'local' 
     }, { 
-        snapshotLocation: './test/playground/snapshot/', 
+        snapshotLocation: './tests/playground/snapshot/', 
         local: true
     });
 
