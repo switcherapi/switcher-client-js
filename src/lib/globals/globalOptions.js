@@ -33,4 +33,8 @@ export class GlobalOptions {
   static get silentMode() {
     return this.#options.silentMode;
   }
+
+  static get restrictRelay() {
+    return this.#options.restrictRelay;
+  }
 }

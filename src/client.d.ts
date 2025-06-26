@@ -216,6 +216,11 @@ export type SwitcherOptions = {
   snapshotWatcher?: boolean;
 
   /**
+   * Allow local snapshots to ignore or require Relay verification.
+   */
+  restrictRelay?: boolean;
+
+  /**
    * When defined it will switch to local during the specified time before it switches back to remote
    * e.g. 5s (s: seconds - m: minutes - h: hours)
    */

@@ -9,6 +9,7 @@ export class SwitcherBuilder {
   _defaultResult;
   _forceRemote = false;
   _showDetail = false;
+  _restrictRelay = true;
 
   constructor(key) {
     this._key = key;
@@ -40,6 +41,11 @@ export class SwitcherBuilder {
 
   defaultResult(defaultResult) {
     this._defaultResult = defaultResult;
+    return this;
+  }
+  
+  restrictRelay(restrict = true) {
+    this._restrictRelay = restrict;
     return this;
   }
 

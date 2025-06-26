@@ -151,6 +151,7 @@ export async function resolveSnapshot(domain, environment, component) {
                     group { name activated
                         config { key activated
                             strategies { strategy activated operation values }
+                            relay { type activated }
                             components
                         }
                     }

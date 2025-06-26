@@ -18,11 +18,12 @@
   ],
   "license": "MIT",
   "scripts": {
-    "lint": "eslint ./src/**/*.js ./test/**/*.js",
-    "test": "npm run coverage \"./test/**/*.test.js\"",
-    "test-local": "env-cmd npm run coverage \"./test/**/*.test.js\"",
+    "lint": "eslint ./src/**/*.js ./tests/**/*.js",
+    "test": "npm run coverage \"./tests/**/*.test.js\"",
+    "test-file": "env-cmd npm run coverage",
+    "test-local": "env-cmd npm run coverage \"./tests/**/*.test.js\"",
     "coverage": "c8 --include='src/**/*.js' mocha",
-    "play": "env-cmd node ./test/playground/index.js"
+    "play": "env-cmd node ./tests/playground/index.js"
   },
   "files": [
     "LICENSE",
@@ -37,7 +38,7 @@
     "chai": "^5.2.0",
     "env-cmd": "^10.1.0",
     "eslint": "^9.29.0",
-    "mocha": "^11.7.0",
+    "mocha": "^11.7.1",
     "mocha-sonarqube-reporter": "^1.0.2",
     "sinon": "^21.0.0"
   },

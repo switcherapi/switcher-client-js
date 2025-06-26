@@ -127,6 +127,33 @@
                             "components": []
                         }
                     ]
+                },
+                {
+                    "name": "Relay test",
+                    "description": "Relay group",
+                    "activated": true,
+                    "config": [
+                        {
+                            "key": "USECASE103",
+                            "description": "Relay enabled",
+                            "activated": true,
+                            "relay": {
+                                "type": "VALIDATOR",
+                                "activated": true
+                            },
+                            "components": []
+                        },
+                        {
+                            "key": "USECASE104",
+                            "description": "Relay disabled",
+                            "relay": {
+                                "type": "VALIDATOR",
+                                "activated": false
+                            },
+                            "activated": true,
+                            "components": []
+                        }
+                    ]
                 }
             ]
         }

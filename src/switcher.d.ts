@@ -45,6 +45,11 @@ export class Switcher {
    * Define a default result when the client enters in panic mode
    */
   defaultResult(defaultResult: boolean): Switcher;
+  
+  /**
+   * Allow local snapshots to ignore or require Relay verification.
+   */
+  restrictRelay(restrict: boolean): Switcher;
 
   /**
    * Adds a strategy for validation
