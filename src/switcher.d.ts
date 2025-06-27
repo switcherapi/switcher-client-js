@@ -1,4 +1,4 @@
-import { ResultDetail } from "./client";
+import { SwitcherResult } from './lib/result.js';
 
 /**
  * Switcher handles criteria execution and validations.
@@ -20,9 +20,9 @@ export class Switcher {
   /**
    * Execute criteria
    * 
-   * @returns boolean or ResultDetail when detail() is used
+   * @returns boolean or SwitcherResult when detail() is used
    */
-  isItOn(key?: string): Promise<boolean | ResultDetail>;
+  isItOn(key?: string): Promise<boolean | SwitcherResult>;
 
   /**
    * Define a delay (ms) for the next async execution.
@@ -37,7 +37,7 @@ export class Switcher {
   remote(forceRemote?: boolean): Switcher;
 
   /**
-   * When enabled, isItOn will return a ResultDetail object
+   * When enabled, isItOn will return a SwitcherResult object
    */
   detail(showDetail?: boolean): Switcher;
 
@@ -45,7 +45,7 @@ export class Switcher {
    * Define a default result when the client enters in panic mode
    */
   defaultResult(defaultResult: boolean): Switcher;
-  
+
   /**
    * Allow local snapshots to ignore or require Relay verification.
    */
@@ -83,7 +83,7 @@ export class Switcher {
 
   /**
    * Adds REGEX_VALIDATION input for strategy validation
-   */ 
+   */
   checkRegex(input: string): Switcher;
 
   /**

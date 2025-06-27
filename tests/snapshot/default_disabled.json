@@ -1,0 +1,10 @@
+{
+    "data": {
+        "domain": {
+            "name": "Business",
+            "description": "Business description",
+            "activated": false,
+            "group": []
+        }
+    }
+}

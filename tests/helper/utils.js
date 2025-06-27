@@ -19,7 +19,7 @@ export async function assertReject(assert, promise, expectedError) {
   });
 
   assert.isNotNull(result);
-  assert.equal(expectedError, result.message);
+  assert.equal(result.message, expectedError);
 }
 
 export async function assertResolve(assert, promise) {
@@ -46,7 +46,7 @@ export async function assertUntilResolve(assert, actual, expected) {
   if (!actual()) {
     console.warn('Async test could not resolve in time');
   } else {
-    assert.equal(expected, actual());
+    assert.equal(actual(), expected);
   }
 }
 

@@ -4,6 +4,7 @@ import checkCriteriaLocal from './lib/resolver.js';
 import * as remote from './lib/remote.js';
 import * as util from './lib/utils/index.js';
 import { Auth } from './lib/remoteAuth.js';
+import { SwitcherResult } from './lib/result.js';
 import { GlobalAuth } from './lib/globals/globalAuth.js';
 import { GlobalOptions } from './lib/globals/globalOptions.js';
 import { GlobalSnapshot } from './lib/globals/globalSnapshot.js';
@@ -176,10 +177,7 @@ export class Switcher extends SwitcherRequest {
       throw err;
     }
 
-    const response = {
-      result: this._defaultResult,
-      reason: 'Default result'
-    };
+    const response = SwitcherResult.create(this._defaultResult, 'Default result');
 
     this.#notifyError(err);
     return response;

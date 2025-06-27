@@ -18,56 +18,64 @@ describe('Processing strategy: NETWORK', () => {
         '192.168.56.58'
     ];
 
+    const givenStrategyConfig = (operation, values) => ({
+        strategy: StrategiesType.NETWORK,
+        operation: operation,
+        values: values,
+        activated: true,
+    });
+
     it('should agree when input range EXIST', async () => {
-        const result = await processOperation(
-            StrategiesType.NETWORK, OperationsType.EXIST, '10.0.0.3', mock_values1);
+        const strategyConfig = givenStrategyConfig(OperationsType.EXIST, mock_values1);
+        const result = await processOperation(strategyConfig, '10.0.0.3');
         assert.isTrue(result);
     });
 
     it('should agree when input range EXIST - Irregular CIDR', async function () {
-        const result = await processOperation(StrategiesType.NETWORK, OperationsType.EXIST, '10.0.0.3', ['10.0.0.3/24']);
+        const strategyConfig = givenStrategyConfig(OperationsType.EXIST,  ['10.0.0.3/24']);
+        const result = await processOperation(strategyConfig, '10.0.0.3');
         assert.isTrue(result);
     });
 
     it('should NOT agree when input range DOES NOT EXIST', async () => {
-        const result = await processOperation(
-            StrategiesType.NETWORK, OperationsType.EXIST, '10.0.0.4', mock_values1);
+        const strategyConfig = givenStrategyConfig(OperationsType.EXIST, mock_values1);
+        const result = await processOperation(strategyConfig, '10.0.0.4');
         assert.isFalse(result);
     });
 
     it('should agree when input DOES NOT EXIST', async () => {
-        const result = await processOperation(
-            StrategiesType.NETWORK, OperationsType.NOT_EXIST, '10.0.0.4', mock_values1);
+        const strategyConfig = givenStrategyConfig(OperationsType.NOT_EXIST, mock_values1);
+        const result = await processOperation(strategyConfig, '10.0.0.4');
         assert.isTrue(result);
     });
 
     it('should NOT agree when input EXIST but assumed that it DOES NOT EXIST', async () => {
-        const result = await processOperation(
-            StrategiesType.NETWORK, OperationsType.NOT_EXIST, '10.0.0.3', mock_values1);
+        const strategyConfig = givenStrategyConfig(OperationsType.NOT_EXIST, mock_values1);
+        const result = await processOperation(strategyConfig, '10.0.0.3');
         assert.isFalse(result);
     });
 
     it('should agree when input IP EXIST', async () => {
-        const result = await processOperation(
-            StrategiesType.NETWORK, OperationsType.EXIST, '192.168.56.58', mock_values3);
+        const strategyConfig = givenStrategyConfig(OperationsType.EXIST, mock_values3);
+        const result = await processOperation(strategyConfig, '192.168.56.58');
         assert.isTrue(result);
     });
 
     it('should agree when input IP DOES NOT EXIST', async () => {
-        const result = await processOperation(
-            StrategiesType.NETWORK, OperationsType.NOT_EXIST, '192.168.56.50', mock_values3);
+        const strategyConfig = givenStrategyConfig(OperationsType.NOT_EXIST, mock_values3);
+        const result = await processOperation(strategyConfig, '192.168.56.50');
         assert.isTrue(result);
     });
 
     it('should agree when input range EXIST for multiple ranges', async () => {
-        const result = await processOperation(
-            StrategiesType.NETWORK, OperationsType.EXIST, '192.168.0.3', mock_values2);
+        const strategyConfig = givenStrategyConfig(OperationsType.EXIST, mock_values2);
+        const result = await processOperation(strategyConfig, '192.168.0.3');
         assert.isTrue(result);
     });
 
     it('should NOT agree when input range DOES NOT EXIST for multiple ranges', async () => {
-        const result = await processOperation(
-            StrategiesType.NETWORK, OperationsType.NOT_EXIST, '127.0.0.0', mock_values2);
+        const strategyConfig = givenStrategyConfig(OperationsType.NOT_EXIST, mock_values2);
+        const result = await processOperation(strategyConfig, '127.0.0.0');
         assert.isTrue(result);
     });
 

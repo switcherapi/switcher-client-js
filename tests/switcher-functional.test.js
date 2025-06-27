@@ -293,7 +293,7 @@ describe('Integrated test - Switcher:', function () {
       fetchStub.restore();
     });
 
-    it('should NOT be valid - API returned 429 (too many requests) at checkHealth/auth', async function () {
+    it('should NOT be valid - API returned 429 (too many requests) at auth', async function () {
       // given API responses
       given(fetchStub, 0, { status: 429 });
       given(fetchStub, 1, { error: 'Too many requests', status: 429 });
@@ -333,17 +333,24 @@ describe('Integrated test - Switcher:', function () {
     it('should use silent mode when fail to check criteria', async function () {
       // given API responses
       given(fetchStub, 0, { json: () => generateAuth('[auth_token]', 5), status: 200 });
-      given(fetchStub, 1, { status: 429 });
+      given(fetchStub, 1, { status: 429 }); // [POST@/criteria]
+      givenError(fetchStub, 2, { errno: 'ECONNREFUSED' }); // [GET@/check] used in the 2nd isItOn call
 
       // test
       let asyncErrorMessage = null;
-      Client.buildContext(contextSettings, { silentMode: '5m', regexSafe: false, snapshotLocation: './tests/snapshot/' });
+      Client.buildContext(contextSettings, { silentMode: '1s', regexSafe: false, snapshotLocation: './tests/snapshot/' });
       Client.subscribeNotifyError((error) => asyncErrorMessage = error.message);
 
       const switcher = Client.getSwitcher();
+
+      // assert silent mode being used while registering the error
       await assertResolve(assert, switcher.isItOn('FF2FOR2021'));
       await assertUntilResolve(assert, () => asyncErrorMessage, 
         'Something went wrong: [checkCriteria] failed with status 429');
+
+      // assert silent mode being used in the next call
+      await sleep(1500);
+      await assertResolve(assert, switcher.isItOn('FF2FOR2021'));
     });
 
   });
@@ -410,7 +417,7 @@ describe('Integrated test - Switcher:', function () {
       //test
       Client.buildContext(contextSettings);
       await assertReject(assert, Client.checkSwitchers(['FEATURE01', 'FEATURE02']), 
-        'Something went wrong: Something went wrong: [FEATURE02] not found');
+        'Something went wrong: [FEATURE02] not found');
     });
 
     it('should throw when no switcher keys were provided', async function() {

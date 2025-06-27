@@ -1,3 +1,4 @@
+import { SwitcherResult } from '../result.js';
 import Criteria from './criteria.js';
 
 /**
@@ -67,11 +68,7 @@ export default class Key {
             result = this.#getResultBasedOnCriteria(this.#criteria, input);
         }
 
-        return {
-            result,
-            reason: this.#reason,
-            metadata: this.#metadata,
-        };
+        return SwitcherResult.create(result, this.#reason, this.#metadata);
     }
 
     #getResultBasedOnCriteria(criteria, input) {

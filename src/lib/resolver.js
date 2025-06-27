@@ -1,130 +1,143 @@
 import { processOperation } from './snapshot.js';
 import { getEntry } from '../lib/remote.js';
 import * as util from '../lib/utils/index.js';
+import { SwitcherResult } from './result.js';
 
-async function resolveCriteria({ domain }, switcher) {
-    let result = true, reason = '';
-
-    try {
-        if (!domain.activated) {
-            throw new CriteriaFailed('Domain disabled');
-        }
-
-        const { group } = domain;
-        if (!(await checkGroup(group, switcher))) {
-            throw new Error(`Something went wrong: {"error":"Unable to load a key ${switcher.key}"}`);
-        }
-
-        reason = 'Success';
-    } catch (e) {
-        if (e instanceof CriteriaFailed) {
-            result = false;
-            reason = e.message;
-        } else {
-            throw e;
-        }
+/**
+ * Resolves the criteria for a given switcher request against the snapshot data.
+ * 
+ * @param {SnapshotData} data - The snapshot data containing domain and group information.
+ * @param {SwitcherRequest} switcher - The switcher request to be evaluated.
+ * @returns {Promise<SwitcherResult>} - The result of the switcher evaluation.
+ */
+async function resolveCriteria(data, switcher) {
+    if (!data.domain.activated) {
+        return SwitcherResult.disabled('Domain disabled');
     }
 
-    return {
-        result,
-        reason
-    };
+    const { group } = data.domain;
+    return await checkGroup(group, switcher);
 }
 
 /**
- * @param {*} groups from a specific Domain
- * @param {*} switcher Switcher to check
- * @return true if Switcher found
+ * Checks if a switcher is valid within a specific group of the domain.
+ * 
+ * @param {Group[]} groups - The list of groups to check against.
+ * @param {SwitcherRequest} switcher - The switcher request to be evaluated.
+ * @returns {Promise<SwitcherResult>} - The result of the switcher evaluation.
+ * @throws {Error} - If the switcher key is not found in any group.
  */
 async function checkGroup(groups, switcher) {
     const key = util.get(switcher.key, '');
 
-    if (groups) {
-        for (const group of groups) {
-            const { config } = group;
-            const configFound = config.filter(c => c.key === key);
+    for (const group of groups) {
+        const { config } = group;
+        const configFound = config.filter(c => c.key === key);
 
-            // Switcher Configs are always supplied as the snapshot is loaded from components linked to the Switcher.
-            if (await checkConfig(group, configFound[0], switcher)) {
-                return true;
+        if (configFound.length) {
+            if (!group.activated) {
+                return SwitcherResult.disabled('Group disabled');
             }
+
+            return await checkConfig(configFound[0], switcher);
         }
     }
-    return false;
+
+    throw new Error(
+        `Something went wrong: {"error":"Unable to load a key ${switcher.key}"}`,
+    );
 }
 
 /**
- * @param {*} group in which Switcher has been found
- * @param {*} config Switcher found
- * @param {*} switcher Switcher to check
- * @return true if Switcher found
+ * Checks if a switcher is valid within a specific configuration.
+ * 
+ * @param {Config} config Configuration to check
+ * @param {SwitcherRequest} switcher - The switcher request to be evaluated.
+ * @return {Promise<SwitcherResult>} - The result of the switcher evaluation.
  */
-async function checkConfig(group, config, switcher) {
-    if (!config) {
-        return false;
-    }
-
-    if (!group.activated) {
-        throw new CriteriaFailed('Group disabled');
-    }
-
+async function checkConfig(config, switcher) {
     if (!config.activated) {
-        throw new CriteriaFailed('Config disabled');
+        return SwitcherResult.disabled('Config disabled');
     }
 
     if (hasRelayEnabled(config) && switcher.isRelayRestricted) {
-        throw new CriteriaFailed(`Config '${config.key}' is restricted to relay`);
+        return SwitcherResult.disabled('Config has Relay enabled');
     }
 
     if (config.strategies) {
-        return await checkStrategy(config, util.get(switcher.input, []));
+        return await checkStrategy(config, switcher.input);
     }
 
-    return true;
+    return SwitcherResult.enabled();
 }
 
+/**
+ * Checks if a switcher is valid against the strategies defined in the configuration.
+ * 
+ * @param {Config} config - The configuration containing strategies.
+ * @param {string[][]} [input] - The input data to be evaluated against the strategies.
+ * @returns {Promise<SwitcherResult>} - The result of the strategy evaluation.
+ */
 async function checkStrategy(config, input) {
     const { strategies } = config;
-    const entry = getEntry(input);
+    const entry = getEntry(util.get(input, []));
 
-    for (const strategy of strategies) {
-        if (!strategy.activated) {
+    for (const strategyConfig of strategies) {
+        if (!strategyConfig.activated) {
             continue;
         }
 
-        await checkStrategyInput(entry, strategy);
+        const strategyResult = await checkStrategyConfig(strategyConfig, entry);
+        if (strategyResult) {
+            return strategyResult;
+        }
     }
 
-    return true;
+    return SwitcherResult.enabled();
 }
 
-async function checkStrategyInput(entry, { strategy, operation, values }) {
-    if (entry?.length) {
-        const strategyEntry = entry.filter(e => e.strategy === strategy);
-        if (strategyEntry.length == 0 || !(await processOperation(strategy, operation, strategyEntry[0].input, values))) {
-            throw new CriteriaFailed(`Strategy '${strategy}' does not agree`);
-        }
-    } else {
-        throw new CriteriaFailed(`Strategy '${strategy}' did not receive any input`);
+/**
+ * Checks if a strategy configuration is valid against the provided entry data.
+ * 
+ * @param {Strategy} strategyConfig - The strategy configuration to be checked.
+ * @param {Entry[]} [entry] - The entry data to be evaluated against the strategy.
+ * @returns {Promise<SwitcherResult | undefined>} - The result of the strategy evaluation or undefined if valid.
+ */
+async function checkStrategyConfig(strategyConfig, entry) {
+    if (!entry?.length) {
+        return SwitcherResult.disabled(`Strategy '${strategyConfig.strategy}' did not receive any input`);
     }
+
+    const strategyEntry = entry.filter((e) => e.strategy === strategyConfig.strategy);
+    if (await isStrategyFulfilled(strategyEntry, strategyConfig)) {
+        return SwitcherResult.disabled(`Strategy '${strategyConfig.strategy}' does not agree`);
+    }
+
+    return undefined;
 }
 
 function hasRelayEnabled(config) {
     return config.relay?.activated;
 }
 
+async function isStrategyFulfilled(strategyEntry, strategyConfig) {
+    return strategyEntry.length == 0 ||
+        !(await processOperation(strategyConfig, strategyEntry[0].input));
+}
+
+/**
+ * Checks the criteria for a switcher request against the local snapshot.
+ * 
+ * @param {Snapshot | undefined} snapshot - The snapshot containing the data to check against.
+ * @param {SwitcherRequest} switcher - The switcher request to be evaluated.
+ * @returns {Promise<SwitcherResult>} - The result of the switcher evaluation.
+ * @throws {Error} - If the snapshot is not loaded.
+ */
 export default async function checkCriteriaLocal(snapshot, switcher) {
     if (!snapshot) {
         throw new Error('Snapshot not loaded. Try to use \'Client.loadSnapshot()\'');
     }
-    
+
     const { data } = snapshot;
     return resolveCriteria(data, switcher);
-}
-
-class CriteriaFailed extends Error {
-    constructor(reason) {
-        super(reason);
-        this.name = this.constructor.name;
-    }
 }

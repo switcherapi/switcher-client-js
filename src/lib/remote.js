@@ -1,14 +1,12 @@
 import fs from 'node:fs';
 import { Agent } from 'node:https';
 
-import { AuthError, CheckSwitcherError, CriteriaError, SnapshotServiceError } from './exceptions/index.js';
+import { CheckSwitcherError, ClientError, RemoteError } from './exceptions/index.js';
 import FetchFacade from './utils/fetchFacade.js';
 import * as util from './utils/index.js';
 import { GlobalAuth } from './globals/globalAuth.js';
 
 let httpClient;
-
-const getConnectivityError = (code) => `Connection has been refused - ${code}`;
 
 const getHeader = (token) => {
     return {
@@ -19,7 +17,7 @@ const getHeader = (token) => {
 
 export function setCerts(certPath) {
     if (!fs.existsSync(certPath)) {
-        throw new Error(`Invalid certificate path '${certPath}'`);
+        throw new RemoteError(`Invalid certificate path '${certPath}'`);
     }
     
     httpClient = new Agent({
@@ -36,7 +34,7 @@ export function getEntry(input) {
         return undefined;
     }
 
-    let entry = [];
+    const entry = [];
     for (const inputValues of input) {
         entry.push({
             strategy: inputValues[0],
@@ -67,9 +65,9 @@ export async function auth(context) {
             return response.json();
         }
       
-        throw new Error(`[auth] failed with status ${response.status}`);
+        throw new RemoteError(`[auth] failed with status ${response.status}`);
     } catch (e) {
-        throw new AuthError(e.errno ? getConnectivityError(e.errno) : e.message);
+        throw errorHandler(e);
     }
 }
 
@@ -95,10 +93,10 @@ export async function checkCriteria(key, input, showDetail = false) {
         if (response.status == 200) {
             return response.json();
         }
-      
-        throw new Error(`[checkCriteria] failed with status ${response.status}`);
+        
+        throw new RemoteError(`[checkCriteria] failed with status ${response.status}`);
     } catch (e) {
-        throw new CriteriaError(e.errno ? getConnectivityError(e.errno) : e.message);
+        throw errorHandler(e);
     }
 }
 
@@ -112,7 +110,7 @@ export async function checkSwitchers(switcherKeys) {
         });
 
         if (response.status != 200) {
-            throw new Error(`[checkSwitchers] failed with status ${response.status}`);
+            throw new RemoteError(`[checkSwitchers] failed with status ${response.status}`);
         }
         
         const json = response.json();
@@ -120,7 +118,7 @@ export async function checkSwitchers(switcherKeys) {
             throw new CheckSwitcherError(json.not_found);
         }
     } catch (e) {
-        throw new CriteriaError(e.errno ? getConnectivityError(e.errno) : e.message);
+        throw errorHandler(e);
     }
 }
 
@@ -136,9 +134,9 @@ export async function checkSnapshotVersion(version) {
             return response.json();
         }
     
-        throw new Error(`[checkSnapshotVersion] failed with status ${response.status}`);
+        throw new RemoteError(`[checkSnapshotVersion] failed with status ${response.status}`);
     } catch (e) {
-        throw new SnapshotServiceError(e.errno ? getConnectivityError(e.errno) : e.message);
+        throw errorHandler(e);
     }
 }
 
@@ -171,8 +169,16 @@ export async function resolveSnapshot(domain, environment, component) {
             return JSON.stringify(response.json(), null, 4);
         }
     
-        throw new Error(`[resolveSnapshot] failed with status ${response.status}`);
+        throw new RemoteError(`[resolveSnapshot] failed with status ${response.status}`);
     } catch (e) {
-        throw new SnapshotServiceError(e.errno ? getConnectivityError(e.errno) : e.message);
+        throw errorHandler(e);
     }
+}
+
+function errorHandler(e) {
+    if (!(e instanceof ClientError)) {
+        throw new RemoteError(e.errno ? `Connection has been refused - ${e.errno}` : e.message);
+    }
+
+    throw e;
 }

@@ -1,4 +1,5 @@
 import { Switcher } from './switcher';
+import { SwitcherResult } from './lib/result';
 
 /**
 * Quick start with the following 3 steps.
@@ -119,15 +120,6 @@ export class Client {
 }
 
 /**
- * ResultDetail is a detailed response from the API.
- */
-export type ResultDetail = {
-  result: boolean;
-  reason: string | undefined;
-  metadata: object | undefined;
-}
-
-/**
  * Criteria defines the condition(s) to evaluate the switcher when using Client.assume(key)
  */
 export type Criteria = {
@@ -149,7 +141,7 @@ export type Criteria = {
 export type LoggerRecord = {
   key: string;
   input: string[][];
-  response: ResultDetail
+  response: SwitcherResult
 }
 
 /**
@@ -303,5 +295,5 @@ declare class Key {
   /**
    * Return key response
    */
-  getResponse(input?: string[][]): ResultDetail;
+  getResponse(input?: string[][]): SwitcherResult;
 }
