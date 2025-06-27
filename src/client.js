@@ -15,7 +15,7 @@ import {
 import TimedMatch from './lib/utils/timed-match/index.js';
 import ExecutionLogger from './lib/utils/executionLogger.js';
 import SnapshotAutoUpdater from './lib/utils/snapshotAutoUpdater.js';
-import { SnapshotNotFoundError } from './lib/exceptions/index.js';
+import { ClientError } from './lib/exceptions/index.js';
 import { loadDomain, validateSnapshot, checkSwitchersLocal } from './lib/snapshot.js';
 import { Switcher } from './switcher.js';
 import { Auth } from './lib/remoteAuth.js';
@@ -106,7 +106,7 @@ export class Client {
 
   static async checkSnapshot() {
     if (!GlobalSnapshot.snapshot) {
-      throw new SnapshotNotFoundError('Snapshot is not loaded. Use Client.loadSnapshot()');
+      throw new ClientError('Snapshot is not loaded. Use Client.loadSnapshot()');
     }
 
     if (Auth.isTokenExpired()) {
@@ -263,11 +263,5 @@ export class SwitcherContext {
 export class SwitcherOptions {
   static build() {
     return new SwitcherOptions();
-  }
-}
-
-export class ResultDetail {
-  static build() {
-    return new ResultDetail();
   }
 }

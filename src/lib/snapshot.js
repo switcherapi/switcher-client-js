@@ -86,7 +86,9 @@ const OperationsType = Object.freeze({
     HAS_ALL: 'HAS_ALL'
 });
 
-const processOperation = async (strategy, operation, input, values) => {
+const processOperation = async (strategyConfig, input) => {
+    const { strategy, operation, values } = strategyConfig;
+
     switch(strategy) {
         case StrategiesType.NETWORK:
             return processNETWORK(operation, input, values);

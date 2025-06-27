@@ -1,10 +1,10 @@
-import { Client, type ResultDetail, type SwitcherContext, type SwitcherOptions } from "../client";
-import { Switcher } from "../switcher";
+import { Client, type SwitcherContext, type SwitcherOptions } from "../client";
+import { Switcher, SwitcherResult } from "../switcher";
 
 export {
   Switcher,
   Client,
-  ResultDetail,
+  SwitcherResult,
   SwitcherContext,
   SwitcherOptions
 }

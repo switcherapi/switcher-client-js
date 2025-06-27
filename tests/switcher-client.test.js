@@ -1,7 +1,7 @@
 import { rmdir } from 'fs';
 import { assert } from 'chai';
 
-import { Client, ResultDetail, SwitcherContext, SwitcherOptions } from '../switcher-client.js';
+import { Client, SwitcherContext, SwitcherOptions } from '../switcher-client.js';
 import { StrategiesType } from '../src/lib/snapshot.js';
 import { assertReject, assertResolve, deleteGeneratedSnapshot } from './helper/utils.js';
 import TimedMatch from '../src/lib/utils/timed-match/index.js';
@@ -80,6 +80,11 @@ describe('E2E test - Switcher local:', function () {
 
     assert.isTrue(response.result);
     assert.equal(response.reason, 'Success');
+    assert.deepEqual(response.toJSON(), {
+      result: true,
+      reason: 'Success',
+      metadata: undefined
+    });
   });
 
   it('should be valid - No prepare function needed', async function () {
@@ -225,6 +230,27 @@ describe('E2E test - Switcher local:', function () {
 
 });
 
+describe('E2E test - Client local #2:', function () {
+  this.beforeAll(async function () {
+    Client.buildContext({ domain: contextSettings.domain, environment: 'default_disabled' }, options);
+
+    await Client.loadSnapshot();
+    switcher = Client.getSwitcher();
+  });
+
+  this.afterAll(function () {
+    Client.unloadSnapshot();
+    TimedMatch.terminateWorker();
+  });
+
+  it('should be invalid - Client domain disabled', async function () {
+    assert.isFalse(await switcher.isItOn('FF2FOR2040'));
+    assert.equal(Client.getLogger('FF2FOR2040')[0].response.reason, 
+      'Domain disabled');
+  });
+  
+});
+
 describe('E2E test - Client testing (assume) feature:', function () {
   this.beforeAll(async function () {
     Client.buildContext(contextSettings, options);
@@ -242,6 +268,16 @@ describe('E2E test - Client testing (assume) feature:', function () {
     Client.clearLogger();
     Client.forget('FF2FOR2020');
     switcher = Client.getSwitcher();
+  });
+  
+  it('should replace the result of isItOn with Client.assume', async function () {
+    await switcher.prepare('DUMMY');
+
+    Client.assume('DUMMY').true();
+    assert.isTrue(await switcher.isItOn());
+
+    Client.assume('DUMMY').false();
+    assert.isFalse(await switcher.isItOn());
   });
 
   it('should be valid assuming key to be false and then forgetting it', async function () {
@@ -325,15 +361,12 @@ describe('Type placeholders:', function () {
   });
 
   it('should check exported types', function () {
-    const resultDetail = ResultDetail.build();
     const switcherContext = SwitcherContext.build();
     const switcherOptions = SwitcherOptions.build();
 
-    assert.isTrue(resultDetail instanceof ResultDetail);
     assert.isTrue(switcherContext instanceof SwitcherContext);
     assert.isTrue(switcherOptions instanceof SwitcherOptions);
 
-    assert.isNotNull(resultDetail);
     assert.isNotNull(switcherContext);
     assert.isNotNull(switcherOptions);
   });

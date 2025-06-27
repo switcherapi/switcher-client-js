@@ -39,6 +39,13 @@ describe('Processing strategy: PAYLOAD', () => {
         env: 'default'
     });
 
+    const givenStrategyConfig = (operation, values) => ({
+        strategy: StrategiesType.PAYLOAD,
+        operation: operation,
+        values: values,
+        activated: true,
+    });
+
     it('should read keys from payload #1', () => {
         const keys = payloadReader(JSON.parse(fixture_values2));
         assert.deepEqual(keys, [                
@@ -78,54 +85,58 @@ describe('Processing strategy: PAYLOAD', () => {
     });
 
     it('should return TRUE when payload has field', async () => {
-        assert.isTrue(await processOperation(
-            StrategiesType.PAYLOAD, OperationsType.HAS_ONE, fixture_1, ['login']));
+        const strategyConfig = givenStrategyConfig(OperationsType.HAS_ONE, ['login']);
+        assert.isTrue(await processOperation(strategyConfig, fixture_1));
     });
 
     it('should return FALSE when payload does not have field', async () => {
-        assert.isFalse(await processOperation(
-            StrategiesType.PAYLOAD, OperationsType.HAS_ONE, fixture_1, ['user']));
+        const strategyConfig = givenStrategyConfig(OperationsType.HAS_ONE, ['user']);
+        assert.isFalse(await processOperation(strategyConfig, fixture_1));
     });
 
     it('should return TRUE when payload has nested field', async () => {
-        assert.isTrue(await processOperation(
-            StrategiesType.PAYLOAD, OperationsType.HAS_ONE, fixture_values2, [
-                'order.qty', 'order.total'
-            ]));
+        const strategyConfig = givenStrategyConfig(OperationsType.HAS_ONE, [
+            'order.qty', 'order.total'
+        ]);
+
+        assert.isTrue(await processOperation(strategyConfig, fixture_values2));
     });
 
     it('should return TRUE when payload has nested field with arrays', async () => {
-        assert.isTrue(await processOperation(
-            StrategiesType.PAYLOAD, OperationsType.HAS_ONE, fixture_values2, [
-                'order.deliver.tracking.status'
-            ]));
+        const strategyConfig = givenStrategyConfig(OperationsType.HAS_ONE, [
+            'order.deliver.tracking.status'
+        ]);
+
+        assert.isTrue(await processOperation(strategyConfig, fixture_values2));
     });
 
     it('should return TRUE when payload has all', async () => {
-        assert.isTrue(await processOperation(
-            StrategiesType.PAYLOAD, OperationsType.HAS_ALL, fixture_values2, [
-                'product',
-                'order',
-                'order.qty',
-                'order.deliver',
-                'order.deliver.expect',        
-                'order.deliver.tracking',      
-                'order.deliver.tracking.date', 
-                'order.deliver.tracking.status'
-            ]));
+        const strategyConfig = givenStrategyConfig(OperationsType.HAS_ALL, [
+            'product',
+            'order',
+            'order.qty',
+            'order.deliver',
+            'order.deliver.expect',        
+            'order.deliver.tracking',      
+            'order.deliver.tracking.date', 
+            'order.deliver.tracking.status'
+        ]);
+
+        assert.isTrue(await processOperation(strategyConfig, fixture_values2));
     });
 
     it('should return FALSE when payload does not have all', async () => {
-        assert.isFalse(await processOperation(
-            StrategiesType.PAYLOAD, OperationsType.HAS_ALL, fixture_values2, [
-                'product',
-                'order',
-                'order.NOT_EXIST_KEY',
-            ]));
+        const strategyConfig = givenStrategyConfig(OperationsType.HAS_ALL, [
+            'product',
+            'order',
+            'order.NOT_EXIST_KEY',
+        ]);
+
+        assert.isFalse(await processOperation(strategyConfig, fixture_values2));
     });
 
     it('should return FALSE when payload is not a JSON string', async () => {
-        assert.isFalse(await processOperation(
-            StrategiesType.PAYLOAD, OperationsType.HAS_ALL, 'NOT_JSON', []));
+        const strategyConfig = givenStrategyConfig(OperationsType.HAS_ALL, []);
+        assert.isFalse(await processOperation(strategyConfig, 'NOT_JSON'));
     });
 });

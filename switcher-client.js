@@ -15,6 +15,7 @@
  * @module
  */
 
-export { Client, ResultDetail, SwitcherContext, SwitcherOptions } from './src/client.js';
+export { Client, SwitcherContext, SwitcherOptions } from './src/client.js';
 export { Switcher } from './src/switcher.js';
+export { SwitcherResult } from './src/lib/result.js';
 export { StrategiesType } from './src/lib/snapshot.js';
