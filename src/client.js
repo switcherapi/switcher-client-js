@@ -9,6 +9,7 @@ import {
   DEFAULT_LOGGER, 
   DEFAULT_REGEX_MAX_BLACKLISTED, 
   DEFAULT_REGEX_MAX_TIME_LIMIT, 
+  DEFAULT_STATIC,
   DEFAULT_TEST_MODE,
   SWITCHER_OPTIONS 
 } from './lib/constants.js';
@@ -38,6 +39,7 @@ export class Client {
       snapshotAutoUpdateInterval: 0,
       snapshotLocation: options?.snapshotLocation,
       local: util.get(options?.local, DEFAULT_LOCAL),
+      static: util.get(options?.static, DEFAULT_STATIC),
       logger: util.get(options?.logger, DEFAULT_LOGGER)
     });
 
@@ -130,18 +132,20 @@ export class Client {
     return false;
   }
 
-  static async loadSnapshot(options = { fetchRemote: false, watchSnapshot: false }) {
+  static async loadSnapshot(options = {}) {
+    const { fetchRemote = false, watchSnapshot = false } = options;
+
     GlobalSnapshot.init(loadDomain(
       util.get(GlobalOptions.snapshotLocation, ''), 
       util.get(Client.#context.environment, DEFAULT_ENVIRONMENT)
     ));
 
     if (GlobalSnapshot.snapshot.data.domain.version == 0 && 
-        (options.fetchRemote || !GlobalOptions.local)) {
+        (fetchRemote || !GlobalOptions.local)) {
       await Client.checkSnapshot();
     }
 
-    if (options.watchSnapshot) {
+    if (watchSnapshot) {
         Client.watchSnapshot();
     }
 

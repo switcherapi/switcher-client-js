@@ -3,7 +3,7 @@ import { StrategiesType } from './lib/snapshot.js';
 
 export class SwitcherBuilder {
   _delay = 0;
-  _nextRun = 0;
+  _nextRefreshTime = 0;
   _input;
   _key = '';
   _defaultResult;
@@ -17,6 +17,7 @@ export class SwitcherBuilder {
 
   throttle(delay) {
     this._delay = delay;
+    this._nextRefreshTime = Date.now() + delay;
 
     if (delay > 0) {
       GlobalOptions.updateOptions({ logger: true });
@@ -54,6 +55,8 @@ export class SwitcherBuilder {
       this._input = [];
     }
 
+    // replace existing startegy input
+    this._input = this._input.filter((item) => item[0] !== startegyType);
     this._input.push([startegyType, input]);
     return this;
   }
