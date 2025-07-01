@@ -117,6 +117,11 @@ export class Client {
    */
   static testMode(testEnabled?: boolean): void;
 
+  /**
+   * Returns the current snapshot version
+   */
+  static get snapshotVersion(): number
+
 }
 
 /**

@@ -254,6 +254,10 @@ export class Client {
   static testMode(testEnabled = true) {
     Client.testEnabled = testEnabled;
   }
+
+  static get snapshotVersion() {
+    return GlobalSnapshot.snapshot?.data.domain.version || 0;
+  }
 }
 
 // Type export placeholders

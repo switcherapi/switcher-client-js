@@ -320,10 +320,10 @@ describe('Integrated test - Switcher:', function () {
     });
 
     it('should use silent mode when fail to check switchers', async function() {
-      //given
+      // given
       given(fetchStub, 0, { status: 429 });
 
-      //test
+      // test
       Client.buildContext(contextSettings, { silentMode: '5m', regexSafe: false, snapshotLocation: './tests/snapshot/' });
       await Client.checkSwitchers(['FEATURE01', 'FEATURE02']).catch(e => {
         assert.equal(e.message, 'Something went wrong: [FEATURE01,FEATURE02] not found');
@@ -400,45 +400,45 @@ describe('Integrated test - Switcher:', function () {
     });
 
     it('should NOT throw when switcher keys provided were configured properly', async function() {
-      //given
+      // given
       given(fetchStub, 0, { json: () => generateAuth('[auth_token]', 5), status: 200 });
       const response = { not_found: [] };
       given(fetchStub, 1, { json: () => response, status: 200 });
 
-      //test
+      // test
       Client.buildContext(contextSettings);
       await assertResolve(assert, Client.checkSwitchers(['FEATURE01', 'FEATURE02']));
     });
 
     it('should throw when switcher keys provided were not configured properly', async function() {
-      //given
+      // given
       given(fetchStub, 0, { json: () => generateAuth('[auth_token]', 5), status: 200 });
       const response = { not_found: ['FEATURE02'] };
       given(fetchStub, 1, { json: () => response, status: 200 });
 
-      //test
+      // test
       Client.buildContext(contextSettings);
       await assertReject(assert, Client.checkSwitchers(['FEATURE01', 'FEATURE02']), 
         'Something went wrong: [FEATURE02] not found');
     });
 
     it('should throw when no switcher keys were provided', async function() {
-      //given
+      // given
       given(fetchStub, 0, { json: () => generateAuth('[auth_token]', 5), status: 200 });
       given(fetchStub, 1, { status: 422 });
 
-      //test
+      // test
       Client.buildContext(contextSettings);
       await assertReject(assert, Client.checkSwitchers([]), 
         'Something went wrong: [checkSwitchers] failed with status 422');
     });
 
     it('should throw when switcher keys provided were invalid', async function() {
-      //given
+      // given
       given(fetchStub, 0, { json: () => generateAuth('[auth_token]', 5), status: 200 });
       given(fetchStub, 1, { errno: 'ERROR' });
 
-      //test
+      // test
       Client.buildContext(contextSettings);
       await assertReject(assert, Client.checkSwitchers('FEATURE02'), 
         'Something went wrong: [checkSwitchers] failed with status undefined');
