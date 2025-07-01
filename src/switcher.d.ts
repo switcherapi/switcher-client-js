@@ -19,10 +19,25 @@ export class Switcher {
 
   /**
    * Execute criteria
-   * 
+   *
    * @returns boolean or SwitcherResult when detail() is used
    */
-  isItOn(key?: string): Promise<boolean | SwitcherResult>;
+  isItOn(key?: string): Promise<boolean | SwitcherResult> | boolean | SwitcherResult;
+
+  /**
+   * Schedules background refresh of the last criteria request
+   */
+  scheduleBackgroundRefresh(): void;
+
+  /**
+   * Execute criteria from remote API
+   */
+  async executeRemoteCriteria(): Promise<boolean | SwitcherResult>
+
+  /**
+   * Execute criteria from local snapshot
+   */
+  async executeLocalCriteria(): Promise<boolean | SwitcherResult>
 
   /**
    * Define a delay (ms) for the next async execution.

@@ -1,5 +1,6 @@
 import { rmdir } from 'fs';
 import { assert } from 'chai';
+import { spy } from 'sinon';
 
 import { Client, SwitcherContext, SwitcherOptions } from '../switcher-client.js';
 import { StrategiesType } from '../src/lib/snapshot.js';
@@ -23,7 +24,7 @@ const options = {
   regexMaxTimeLimit: 500
 };
 
-describe('E2E test - Switcher local:', function () {
+describe('E2E test - Client local #1:', function () {
   this.beforeAll(async function () {
     Client.buildContext(contextSettings, options);
 
@@ -249,6 +250,128 @@ describe('E2E test - Client local #2:', function () {
       'Domain disabled');
   });
   
+});
+
+describe('E2E test - Client local from cache:', function () {
+  this.beforeAll(async function () {
+    Client.buildContext(contextSettings, options);
+
+    await Client.loadSnapshot();
+    switcher = Client.getSwitcher();
+  });
+
+   this.afterAll(function () {
+    Client.unloadSnapshot();
+    TimedMatch.terminateWorker();
+  });
+
+  this.beforeEach(function () {
+    Client.clearLogger();
+    switcher = Client.getSwitcher();
+  });
+
+  it('should get response from cache', async function () {
+    // 1st call - should not get from cache
+    let result = await switcher
+      .throttle(1000)
+      .detail()
+      .checkValue('Japan')
+      .checkNetwork('10.0.0.3')
+      .isItOn('FF2FOR2020');
+
+    assert.isTrue(result.result);
+    assert.deepEqual(result.metadata || {}, {});
+
+    // 2nd call - should get from cache
+    result = await switcher
+      .throttle(1000)
+      .detail()
+      .checkValue('Japan')
+      .checkNetwork('10.0.0.3')
+      .isItOn('FF2FOR2020');
+
+    assert.isTrue(result.result);
+    assert.deepEqual(result.metadata || {}, { cached: true });
+  });
+
+  it('should NOT get response from cache - different strategy input', async function () {
+    // 1st call - should not get from cache
+    let result = await switcher
+      .throttle(1000)
+      .detail()
+      .checkValue('Japan')
+      .checkNetwork('10.0.0.3')
+      .isItOn('FF2FOR2020');
+
+    assert.isTrue(result.result);
+    assert.deepEqual(result.metadata || {}, {});
+
+    // 2nd call - should get from cache
+    result = await switcher
+      .throttle(1000)
+      .detail()
+      .checkValue('USA')
+      .checkNetwork('10.0.0.3')
+      .isItOn('FF2FOR2020');
+
+    assert.isFalse(result.result);
+    assert.deepEqual(result.metadata || {}, {});
+  });
+
+  it('should NOT get response from cache - different key', async function () {
+    // 1st call - should not get from cache
+    let result = await switcher
+      .throttle(1000)
+      .detail()
+      .isItOn('FF2FOR2021');
+
+    assert.isTrue(result.result);
+    assert.deepEqual(result.metadata || {}, {});
+
+    // 2nd call - should get from cache
+    result = await switcher
+      .throttle(1000)
+      .detail()
+      .isItOn('FF2FOR2022');
+
+    assert.isTrue(result.result);
+    assert.deepEqual(result.metadata || {}, {});
+  });
+
+  it('should get response from cache when static mode is enabled', async function () {
+    // given
+    Client.buildContext(contextSettings, {
+      snapshotLocation: options.snapshotLocation, 
+      local: true,
+      static: true
+    });
+    
+    await Client.loadSnapshot();
+
+    // test
+    switcher = Client.getSwitcher();
+    const spyScheduleBackgroundRefresh = spy(switcher, 'scheduleBackgroundRefresh');
+
+    // 1st call - should not get from cache
+    let result = await switcher
+      .throttle(1000)
+      .detail()
+      .isItOn('FF2FOR2021');
+
+    assert.isTrue(result.result);
+    assert.deepEqual(result.metadata || {}, {});
+
+    // 2nd call - should get from cache
+    result = await switcher
+      .throttle(1000)
+      .detail()
+      .isItOn('FF2FOR2021');
+
+    assert.isTrue(result.result);
+    assert.deepEqual(result.metadata || {}, { cached: true });
+    
+    assert.equal(spyScheduleBackgroundRefresh.callCount, 0);
+  });
 });
 
 describe('E2E test - Client testing (assume) feature:', function () {

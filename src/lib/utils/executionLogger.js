@@ -1,3 +1,5 @@
+import { SwitcherResult } from '../result.js';
+
 const logger = new Array();
 
 export default class ExecutionLogger {
@@ -20,7 +22,14 @@ export default class ExecutionLogger {
             }
         }
         
-        logger.push({ key, input, response });
+        logger.push({
+        key,
+        input,
+        response: SwitcherResult.create(response.result, response.reason, {
+            ...response.metadata,
+            cached: true,
+        }),
+        });
     }
 
      /**
@@ -30,11 +39,13 @@ export default class ExecutionLogger {
      * @param input Switcher input
      */
     static getExecution(key, input) {
-        const result = logger.filter(
-            value => value.key === key && 
-            JSON.stringify(value.input) === JSON.stringify(input));
+        for (const log of logger) {
+            if (this.#hasExecution(log, key, input)) {
+                return log;
+            }
+        }
 
-        return result[0];
+        return new ExecutionLogger();
     }
 
      /**
@@ -67,6 +78,21 @@ export default class ExecutionLogger {
         if (ExecutionLogger.callbackError) {
             ExecutionLogger.callbackError(error);
         }
+    }
+
+    static #hasExecution(log, key, input) {
+        return log.key === key && this.#checkStrategyInputs(log.input, input);
+    }
+
+    static #checkStrategyInputs(loggerInputs, inputs) {
+        for (const [strategy, input] of loggerInputs || []) {
+        const found = inputs?.find((i) => i[0] === strategy && i[1] === input);
+        if (!found) {
+            return false;
+        }
+        }
+
+        return true;
     }
     
 }

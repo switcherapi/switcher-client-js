@@ -43,8 +43,7 @@ export class Switcher extends SwitcherRequest {
     }
   }
 
-  async isItOn(key) {
-    let result;
+  isItOn(key) {
     this.#validateArgs(key);
     
     // verify if query from Bypasser
@@ -54,97 +53,52 @@ export class Switcher extends SwitcherRequest {
       return this._showDetail ? response : response.result;
     }
 
-    try {
-      // verify if query from local snapshot
-      if (GlobalOptions.local && !this._forceRemote) {
-        return await this._executeLocalCriteria();
-      }
-
-      // otherwise, execute remote criteria or local snapshot when silent mode is enabled
-      await this.validate();
-      if (GlobalAuth.token === 'SILENT') {
-        result = await this._executeLocalCriteria();
-      } else {
-        result = await this._executeRemoteCriteria();
-      }
-    } catch (err) {
-      this.#notifyError(err);
-      
-      if (GlobalOptions.silentMode) {
-        Auth.updateSilentToken();
-        return this._executeLocalCriteria();
-      }
-      
-      throw err;
+    // try to get cached result
+    const cachedResult = this.#tryCachedResult();
+    if (cachedResult) {
+      return cachedResult;
     }
     
-    return result;
+    return this.#submit();
   }
 
-  async _executeRemoteCriteria() {
+  /**
+   * Schedules background refresh of the last criteria request
+   */
+  scheduleBackgroundRefresh() {
+    const now = Date.now();
+    if (now > this._nextRefreshTime) {
+      this._nextRefreshTime = now + this._delay;
+      queueMicrotask(() => this.#submit().catch((err) => this._notifyError(err)));
+    }
+  }
+
+  /**
+   * Execute criteria from remote API
+   */
+  async executeRemoteCriteria() {
     let responseCriteria;
 
-    if (this.#useSync()) {
-      try {
-        responseCriteria = await remote.checkCriteria(
-          this._key, 
-          this._input, 
-          this._showDetail
-        );
-      } catch (err) {
-        responseCriteria = this.#getDefaultResultOrThrow(err);
-      }
-      
-      if (GlobalOptions.logger && this._key) {
-        ExecutionLogger.add(responseCriteria, this._key, this._input);
-      }
-    } else {
-      responseCriteria = this._executeAsyncRemoteCriteria();
+    try {
+      responseCriteria = await remote.checkCriteria(
+        this._key,
+        this._input,
+        this._showDetail,
+      );
+    } catch (err) {
+      responseCriteria = this.#getDefaultResultOrThrow(err);
     }
-    
+
+    if (GlobalOptions.logger && this._key) {
+      ExecutionLogger.add(responseCriteria, this._key, this._input);
+    }
+
     return this._showDetail ? responseCriteria : responseCriteria.result;
   }
 
-  _executeAsyncRemoteCriteria() {
-    if (this._nextRun < Date.now()) {
-      this._nextRun = Date.now() + this._delay;
-
-      if (Auth.isTokenExpired()) {
-        this.prepare(this._key)
-          .then(() => this.#executeAsyncCheckCriteria())
-          .catch(err => this.#notifyError(err));
-      } else {
-        this.#executeAsyncCheckCriteria();
-      }
-    }
-
-    const executionLog = ExecutionLogger.getExecution(this._key, this._input);
-    return executionLog.response;
-  }
-
-  #executeAsyncCheckCriteria() {
-    remote.checkCriteria(this._key, this._input, this._showDetail)
-      .then(response => ExecutionLogger.add(response, this._key, this._input))
-      .catch(err => this.#notifyError(err));
-  }
-
-  #notifyError(err) {
-    ExecutionLogger.notifyError(err);
-  }
-
-  async #executeApiValidation() {
-    if (!this.#useSync()) {
-      return;
-    }
-
-    Auth.checkHealth();
-    if (Auth.isTokenExpired()) {
-      await this.prepare(this._key);
-    }
-  }
-
-  async _executeLocalCriteria() {
+  async executeLocalCriteria() {
     let response;
+
     try {
       response = await checkCriteriaLocal(GlobalSnapshot.snapshot, this);
     } catch (err) {
@@ -162,14 +116,66 @@ export class Switcher extends SwitcherRequest {
     return response.result;
   }
 
+  #notifyError(err) {
+    ExecutionLogger.notifyError(err);
+  }
+
+  async #executeApiValidation() {
+    Auth.checkHealth();
+    if (Auth.isTokenExpired()) {
+      await this.prepare(this._key);
+    }
+  }
+
+  async #submit() {
+    try {
+      // verify if query from local snapshot
+      if (GlobalOptions.local && !this._forceRemote) {
+        return await this.executeLocalCriteria();
+      }
+
+      // otherwise, execute remote criteria or local snapshot when silent mode is enabled
+      await this.validate();
+      if (GlobalAuth.token === 'SILENT') {
+        return await this.executeLocalCriteria();
+      }
+
+      return await this.executeRemoteCriteria();
+    } catch (err) {
+      this.#notifyError(err);
+      
+      if (GlobalOptions.silentMode) {
+        Auth.updateSilentToken();
+        return this.executeLocalCriteria();
+      }
+      
+      throw err;
+    }
+  }
+
+  #tryCachedResult() {
+    if (this.#hasThrottle()) {
+      if (!GlobalOptions.static) {
+        this.scheduleBackgroundRefresh();
+      }
+
+      const cachedResultLogger = ExecutionLogger.getExecution(this._key, this._input);
+      if (cachedResultLogger.key) {
+        return this._showDetail ? cachedResultLogger.response : cachedResultLogger.response.result;
+      }
+    }
+
+    return undefined;
+  }
+
   #validateArgs(key) {
     if (key) { 
       this._key = key; 
     }
   }
 
-  #useSync() {
-    return this._delay == 0 || !ExecutionLogger.getExecution(this._key, this._input);
+  #hasThrottle() {
+    return this._delay !== 0;
   }
 
   #getDefaultResultOrThrow(err) {

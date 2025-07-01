@@ -13,7 +13,7 @@ const snapshotLocation = './tests/playground/snapshot/';
  * Playground environment for showcasing the API
  */
 async function setupSwitcher(local) {
-    Client.buildContext({ url, apiKey, domain, component, environment }, { local, logger: true });
+    Client.buildContext({ url, apiKey, domain, component, environment }, { snapshotLocation, local, logger: true });
     await Client.loadSnapshot({ watchSnapshot: false, fetchRemote: local })
         .then(version => console.log('Snapshot loaded - version:', version))
         .catch(() => console.log('Failed to load Snapshot'));
@@ -42,7 +42,11 @@ const _testLocal = async () => {
 
     setInterval(async () => {
         const time = Date.now();
-        const result = await switcher.detail().isItOn(SWITCHER_KEY);
+        const result = await switcher
+            .detail()
+            .throttle(1000)
+            .isItOn(SWITCHER_KEY);
+
         console.log(`- ${Date.now() - time} ms - ${JSON.stringify(result)}`);
     }, 1000);
 };
@@ -59,7 +63,7 @@ const _testSimpleAPICall = async (local) => {
 
     setInterval(async () => {
         const time = Date.now();
-        const result = await switcher.isItOn(SWITCHER_KEY);
+        const result = await switcher.detail().isItOn(SWITCHER_KEY);
         console.log(`- ${Date.now() - time} ms - ${JSON.stringify(result)}`);
     }, 1000);
 };
@@ -90,8 +94,6 @@ const _testSnapshotUpdate = async () => {
     await sleep(2000);
     
     console.log('checkSnapshot:', await Client.checkSnapshot());
-
-    Client.unloadSnapshot();
 };
 
 const _testAsyncCall = async () => {
@@ -103,8 +105,6 @@ const _testAsyncCall = async () => {
     switcher.isItOn(SWITCHER_KEY)
         .then(res => console.log('Promise result:', res))
         .catch(error => console.log(error));
-
-    Client.unloadSnapshot();
 };
 
 // Does not require remote API
