@@ -383,7 +383,7 @@ describe('Error Scenarios - Snapshot', function() {
     });
     
     const switcher = Client.getSwitcher();
-    await assertReject(assert, switcher.isItOn('FF2FOR2030'), 
-      'Snapshot not loaded. Try to use \'Client.loadSnapshot()\'' );
+    assert.throws(() => switcher.isItOn('FF2FOR2030'), 
+      Error, 'Snapshot not loaded. Try to use \'Client.loadSnapshot()\'' );
   });
 });

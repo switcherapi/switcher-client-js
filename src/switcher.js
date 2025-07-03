@@ -43,6 +43,26 @@ export class Switcher extends SwitcherRequest {
     }
   }
 
+  isItOnBool(key, forceAsync = false) {
+    this.detail(false);
+
+    if (forceAsync) {
+      return Promise.resolve(this.isItOn(key));
+    }
+
+    return this.isItOn(key);
+  }
+
+  isItOnDetail(key, forceAsync = false) {
+    this.detail(true);
+
+    if (forceAsync) {
+      return Promise.resolve(this.isItOn(key));
+    }
+
+    return this.isItOn(key);
+  }
+
   isItOn(key) {
     this.#validateArgs(key);
     
@@ -50,7 +70,7 @@ export class Switcher extends SwitcherRequest {
     const bypassKey = Bypasser.searchBypassed(this._key);
     if (bypassKey) {
       const response = bypassKey.getResponse(util.get(this._input, []));
-      return this._showDetail ? response : response.result;
+      return this.#transformResult(response);
     }
 
     // try to get cached result
@@ -62,58 +82,50 @@ export class Switcher extends SwitcherRequest {
     return this.#submit();
   }
 
-  /**
-   * Schedules background refresh of the last criteria request
-   */
   scheduleBackgroundRefresh() {
     const now = Date.now();
+    
     if (now > this._nextRefreshTime) {
       this._nextRefreshTime = now + this._delay;
-      queueMicrotask(() => this.#submit().catch((err) => this._notifyError(err)));
+      queueMicrotask(async () => {
+        try {
+          await this.#submit();
+        } catch (err) {
+          this.#notifyError(err);
+        }
+      });
     }
   }
 
-  /**
-   * Execute criteria from remote API
-   */
   async executeRemoteCriteria() {
-    let responseCriteria;
+    return remote.checkCriteria(
+      this._key,
+      this._input,
+      this._showDetail,
+    ).then((responseCriteria) => {
+      if (this.#canLog()) {
+        ExecutionLogger.add(responseCriteria, this._key, this._input);
+      }
 
-    try {
-      responseCriteria = await remote.checkCriteria(
-        this._key,
-        this._input,
-        this._showDetail,
-      );
-    } catch (err) {
-      responseCriteria = this.#getDefaultResultOrThrow(err);
-    }
-
-    if (GlobalOptions.logger && this._key) {
-      ExecutionLogger.add(responseCriteria, this._key, this._input);
-    }
-
-    return this._showDetail ? responseCriteria : responseCriteria.result;
+      return this.#transformResult(responseCriteria);
+    }).catch((err) => {
+      const responseCriteria = this.#getDefaultResultOrThrow(err);
+      return this.#transformResult(responseCriteria);
+    });
   }
 
-  async executeLocalCriteria() {
-    let response;
-
+  executeLocalCriteria() {
     try {
-      response = await checkCriteriaLocal(GlobalSnapshot.snapshot, this);
+      const response = checkCriteriaLocal(GlobalSnapshot.snapshot, this);
+      if (this.#canLog()) {
+        ExecutionLogger.add(response, this._key, this._input);
+      }
+
+      return this.#transformResult(response);
     } catch (err) {
-      response = this.#getDefaultResultOrThrow(err);
+      const response = this.#getDefaultResultOrThrow(err);
+      return this.#transformResult(response);
     }
-
-    if (GlobalOptions.logger) {
-      ExecutionLogger.add(response, this._key, this._input);
-    }
-
-    if (this._showDetail) {
-      return response;
-    }
-
-    return response.result;
   }
 
   #notifyError(err) {
@@ -127,30 +139,31 @@ export class Switcher extends SwitcherRequest {
     }
   }
 
-  async #submit() {
-    try {
-      // verify if query from local snapshot
-      if (GlobalOptions.local && !this._forceRemote) {
-        return await this.executeLocalCriteria();
-      }
-
-      // otherwise, execute remote criteria or local snapshot when silent mode is enabled
-      await this.validate();
-      if (GlobalAuth.token === 'SILENT') {
-        return await this.executeLocalCriteria();
-      }
-
-      return await this.executeRemoteCriteria();
-    } catch (err) {
-      this.#notifyError(err);
-      
-      if (GlobalOptions.silentMode) {
-        Auth.updateSilentToken();
-        return this.executeLocalCriteria();
-      }
-      
-      throw err;
+  #submit() {
+    // verify if query from snapshot
+    if (GlobalOptions.local && !this._forceRemote) {
+      return this.executeLocalCriteria();
     }
+
+    // otherwise, execute remote criteria or local snapshot when silent mode is enabled
+    return this.validate()
+      .then(() => {
+        if (GlobalAuth.token === 'SILENT') {
+          return this.executeLocalCriteria();
+        }
+
+        return this.executeRemoteCriteria();
+      })
+      .catch((err) => {
+        this.#notifyError(err);
+
+        if (GlobalOptions.silentMode) {
+          Auth.updateSilentToken();
+          return this.executeLocalCriteria();
+        }
+
+        throw err;
+      });
   }
 
   #tryCachedResult() {
@@ -161,7 +174,7 @@ export class Switcher extends SwitcherRequest {
 
       const cachedResultLogger = ExecutionLogger.getExecution(this._key, this._input);
       if (cachedResultLogger.key) {
-        return this._showDetail ? cachedResultLogger.response : cachedResultLogger.response.result;
+        return this.#transformResult(cachedResultLogger.response);
       }
     }
 
@@ -178,6 +191,10 @@ export class Switcher extends SwitcherRequest {
     return this._delay !== 0;
   }
 
+  #canLog() {
+    return GlobalOptions.logger === true && this._key.length > 0;
+  }
+
   #getDefaultResultOrThrow(err) {
     if (this._defaultResult === undefined) {
       throw err;
@@ -187,6 +204,10 @@ export class Switcher extends SwitcherRequest {
 
     this.#notifyError(err);
     return response;
+  }
+
+  #transformResult(result) {
+    return this._showDetail ? result : result.result;
   }
 
 }

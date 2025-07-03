@@ -96,14 +96,23 @@ const switcher = Client.getSwitcher();
 There are a few different ways to call the API.
 Here are some examples:
 
-1. **No parameters**
-This is the simplest way to execute a criteria. It will return a boolean value indicating whether the feature is enabled or not.
+1. **Basic usage**
+Some of the ways you can check if a feature is enabled or not.
 
 ```js
 const switcher = Client.getSwitcher();
-await switcher.isItOn('FEATURE01');
-// or
-const { result, reason, metadata } = await switcher.detail().isItOn('FEATURE01');
+
+// Local (synchronous) execution
+const isOnBool = switcher.isItOn('FEATURE01'); // true or false
+const isOnBool = switcher.isItOnBool('FEATURE01'); // true or false
+const isOnDetail = switcher.detail().isItOn('FEATURE01'); // { result: true, reason: 'Success', metadata: {} }
+const isOnDetail = switcher.isItOnDetail('FEATURE01'); // { result: true, reason: 'Success', metadata: {} }
+
+// Remote (asynchronous) execution or hybrid (local/remote) execution
+const isOnBoolAsync = await switcher.isItOn('FEATURE01'); // Promise<boolean>
+const isOnBoolAsync = await switcher.isItOnBool('FEATURE01', true); // Promise<boolean>
+const isOnDetailAsync = await switcher.detail().isItOn('FEATURE01'); // Promise<SwitcherResult>
+const isOnDetailAsync = await switcher.isItOnDetail('FEATURE01', true); // Promise<SwitcherResult>
 ```
 
 2. **Strategy validation - preparing input**

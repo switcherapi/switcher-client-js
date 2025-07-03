@@ -38,14 +38,12 @@ const _testLocal = async () => {
         .then(version => console.log('Snapshot loaded - version:', version))
         .catch(() => console.log('Failed to load Snapshot'));
 
-    const switcher = Client.getSwitcher();
+    const switcher = Client.getSwitcher(SWITCHER_KEY)
+            .detail();
 
-    setInterval(async () => {
+    setInterval(() => {
         const time = Date.now();
-        const result = await switcher
-            .detail()
-            .throttle(1000)
-            .isItOn(SWITCHER_KEY);
+        const result = switcher.isItOn();
 
         console.log(`- ${Date.now() - time} ms - ${JSON.stringify(result)}`);
     }, 1000);
@@ -129,16 +127,24 @@ const _testBypasser = async () => {
 // Requires remote API
 const _testWatchSnapshot = async () => {
     Client.buildContext({ url, apiKey, domain, component, environment }, { snapshotLocation, local: true, logger: true });
-    await Client.loadSnapshot({ watchSnapshot: false, fetchRemote: true })
+    await Client.loadSnapshot({ fetchRemote: true })
         .then(() => console.log('Snapshot loaded'))
         .catch(() => console.log('Failed to load Snapshot'));
 
-    const switcher = Client.getSwitcher();
-    
     Client.watchSnapshot({
-        success: async () => console.log('In-memory snapshot updated', await switcher.isItOn(SWITCHER_KEY)),
+        success: () => console.log('In-memory snapshot updated'),
         reject: (err) => console.log(err)
     });
+
+    const switcher = Client.getSwitcher(SWITCHER_KEY)
+        .detail()
+        .throttle(1000);
+
+    setInterval(() => {
+        const time = Date.now();
+        const result = switcher.isItOn(SWITCHER_KEY);
+        console.log(`- ${Date.now() - time} ms - ${JSON.stringify(result)}`);
+    }, 1000);
 };
 
 // Does not require remote API
@@ -185,4 +191,4 @@ const _testSnapshotAutoUpdate = async () => {
     }, 2000);
 };
 
-_testLocal();
+_testWatchSnapshot();
