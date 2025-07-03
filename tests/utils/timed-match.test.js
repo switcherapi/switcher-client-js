@@ -8,7 +8,7 @@ const nokInput = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';
 
 const COLD_TIME = 550;
 const WARM_TIME = 50;
-const TIMEOUT = 1000;
+const TIMEOUT = 950; // 50ms margin for worker thread to finish
 
 const getTimer = (timer) => (timer - Date.now()) * -1;
 
