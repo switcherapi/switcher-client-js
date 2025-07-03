@@ -140,8 +140,7 @@ export class Client {
       util.get(Client.#context.environment, DEFAULT_ENVIRONMENT)
     ));
 
-    if (GlobalSnapshot.snapshot.data.domain.version == 0 && 
-        (fetchRemote || !GlobalOptions.local)) {
+    if (this.#isCheckSnapshotAvailable(fetchRemote)) {
       await Client.checkSnapshot();
     }
 
@@ -150,6 +149,17 @@ export class Client {
     }
 
     return GlobalSnapshot.snapshot?.data.domain.version || 0;
+  }
+
+  /**
+   * Checks if the snapshot is available to be checked.
+   *
+   * Snapshots with version 0 are required to be checked if either:
+   * - fetchRemote is true, meaning it will fetch the latest snapshot from the API.
+   * - GlobalOptions.local is false, meaning it will not use the local snapshot.
+   */
+  static #isCheckSnapshotAvailable(fetchRemote) {
+    return GlobalSnapshot.snapshot?.data.domain.version == 0 && (fetchRemote || !GlobalOptions.local);
   }
 
   static watchSnapshot(callback = {}) {

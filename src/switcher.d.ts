@@ -1,11 +1,103 @@
 import { SwitcherResult } from './lib/result.js';
 
+export type SwitcherExecutionResult = Promise<boolean | SwitcherResult> | boolean | SwitcherResult;
+
 /**
  * Switcher handles criteria execution and validations.
  *
- * Create a intance of Switcher using Client.getSwitcher()
+ * The class provides methods to execute criteria with both boolean and detailed results,
+ * and supports both synchronous and asynchronous execution modes.
+ *
+ * @example
+ * Example usage of the Switcher class:
+ * ```typescript
+ * // Local mode - synchronous execution
+ * const isOn = switcher.isItOnBool();
+ * const { result, reason, metadata } = switcher.isItOnDetail();
+ *
+ * // Force asynchronous execution
+ * const isOnAsync = await switcher.isItOnBool('MY_SWITCHER', true);
+ * const detailAsync = await switcher.isItOnDetail('MY_SWITCHER', true);
+ * ```
  */
 export class Switcher {
+
+  /**
+   * Execute criteria with boolean result (synchronous version)
+   *
+   * @param key - switcher key
+   * @param forceAsync - when true, forces async execution
+   * @returns boolean value
+   */
+  isItOnBool(key: string, forceAsync?: false): boolean;
+
+  /**
+   * Execute criteria with boolean result (asynchronous version)
+   *
+   * @param key - switcher key
+   * @param forceAsync - when true, forces async execution
+   * @returns Promise<boolean> value
+   */
+  isItOnBool(key: string, forceAsync?: true): Promise<boolean>;
+
+  /**
+   * Execute criteria with boolean result
+   *
+   * @param key - switcher key
+   * @param forceAsync - when true, forces async execution
+   * @returns boolean value or Promise<boolean> based on execution mode
+   */
+  isItOnBool(key: string, forceAsync?: boolean): Promise<boolean> | boolean;
+
+  /**
+   * Execute criteria with detail information (synchronous version)
+   *
+   * @param key - switcher key
+   * @param forceAsync - when true, forces async execution
+   * @returns SwitcherResult object
+   */
+  isItOnDetail(key: string, forceAsync?: false): SwitcherResult;
+
+  /**
+   * Execute criteria with detail information (asynchronous version)
+   *
+   * @param key - switcher key
+   * @param forceAsync - when true, forces async execution
+   * @returns Promise<SwitcherResult> object
+   */
+  isItOnDetail(key: string, forceAsync?: true): Promise<SwitcherResult>;
+
+  /**
+   * Execute criteria with detail information
+   *
+   * @param key - switcher key
+   * @param forceAsync - when true, forces async execution
+   * @returns SwitcherResult or Promise<SwitcherResult> based on execution mode
+   */
+  isItOnDetail(key: string, forceAsync?: boolean): Promise<SwitcherResult> | SwitcherResult;
+
+  /**
+   * Execute criteria
+   *
+   * @param key - switcher key
+   * @returns {SwitcherExecutionResult} - boolean value or SwitcherResult when detail() is applied
+   */
+  isItOn(key?: string): SwitcherExecutionResult;
+
+  /**
+   * Schedules background refresh of the last criteria request
+   */
+  scheduleBackgroundRefresh(): void;
+
+  /**
+   * Execute criteria from remote API
+   */
+  async executeRemoteCriteria(): Promise<boolean | SwitcherResult>;
+
+  /**
+   * Execute criteria from local snapshot
+   */
+  executeLocalCriteria(): boolean | SwitcherResult;
 
   /**
    * Validates client settings for remote API calls
@@ -16,28 +108,6 @@ export class Switcher {
    * Checks API credentials and connectivity
    */
   prepare(key?: string): Promise<void>;
-
-  /**
-   * Execute criteria
-   *
-   * @returns boolean or SwitcherResult when detail() is used
-   */
-  isItOn(key?: string): Promise<boolean | SwitcherResult> | boolean | SwitcherResult;
-
-  /**
-   * Schedules background refresh of the last criteria request
-   */
-  scheduleBackgroundRefresh(): void;
-
-  /**
-   * Execute criteria from remote API
-   */
-  async executeRemoteCriteria(): Promise<boolean | SwitcherResult>
-
-  /**
-   * Execute criteria from local snapshot
-   */
-  async executeLocalCriteria(): Promise<boolean | SwitcherResult>
 
   /**
    * Define a delay (ms) for the next async execution.
@@ -115,4 +185,9 @@ export class Switcher {
    * Return switcher current strategy input
    */
   get input(): string[][] | undefined;
+
+  /**
+   * Return switcher Relay restriction settings
+   */
+  get isRelayRestricted(): boolean;
 }

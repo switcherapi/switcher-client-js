@@ -48,11 +48,13 @@ describe('E2E test - Client local #1:', function () {
     await switcher
       .checkValue('Japan')
       .checkNetwork('10.0.0.3')
-      .prepare('FF2FOR2020');
-
-    const result = await switcher.isItOn('FF2FOR2020');
-    assert.isTrue(result);
-    assert.isNotEmpty(Client.getLogger('FF2FOR2020'));
+      .prepare();
+    
+    assert.isTrue(await switcher.isItOn('FF2FOR2020') === true);
+    assert.isTrue(switcher.isItOnBool('FF2FOR2020') === true);
+    assert.isTrue(await switcher.isItOnBool('FF2FOR2020', true) === true);
+    assert.isTrue(switcher.isItOnDetail('FF2FOR2020').result === true);
+    assert.isTrue((await switcher.isItOnDetail('FF2FOR2020', true)).result === true);
   });
 
   it('should get execution from logger', async function () {
@@ -444,7 +446,7 @@ describe('E2E test - Client testing (assume) feature:', function () {
     assert.isTrue(await switcher.isItOn());
 
     Client.forget('UNKNOWN');
-    await assertReject(assert, switcher.isItOn(), 'Something went wrong: {"error":"Unable to load a key UNKNOWN"}');
+    assert.throws(() => switcher.isItOn(), Error, 'Something went wrong: {"error":"Unable to load a key UNKNOWN"}');
   });
 
   it('should return true using Client.assume only when Strategy input values match', async function () {

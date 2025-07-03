@@ -70,11 +70,11 @@ describe('E2E test - Switcher local - Watch Snapshot (watchSnapshot):', function
 
     initContext('watch1').then(async () => {
       const switcher = Client.getSwitcher();
-      const result1 = await switcher.isItOn('FF2FOR2030');
+      const result1 = switcher.isItOn('FF2FOR2030');
       assert.isTrue(result1);
 
       updateSwitcher('watch1', false);
-      const result2 = await switcher.isItOn('FF2FOR2030');
+      const result2 = switcher.isItOn('FF2FOR2030');
       assert.isTrue(result2);
       done();
     });
@@ -87,14 +87,14 @@ describe('E2E test - Switcher local - Watch Snapshot (watchSnapshot):', function
       const switcher = Client.getSwitcher();
       Client.watchSnapshot({
         success: async () => {
-          const result = await switcher.isItOn('FF2FOR2030');
+          const result = switcher.isItOn('FF2FOR2030');
           assert.isFalse(result);
           done();
         }
       });
 
       setTimeout(async () => {
-        const result = await switcher.isItOn('FF2FOR2030');
+        const result = switcher.isItOn('FF2FOR2030');
         assert.isTrue(result);
         updateSwitcher('watch2', false);
       }, 1000);
@@ -114,14 +114,11 @@ describe('E2E test - Switcher local - Watch Snapshot (watchSnapshot):', function
       });
 
       setTimeout(() => {
-        switcher.isItOn('FF2FOR2030').then(handleValue);
+        const result = switcher.isItOn('FF2FOR2030');
+        assert.isTrue(result);
+        invalidateJSON('watch3');
       }, 1000);
     });
-
-    function handleValue(result) {
-      assert.isTrue(result);
-      invalidateJSON('watch3');
-    }
   });
 
   it('should NOT allow to watch snapshot - Switcher test is enabled', function (done) {
@@ -165,7 +162,7 @@ describe('E2E test - Switcher local - Watch Snapshot (context):', function () {
     await initContext('watch4');
 
     const switcher = Client.getSwitcher();
-    assert.isTrue(await switcher.isItOn('FF2FOR2030'));
+    assert.isTrue(switcher.isItOn('FF2FOR2030'));
     updateSwitcher('watch4', false);
 
     assert.isFalse(await getSwitcherResulUntil(switcher, 'FF2FOR2030', false));

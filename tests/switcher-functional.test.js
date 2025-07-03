@@ -180,8 +180,7 @@ describe('Integrated test - Switcher:', function () {
       // given API responses
       // first API call
       given(fetchStub, 0, { json: () => generateAuth('[auth_token]', 5), status: 200 });
-      given(fetchStub, 1, { json: () => generateResult(true), status: 200 }); // sync call
-      given(fetchStub, 2, { json: () => generateResult(true), status: 200 }); // async call
+      given(fetchStub, 1, { json: () => generateResult(true), status: 200 }); // before token expires
 
       // test
       let asyncErrorMessage = null;
@@ -199,7 +198,7 @@ describe('Integrated test - Switcher:', function () {
       assert.isNull(asyncErrorMessage);
 
       // given
-      given(fetchStub, 3, { status: 500 });
+      given(fetchStub, 2, { status: 500 });
 
       // test
       assert.isTrue(await switcher.isItOn('FLAG_1')); // async
@@ -610,8 +609,8 @@ describe('Integrated test - Switcher:', function () {
       givenError(fetchStub, 0, { errno: 'ECONNREFUSED' });
       assert.isTrue(await switcher.isItOn('FF2FOR2030'));
 
-      await sleep(500);
       // The call below is in silent mode. It is getting the configuration from the local snapshot again
+      await sleep(500);
       assert.isTrue(await switcher.isItOn());
 
       // As the silent mode was configured to retry after 2 seconds, it's still in time, 
@@ -626,6 +625,9 @@ describe('Integrated test - Switcher:', function () {
 
       // Auth is async when silent mode is enabled to prevent blocking the execution while the API is not available
       assert.isTrue(await switcher.isItOn());
+
+      // Now the remote call was invoked, so it should return false
+      await sleep(500);
       assert.isFalse(await switcher.isItOn());
       assert.equal(spyRemote.callCount, 1);
     });
