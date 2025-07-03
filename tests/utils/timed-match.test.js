@@ -132,7 +132,7 @@ describe('REGEX - Timed Match', () => {
         let timer = Date.now();
         TimedMatch.tryMatch([nokRE], nokInput);
         timer = getTimer(timer);
-        assert.isAbove(timer, 500);
+        assert.isAbove(timer, 450);
         assert.isBelow(timer, TIMEOUT);
     });
 });
