@@ -14,9 +14,14 @@ const getTimer = (timer) => (timer - Date.now()) * -1;
 
 describe('REGEX - Timed Match', () => {
     beforeEach(() => {
+        TimedMatch.initializeWorker();
         TimedMatch.clearBlackList();
         TimedMatch.setMaxBlackListed(50);
         TimedMatch.setMaxTimeLimit(1000);
+    });
+
+    afterEach(() => {
+        TimedMatch.terminateWorker();
     });
 
     it('should return true', function () {

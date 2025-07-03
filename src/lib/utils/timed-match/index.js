@@ -9,7 +9,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 /**
- * This class will run a match operation using a child process.
+ * This class will run a match operation using a Worker Thread.
  *
  * Workers should be killed given a specified (3000 ms default) time limit.
  *
@@ -26,7 +26,7 @@ export default class TimedMatch {
      * Initialize Worker process for working with Regex process operators
      */
     static initializeWorker() {
-        this.#worker = this.#createChildProcess();
+        this.#worker = this.#createWorker();
         this.#workerActive = true;
     }
 
@@ -112,7 +112,7 @@ export default class TimedMatch {
      */
     static #resetWorker(values, input) {
         this.#worker.terminate();
-        this.#worker = this.#createChildProcess();
+        this.#worker = this.#createWorker();
 
         if (this.#blacklisted.length == this.#maxBlackListed) {
             this.#blacklisted.splice(0, 1);
@@ -124,7 +124,7 @@ export default class TimedMatch {
         });
     }
     
-    static #createChildProcess() {
+    static #createWorker() {
         const match_proc = new Worker(`${__dirname}/match-proc.js`);
         
         match_proc.unref();
