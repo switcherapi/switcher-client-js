@@ -173,7 +173,7 @@ describe('E2E test - Switcher local - Snapshot:', function () {
     assert.equal(error.message, 'Something went wrong: Snapshot is not loaded. Use Client.loadSnapshot()');
   });
 
-  it('should update snapshot', async function () {
+  it('should update snapshot when loading from remote', async function () {
     // given
     fetchStub = stub(FetchFacade, 'fetch');
 
@@ -186,8 +186,9 @@ describe('E2E test - Switcher local - Snapshot:', function () {
       snapshotLocation: 'generated-snapshots/'
     });
 
-    await Client.loadSnapshot();
+    const snapshotVersion = await Client.loadSnapshot();
     assert.isNotNull(Client.snapshot);
+    assert.isAbove(snapshotVersion, 0);
 
     // restore state to avoid process leakage
     Client.unloadSnapshot();
