@@ -1,17 +1,17 @@
-import { writeFileSync, watchFile, unwatchFile } from 'node:fs';
+import { writeFileSync } from 'node:fs';
 
 import * as remote from './lib/remote.js';
 import * as util from './lib/utils/index.js';
 import Bypasser from './lib/bypasser/index.js';
-import { 
-  DEFAULT_ENVIRONMENT, 
-  DEFAULT_LOCAL, 
-  DEFAULT_LOGGER, 
-  DEFAULT_REGEX_MAX_BLACKLISTED, 
-  DEFAULT_REGEX_MAX_TIME_LIMIT, 
+import {
+  DEFAULT_ENVIRONMENT,
+  DEFAULT_LOCAL,
+  DEFAULT_LOGGER,
+  DEFAULT_REGEX_MAX_BLACKLISTED,
+  DEFAULT_REGEX_MAX_TIME_LIMIT,
   DEFAULT_STATIC,
   DEFAULT_TEST_MODE,
-  SWITCHER_OPTIONS 
+  SWITCHER_OPTIONS
 } from './lib/constants.js';
 import TimedMatch from './lib/utils/timed-match/index.js';
 import ExecutionLogger from './lib/utils/executionLogger.js';
@@ -22,15 +22,16 @@ import { Switcher } from './switcher.js';
 import { Auth } from './lib/remoteAuth.js';
 import { GlobalOptions } from './lib/globals/globalOptions.js';
 import { GlobalSnapshot } from './lib/globals/globalSnapshot.js';
+import { SnapshotWatcher } from './lib/snapshotWatcher.js';
 
 export class Client {
-
+  static #snapshotWatcher = new SnapshotWatcher();
+  static #testEnabled;
   static #context;
 
   static buildContext(context, options) {
-    this.testEnabled = DEFAULT_TEST_MODE;
-
     this.#context = context;
+    this.#testEnabled = DEFAULT_TEST_MODE;
     this.#context.environment = util.get(context.environment, DEFAULT_ENVIRONMENT);
 
     // Default values
@@ -44,16 +45,16 @@ export class Client {
     });
 
     if (options) {
-        Client.#buildOptions(options);
+      Client.#buildOptions(options);
     }
-    
+
     // Initialize Auth
     Auth.init(this.#context);
   }
 
   static #buildOptions(options) {
     remote.removeAgent();
-    
+
     const optionsHandler = {
       [SWITCHER_OPTIONS.CERT_PATH]: (val) => val && remote.setCerts(val),
       [SWITCHER_OPTIONS.SILENT_MODE]: (val) => val && this.#initSilentMode(val),
@@ -85,7 +86,7 @@ export class Client {
     GlobalOptions.updateOptions({ silentMode });
     Client.loadSnapshot();
   }
-  
+
   static #initTimedMatch(options) {
     if (SWITCHER_OPTIONS.REGEX_MAX_BLACK_LIST in options) {
       TimedMatch.setMaxBlackListed(util.get(options.regexMaxBlackList, DEFAULT_REGEX_MAX_BLACKLISTED));
@@ -114,12 +115,12 @@ export class Client {
     if (Auth.isTokenExpired()) {
       await Auth.auth();
     }
-    
+
     const snapshot = await validateSnapshot(
-        Client.#context,
-        GlobalSnapshot.snapshot.data.domain.version
+      Client.#context,
+      GlobalSnapshot.snapshot.data.domain.version
     );
-    
+
     if (snapshot) {
       if (GlobalOptions.snapshotLocation?.length) {
         writeFileSync(`${GlobalOptions.snapshotLocation}/${Client.#context.environment}.json`, snapshot);
@@ -136,7 +137,7 @@ export class Client {
     const { fetchRemote = false, watchSnapshot = false } = options;
 
     GlobalSnapshot.init(loadDomain(
-      util.get(GlobalOptions.snapshotLocation, ''), 
+      util.get(GlobalOptions.snapshotLocation, ''),
       util.get(Client.#context.environment, DEFAULT_ENVIRONMENT)
     ));
 
@@ -145,7 +146,7 @@ export class Client {
     }
 
     if (watchSnapshot) {
-        Client.watchSnapshot();
+      Client.watchSnapshot();
     }
 
     return GlobalSnapshot.snapshot?.data.domain.version || 0;
@@ -163,40 +164,29 @@ export class Client {
   }
 
   static watchSnapshot(callback = {}) {
-    const { success = () => {}, reject = () => {} } = callback;
+    const { reject = () => { } } = callback;
 
-    if (Client.testEnabled || !GlobalOptions.snapshotLocation?.length) {
+    if (Client.#testEnabled || !GlobalOptions.snapshotLocation?.length) {
       return reject(new Error('Watch Snapshot cannot be used in test mode or without a snapshot location'));
     }
 
-    const snapshotFile = `${GlobalOptions.snapshotLocation}/${Client.#context.environment}.json`;
-    let lastUpdate;
-    watchFile(snapshotFile, (listener) => {
-      try {
-        if (!lastUpdate || listener.ctime > lastUpdate) {
-          GlobalSnapshot.init(loadDomain(GlobalOptions.snapshotLocation, Client.#context.environment));
-          success();
-        }
-      } catch (e) {
-        reject(e);
-      } finally {
-        lastUpdate = listener.ctime;
-      }
-    });
+    Client.#snapshotWatcher.watchSnapshot(
+      util.get(Client.#context.environment, DEFAULT_ENVIRONMENT),
+      callback
+    );
   }
 
   static unloadSnapshot() {
-    if (Client.testEnabled) {
+    if (Client.#testEnabled) {
       return;
     }
 
-    const snapshotFile = `${GlobalOptions.snapshotLocation}${Client.#context.environment}.json`;
     GlobalSnapshot.clear();
-    unwatchFile(snapshotFile);
+    Client.#snapshotWatcher.stopWatching();
   }
 
   static scheduleSnapshotAutoUpdate(interval, callback = {}) {
-    const { success = () => {}, reject = () => {} } = callback;
+    const { success = () => { }, reject = () => { } } = callback;
 
     if (interval) {
       GlobalOptions.updateOptions({ snapshotAutoUpdateInterval: interval });
@@ -204,9 +194,9 @@ export class Client {
 
     if (GlobalOptions.snapshotAutoUpdateInterval && GlobalOptions.snapshotAutoUpdateInterval > 0) {
       SnapshotAutoUpdater.schedule(
-        GlobalOptions.snapshotAutoUpdateInterval, 
-        this.checkSnapshot, 
-        success, 
+        GlobalOptions.snapshotAutoUpdateInterval,
+        this.checkSnapshot,
+        success,
         reject
       );
     }
@@ -262,7 +252,7 @@ export class Client {
   }
 
   static testMode(testEnabled = true) {
-    Client.testEnabled = testEnabled;
+    Client.#testEnabled = testEnabled;
   }
 
   static get snapshotVersion() {
