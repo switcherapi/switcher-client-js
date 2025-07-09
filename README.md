@@ -60,7 +60,7 @@ You can also activate features such as local and silent mode:
 
 ```js
 const local = true;
-const static = true;
+const freeze = true;
 const logger = true;
 const snapshotLocation = './snapshot/';
 const snapshotAutoUpdateInterval = 3;
@@ -70,7 +70,7 @@ const restrictRelay = true;
 const certPath = './certs/ca.pem';
 
 Client.buildContext({ url, apiKey, domain, component, environment }, {
-    local, static, logger, snapshotLocation, snapshotAutoUpdateInterval, 
+    local, freeze, logger, snapshotLocation, snapshotAutoUpdateInterval, 
     snapshotWatcher, silentMode, restrictRelay, certPath
 });
 
@@ -78,7 +78,7 @@ const switcher = Client.getSwitcher();
 ```
 
 - **local**: If activated, the client will only fetch the configuration inside your snapshot file. The default value is 'false'
-- **static**: If activated, the client will not perform any API calls and will only use the in-memory snapshot. The default value is 'false'
+- **freeze**: If activated, prevents the execution of background cache update when using throttle. The default value is 'false'
 - **logger**: If activated, it is possible to retrieve the last results from a given Switcher key using Client.getLogger('KEY')
 - **snapshotLocation**: Location of snapshot files
 - **snapshotAutoUpdateInterval**: Enable Snapshot Auto Update given an interval in seconds (default: 0 disabled)

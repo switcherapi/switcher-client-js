@@ -340,12 +340,12 @@ describe('E2E test - Client local from cache:', function () {
     assert.deepEqual(result.metadata || {}, {});
   });
 
-  it('should get response from cache when static mode is enabled', async function () {
+  it('should get response from cache when freeze mode is enabled', async function () {
     // given
     Client.buildContext(contextSettings, {
       snapshotLocation: options.snapshotLocation, 
       local: true,
-      static: true
+      freeze: true
     });
     
     await Client.loadSnapshot();
