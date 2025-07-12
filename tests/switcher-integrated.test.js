@@ -7,6 +7,10 @@ describe('Switcher integrated test', () => {
     it('should hit remote API and return Switcher response', async function () {
         this.timeout(3000);
 
+        if (!process.env.SWITCHER_API_KEY) {
+            this.skip();
+        }
+
         // given context build
         Client.buildContext({
             url: 'https://api.switcherapi.com',
