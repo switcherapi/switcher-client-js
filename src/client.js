@@ -71,11 +71,11 @@ export class Client {
       }
     };
 
-    Object.entries(optionsHandler).forEach(([key, handler]) => {
+    for (const [key, handler] of Object.entries(optionsHandler)) {
       if (key in options) {
         handler(options[key]);
       }
-    });
+    }
 
     this.#initTimedMatch(options);
   }

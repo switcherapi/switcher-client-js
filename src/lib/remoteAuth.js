@@ -17,7 +17,7 @@ export class Auth {
 
   static setRetryOptions(silentMode) {
     this.#retryOptions = {
-      retryTime: parseInt(silentMode.slice(0, -1)),
+      retryTime: Number.parseInt(silentMode.slice(0, -1)),
       retryDurationIn: silentMode.slice(-1),
     };
   }
