@@ -7,7 +7,7 @@ export function payloadReader(payload) {
     return Object.keys(payloadRead)
         .flatMap(field => [field, ...payloadReader(payload[field])
         .map(nestedField => `${field}.${nestedField}`)])
-        .filter(field => isNaN(Number(field)))
+        .filter(field => Number.isNaN(Number(field)))
         .reduce((acc, curr) => {
             if (!acc.includes(curr)) {
                 acc.push(curr);

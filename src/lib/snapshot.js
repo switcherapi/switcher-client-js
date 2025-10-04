@@ -48,7 +48,7 @@ const checkSwitchersLocal = (snapshot, switcherKeys) => {
             found = false;
             const { config } = g;
 
-            if (config.find(c => c.key === switcher)) {
+            if (config.some(c => c.key === switcher)) {
                 found = true;
                 break;
             }
@@ -229,7 +229,7 @@ function processPAYLOAD(operation, input, values) {
     const keys = payloadReader(inputJson);
     switch(operation) {
         case OperationsType.HAS_ONE:
-            return keys.filter(key => values.includes(key)).length > 0;
+            return keys.some(key => values.includes(key));
         case OperationsType.HAS_ALL:
             return values.every(element => keys.includes(element));
     }
