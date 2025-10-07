@@ -14,7 +14,7 @@ const loadDomain = (snapshotLocation, environment) => {
         if (existsSync(snapshotFile)) {
             dataBuffer = readFileSync(snapshotFile);
         } else {
-            dataBuffer = JSON.stringify({ data: { domain: { version: 0 } } }, null, 4);
+            dataBuffer = JSON.stringify({ domain: { version: 0 } }, null, 4);
 
             if (snapshotLocation.length) {
                 mkdirSync(snapshotLocation, { recursive: true });
@@ -40,7 +40,7 @@ const validateSnapshot = async (context, snapshotVersion) => {
 };
 
 const checkSwitchersLocal = (snapshot, switcherKeys) => {
-    const { group } = snapshot.data.domain;
+    const { group } = snapshot.domain;
     let notFound = [], found = false;
     
     for (const switcher of switcherKeys) {

@@ -118,7 +118,7 @@ export class Client {
 
     const snapshot = await validateSnapshot(
       Client.#context,
-      GlobalSnapshot.snapshot.data.domain.version
+      GlobalSnapshot.snapshot.domain.version
     );
 
     if (snapshot) {
@@ -149,7 +149,7 @@ export class Client {
       Client.watchSnapshot();
     }
 
-    return GlobalSnapshot.snapshot?.data.domain.version || 0;
+    return GlobalSnapshot.snapshot?.domain.version || 0;
   }
 
   /**
@@ -160,7 +160,7 @@ export class Client {
    * - GlobalOptions.local is false, meaning it will not use the local snapshot.
    */
   static #isCheckSnapshotAvailable(fetchRemote) {
-    return GlobalSnapshot.snapshot?.data.domain.version == 0 && (fetchRemote || !GlobalOptions.local);
+    return GlobalSnapshot.snapshot?.domain.version == 0 && (fetchRemote || !GlobalOptions.local);
   }
 
   static watchSnapshot(callback = {}) {
@@ -256,7 +256,7 @@ export class Client {
   }
 
   static get snapshotVersion() {
-    return GlobalSnapshot.snapshot?.data.domain.version || 0;
+    return GlobalSnapshot.snapshot?.domain.version || 0;
   }
 }
 

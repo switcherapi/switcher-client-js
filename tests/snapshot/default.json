@@ -1,161 +1,159 @@
 {
-    "data": {
-        "domain": {
-            "name": "Business",
-            "description": "Business description",
-            "activated": true,
-            "group": [
-                {
-                    "name": "Rollout 2020",
-                    "description": "Changes that will be applied during the rollout",
-                    "activated": true,
-                    "config": [
-                        {
-                            "key": "FF2FOR2020",
-                            "description": "Feature Flag",
-                            "activated": true,
-                            "strategies": [
-                                {
-                                    "strategy": "NETWORK_VALIDATION",
-                                    "activated": true,
-                                    "operation": "EXIST",
-                                    "values": [
-                                        "10.0.0.3/24"
-                                    ]
-                                },
-                                {
-                                    "strategy": "VALUE_VALIDATION",
-                                    "activated": true,
-                                    "operation": "NOT_EXIST",
-                                    "values": [
-                                        "USA",
-                                        "Canada",
-                                        "Australia",
-                                        "Africa"
-                                    ]
-                                }
-                            ],
-                            "components": []
-                        },
-                        {
-                            "key": "FF2FOR2021",
-                            "description": "Strategy disabled",
-                            "activated": true,
-                            "strategies": [
-                                {
-                                    "strategy": "NETWORK_VALIDATION",
-                                    "activated": false,
-                                    "operation": "EXIST",
-                                    "values": [
-                                        "10.0.0.3/24"
-                                    ]
-                                }
-                            ],
-                            "components": []
-                        },
-                        {
-                            "key": "FF2FOR2022",
-                            "description": "No strategies",
-                            "activated": true,
-                            "components": []
-                        },
-                        {
-                            "key": "FF2FOR2023",
-                            "description": "Feature Flag - Payload Strategy",
-                            "activated": true,
-                            "strategies": [
-                                {
-                                    "strategy": "PAYLOAD_VALIDATION",
-                                    "activated": true,
-                                    "operation": "HAS_ALL",
-                                    "values": [
-                                        "id", "user", "user.login", "user.role"
-                                    ]
-                                }
-                            ],
-                            "components": []
-                        },
-                        {
-                            "key": "FF2FOR2024",
-                            "description": "reDOS safe test",
-                            "activated": true,
-                            "strategies": [
-                                {
-                                    "strategy": "REGEX_VALIDATION",
-                                    "activated": true,
-                                    "operation": "EXIST",
-                                    "values": [
-                                        "^(([a-z])+.)+[A-Z]([a-z])+$"
-                                    ]
-                                }
-                            ],
-                            "components": []
-                        }
-                    ]
-                },
-                {
-                    "name": "Rollout 2030",
-                    "description": "Changes that will be applied during the rollout",
-                    "activated": true,
-                    "config": [
-                        {
-                            "key": "FF2FOR2030",
-                            "description": "Feature Flag",
-                            "activated": true,
-                            "strategies": [],
-                            "components": []
-                        },
-                        {
-                            "key": "FF2FOR2031",
-                            "description": "Feature Flag disabled",
-                            "activated": false,
-                            "strategies": [],
-                            "components": []
-                        }
-                    ]
-                },
-                {
-                    "name": "Rollout 2040",
-                    "description": "Project is disabled",
-                    "activated": false,
-                    "config": [
-                        {
-                            "key": "FF2FOR2040",
-                            "description": "Feature Flag",
-                            "activated": true,
-                            "strategies": [],
-                            "components": []
-                        }
-                    ]
-                },
-                {
-                    "name": "Relay test",
-                    "description": "Relay group",
-                    "activated": true,
-                    "config": [
-                        {
-                            "key": "USECASE103",
-                            "description": "Relay enabled",
-                            "activated": true,
-                            "relay": {
-                                "type": "VALIDATOR",
-                                "activated": true
+    "domain": {
+        "name": "Business",
+        "description": "Business description",
+        "activated": true,
+        "group": [
+            {
+                "name": "Rollout 2020",
+                "description": "Changes that will be applied during the rollout",
+                "activated": true,
+                "config": [
+                    {
+                        "key": "FF2FOR2020",
+                        "description": "Feature Flag",
+                        "activated": true,
+                        "strategies": [
+                            {
+                                "strategy": "NETWORK_VALIDATION",
+                                "activated": true,
+                                "operation": "EXIST",
+                                "values": [
+                                    "10.0.0.3/24"
+                                ]
                             },
-                            "components": []
+                            {
+                                "strategy": "VALUE_VALIDATION",
+                                "activated": true,
+                                "operation": "NOT_EXIST",
+                                "values": [
+                                    "USA",
+                                    "Canada",
+                                    "Australia",
+                                    "Africa"
+                                ]
+                            }
+                        ],
+                        "components": []
+                    },
+                    {
+                        "key": "FF2FOR2021",
+                        "description": "Strategy disabled",
+                        "activated": true,
+                        "strategies": [
+                            {
+                                "strategy": "NETWORK_VALIDATION",
+                                "activated": false,
+                                "operation": "EXIST",
+                                "values": [
+                                    "10.0.0.3/24"
+                                ]
+                            }
+                        ],
+                        "components": []
+                    },
+                    {
+                        "key": "FF2FOR2022",
+                        "description": "No strategies",
+                        "activated": true,
+                        "components": []
+                    },
+                    {
+                        "key": "FF2FOR2023",
+                        "description": "Feature Flag - Payload Strategy",
+                        "activated": true,
+                        "strategies": [
+                            {
+                                "strategy": "PAYLOAD_VALIDATION",
+                                "activated": true,
+                                "operation": "HAS_ALL",
+                                "values": [
+                                    "id", "user", "user.login", "user.role"
+                                ]
+                            }
+                        ],
+                        "components": []
+                    },
+                    {
+                        "key": "FF2FOR2024",
+                        "description": "reDOS safe test",
+                        "activated": true,
+                        "strategies": [
+                            {
+                                "strategy": "REGEX_VALIDATION",
+                                "activated": true,
+                                "operation": "EXIST",
+                                "values": [
+                                    "^(([a-z])+.)+[A-Z]([a-z])+$"
+                                ]
+                            }
+                        ],
+                        "components": []
+                    }
+                ]
+            },
+            {
+                "name": "Rollout 2030",
+                "description": "Changes that will be applied during the rollout",
+                "activated": true,
+                "config": [
+                    {
+                        "key": "FF2FOR2030",
+                        "description": "Feature Flag",
+                        "activated": true,
+                        "strategies": [],
+                        "components": []
+                    },
+                    {
+                        "key": "FF2FOR2031",
+                        "description": "Feature Flag disabled",
+                        "activated": false,
+                        "strategies": [],
+                        "components": []
+                    }
+                ]
+            },
+            {
+                "name": "Rollout 2040",
+                "description": "Project is disabled",
+                "activated": false,
+                "config": [
+                    {
+                        "key": "FF2FOR2040",
+                        "description": "Feature Flag",
+                        "activated": true,
+                        "strategies": [],
+                        "components": []
+                    }
+                ]
+            },
+            {
+                "name": "Relay test",
+                "description": "Relay group",
+                "activated": true,
+                "config": [
+                    {
+                        "key": "USECASE103",
+                        "description": "Relay enabled",
+                        "activated": true,
+                        "relay": {
+                            "type": "VALIDATOR",
+                            "activated": true
                         },
-                        {
-                            "key": "USECASE104",
-                            "description": "Relay disabled",
-                            "relay": {
-                                "type": "VALIDATOR",
-                                "activated": false
-                            },
-                            "activated": true,
-                            "components": []
-                        }
-                    ]
-                }
-            ]
-        }
+                        "components": []
+                    },
+                    {
+                        "key": "USECASE104",
+                        "description": "Relay disabled",
+                        "relay": {
+                            "type": "VALIDATOR",
+                            "activated": false
+                        },
+                        "activated": true,
+                        "components": []
+                    }
+                ]
+            }
+        ]
     }
 }

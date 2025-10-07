@@ -1,26 +1,24 @@
 {
-    "data": {
-        "domain": {
-            "name": "Business",
-            "description": "Business description",
-            "version": 1588557288037,
-            "activated": true,
-            "group": [
-                {
-                    "name": "Rollout 2030",
-                    "description": "Changes that will be applied during the rollout",
-                    "activated": true,
-                    "config": [
-                        {
-                            "key": "FF2FOR2030",
-                            "description": "Feature Flag",
-                            "activated": false,
-                            "strategies": [],
-                            "components": []
-                        }
-                    ]
-                }
-            ]
-        }
+    "domain": {
+        "name": "Business",
+        "description": "Business description",
+        "version": 1588557288037,
+        "activated": true,
+        "group": [
+            {
+                "name": "Rollout 2030",
+                "description": "Changes that will be applied during the rollout",
+                "activated": true,
+                "config": [
+                    {
+                        "key": "FF2FOR2030",
+                        "description": "Feature Flag",
+                        "activated": false,
+                        "strategies": [],
+                        "components": []
+                    }
+                ]
+            }
+        ]
     }
 }

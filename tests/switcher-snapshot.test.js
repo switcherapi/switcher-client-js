@@ -20,7 +20,7 @@ describe('E2E test - Switcher local - Snapshot:', function () {
   const url = 'http://localhost:3000';
 
   const dataBuffer = readFileSync('./tests/snapshot/dev.json');
-  const dataJSON = dataBuffer.toString();
+  const dataJSON = `{ "data": ${dataBuffer.toString()} }`;
 
   let fetchStub;
 
@@ -277,7 +277,7 @@ describe('E2E test - Snapshot AutoUpdater:', function () {
   const dataJSON = dataBuffer.toString();
 
   const dataBufferV2 = readFileSync('./tests/snapshot/dev_v2.json');
-  const dataJSONV2 = dataBufferV2.toString();
+  const dataJSONV2 = `{ "data": ${dataBufferV2.toString()} }`;
 
   let fetchStub;
 
