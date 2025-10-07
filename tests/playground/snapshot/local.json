@@ -1,25 +1,23 @@
 {
-    "data": {
-        "domain": {
-            "name": "Switcher API",
-            "version": 1,
-            "activated": true,
-            "group": [
-                {
-                    "name": "Test Project",
-                    "activated": true,
-                    "config": [
-                        {
-                            "key": "CLIENT_JS_FEATURE",
-                            "activated": true,
-                            "strategies": [],
-                            "components": [
-                                "switcher-client-js"
-                            ]
-                        }
-                    ]
-                }
-            ]
-        }
+    "domain": {
+        "name": "Switcher API",
+        "version": 1,
+        "activated": true,
+        "group": [
+            {
+                "name": "Test Project",
+                "activated": true,
+                "config": [
+                    {
+                        "key": "CLIENT_JS_FEATURE",
+                        "activated": true,
+                        "strategies": [],
+                        "components": [
+                            "switcher-client-js"
+                        ]
+                    }
+                ]
+            }
+        ]
     }
 }

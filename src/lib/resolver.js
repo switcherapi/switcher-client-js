@@ -4,18 +4,18 @@ import * as util from '../lib/utils/index.js';
 import { SwitcherResult } from './result.js';
 
 /**
- * Resolves the criteria for a given switcher request against the snapshot data.
+ * Resolves the criteria for a given switcher request against the snapshot domain.
  * 
- * @param {SnapshotData} data - The snapshot data containing domain and group information.
+ * @param {Domain} domain - The domain containing groups and configurations.
  * @param {SwitcherRequest} switcher - The switcher request to be evaluated.
  * @returns {SwitcherResult} - The result of the switcher evaluation.
  */
-function resolveCriteria(data, switcher) {
-    if (!data.domain.activated) {
+function resolveCriteria(domain, switcher) {
+    if (!domain.activated) {
         return SwitcherResult.disabled('Domain disabled');
     }
 
-    const { group } = data.domain;
+    const { group } = domain;
     return checkGroup(group, switcher);
 }
 
@@ -127,7 +127,7 @@ function isStrategyFulfilled(strategyEntry, strategyConfig) {
 /**
  * Checks the criteria for a switcher request against the local snapshot.
  * 
- * @param {Snapshot | undefined} snapshot - The snapshot containing the data to check against.
+ * @param {Snapshot | undefined} snapshot - The snapshot containing the domain to check against.
  * @param {SwitcherRequest} switcher - The switcher request to be evaluated.
  * @returns {SwitcherResult} - The result of the switcher evaluation.
  * @throws {Error} - If the snapshot is not loaded.
@@ -137,6 +137,6 @@ export default function checkCriteriaLocal(snapshot, switcher) {
         throw new Error('Snapshot not loaded. Try to use \'Client.loadSnapshot()\'');
     }
 
-    const { data } = snapshot;
-    return resolveCriteria(data, switcher);
+    const { domain } = snapshot;
+    return resolveCriteria(domain, switcher);
 }

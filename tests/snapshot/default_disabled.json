@@ -1,10 +1,8 @@
 {
-    "data": {
-        "domain": {
-            "name": "Business",
-            "description": "Business description",
-            "activated": false,
-            "group": []
-        }
+    "domain": {
+        "name": "Business",
+        "description": "Business description",
+        "activated": false,
+        "group": []
     }
 }

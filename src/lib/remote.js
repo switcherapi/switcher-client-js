@@ -166,7 +166,7 @@ export async function resolveSnapshot(domain, environment, component) {
         });
         
         if (response.status == 200) {
-            return JSON.stringify(response.json(), null, 4);
+            return JSON.stringify(response.json().data, null, 4);
         }
     
         throw new RemoteError(`[resolveSnapshot] failed with status ${response.status}`);

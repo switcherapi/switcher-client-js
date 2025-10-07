@@ -187,7 +187,7 @@ const _testSnapshotAutoUpdate = async () => {
         const time = Date.now();
         await switcher.checkValue('user_1').isItOn(SWITCHER_KEY);
         console.clear();
-        console.log(Client.getLogger(SWITCHER_KEY), `executed in ${Date.now() - time}ms`);
+        console.log(JSON.stringify(Client.getLogger(SWITCHER_KEY)), `executed in ${Date.now() - time}ms`);
     }, 2000);
 };
 

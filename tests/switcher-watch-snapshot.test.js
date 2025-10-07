@@ -10,7 +10,7 @@ let devJSON;
 
 const updateSwitcher = (environment, status) => {
   const copyOfDevJSON = JSON.parse(JSON.stringify(devJSON));
-  copyOfDevJSON.data.domain.group[0].config[0].activated = status;
+  copyOfDevJSON.domain.group[0].config[0].activated = status;
   writeFileSync(`generated-watch-snapshots/${environment}.json`, JSON.stringify(copyOfDevJSON, null, 4));
 };
 
@@ -25,7 +25,7 @@ const beforeAll = () => {
 
   const dataBuffer = readFileSync('./tests/snapshot/dev.json');
   devJSON = JSON.parse(dataBuffer.toString());
-  devJSON.data.domain.group[0].config[0].activated = true;
+  devJSON.domain.group[0].config[0].activated = true;
 };
 
 const afterAll = () => {
