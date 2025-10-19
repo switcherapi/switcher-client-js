@@ -43,10 +43,11 @@ export async function assertUntilResolve(assert, actual, expected) {
 
   await Promise.race([promise, sleep(2000)]);
 
-  if (!actual()) {
-    console.warn('Async test could not resolve in time');
+  const resolved = actual();
+  if (resolved) {
+    assert.equal(resolved, expected);
   } else {
-    assert.equal(actual(), expected);
+    console.warn('Async test could not resolve in time');
   }
 }
 

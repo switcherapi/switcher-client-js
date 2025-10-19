@@ -1,6 +1,6 @@
 import { assert } from 'chai';
 import { stub, spy } from 'sinon';
-import { unwatchFile } from 'fs';
+import { unwatchFile } from 'node:fs';
 
 import FetchFacade from '../src/lib/utils/fetchFacade.js';
 import ExecutionLogger from '../src/lib/utils/executionLogger.js';
@@ -383,7 +383,7 @@ describe('Integrated test - Switcher:', function () {
         .checkNetwork('192.168.0.1')
         .checkDate('2019-12-01T08:30')
         .checkTime('08:00')
-        .checkRegex('\\bUSER_[0-9]{1,2}\\b')
+        .checkRegex(String.raw`\bUSER_[0-9]{1,2}\b`)
         .checkPayload(JSON.stringify({ name: 'User 1' }))
         .prepare('SWITCHER_MULTIPLE_INPUT');
       
@@ -393,7 +393,7 @@ describe('Integrated test - Switcher:', function () {
         [ 'NETWORK_VALIDATION', '192.168.0.1' ],  
         [ 'DATE_VALIDATION', '2019-12-01T08:30' ],
         [ 'TIME_VALIDATION', '08:00' ],
-        [ 'REGEX_VALIDATION', '\\bUSER_[0-9]{1,2}\\b' ],
+        [ 'REGEX_VALIDATION', String.raw`\bUSER_[0-9]{1,2}\b` ],
         [ 'PAYLOAD_VALIDATION', '{"name":"User 1"}' ]
       ]);
     });
