@@ -1,4 +1,4 @@
-import { rmdir } from 'fs';
+import { rmdir } from 'node:fs';
 import { assert } from 'chai';
 import { spy } from 'sinon';
 

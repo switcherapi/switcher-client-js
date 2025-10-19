@@ -22,69 +22,69 @@ describe('Processing strategy: DATE', () => {
         activated: true,
     });
 
-    it('should agree when input is LOWER', async () => {
+    it('should agree when input is LOWER', () => {
         const strategyConfig = givenStrategyConfig(OperationsType.LOWER, mock_values1);
-        const result = await processOperation(strategyConfig, '2019-11-26');
+        const result = processOperation(strategyConfig, '2019-11-26');
         assert.isTrue(result);
     });
 
-    it('should agree when input is LOWER or SAME', async () => {
+    it('should agree when input is LOWER or SAME', () => {
         const strategyConfig = givenStrategyConfig(OperationsType.LOWER, mock_values1);
-        const result = await processOperation(strategyConfig, '2019-12-01');
+        const result = processOperation(strategyConfig, '2019-12-01');
         assert.isTrue(result);
     });
 
-    it('should NOT agree when input is NOT LOWER', async () => {
+    it('should NOT agree when input is NOT LOWER', () => {
         const strategyConfig = givenStrategyConfig(OperationsType.LOWER, mock_values1);
-        const result = await processOperation(strategyConfig, '2019-12-02');
+        const result = processOperation(strategyConfig, '2019-12-02');
         assert.isFalse(result);
     });
 
-    it('should agree when input is GREATER', async () => {
+    it('should agree when input is GREATER', () => {
         const strategyConfig = givenStrategyConfig(OperationsType.GREATER, mock_values1);
-        const result = await processOperation(strategyConfig, '2019-12-02');
+        const result = processOperation(strategyConfig, '2019-12-02');
         assert.isTrue(result);
     });
 
-    it('should agree when input is GREATER or SAME', async () => {
+    it('should agree when input is GREATER or SAME', () => {
         const strategyConfig = givenStrategyConfig(OperationsType.GREATER, mock_values1);
-        const result = await processOperation(strategyConfig, '2019-12-01');
+        const result = processOperation(strategyConfig, '2019-12-01');
         assert.isTrue(result);
     });
 
-    it('should NOT agree when input is NOT GREATER', async () => {
+    it('should NOT agree when input is NOT GREATER', () => {
         const strategyConfig = givenStrategyConfig(OperationsType.GREATER, mock_values1);
-        const result = await processOperation(strategyConfig, '2019-11-10');
+        const result = processOperation(strategyConfig, '2019-11-10');
         assert.isFalse(result);
     });
 
-    it('should agree when input is in BETWEEN', async () => {
+    it('should agree when input is in BETWEEN', () => {
         const strategyConfig = givenStrategyConfig(OperationsType.BETWEEN, mock_values2);
-        const result = await processOperation(strategyConfig, '2019-12-03');
+        const result = processOperation(strategyConfig, '2019-12-03');
         assert.isTrue(result);
     });
 
-    it('should NOT agree when input is NOT in BETWEEN', async () => {
+    it('should NOT agree when input is NOT in BETWEEN', () => {
         const strategyConfig = givenStrategyConfig(OperationsType.BETWEEN, mock_values2);
-        const result = await processOperation(strategyConfig, '2019-12-12');
+        const result = processOperation(strategyConfig, '2019-12-12');
         assert.isFalse(result);
     });
 
-    it('should agree when input is LOWER including time', async () => {
+    it('should agree when input is LOWER including time', () => {
         const strategyConfig = givenStrategyConfig(OperationsType.LOWER, mock_values3);
-        const result = await processOperation(strategyConfig, '2019-12-01T07:00');
+        const result = processOperation(strategyConfig, '2019-12-01T07:00');
         assert.isTrue(result);
     });
 
-    it('should NOT agree when input is NOT LOWER including time', async () => {
+    it('should NOT agree when input is NOT LOWER including time', () => {
         const strategyConfig = givenStrategyConfig(OperationsType.LOWER, mock_values1);
-        const result = await processOperation(strategyConfig, '2019-12-01T07:00');
+        const result = processOperation(strategyConfig, '2019-12-01T07:00');
         assert.isFalse(result);
     });
 
-    it('should agree when input is GREATER including time', async () => {
+    it('should agree when input is GREATER including time', () => {
         const strategyConfig = givenStrategyConfig(OperationsType.GREATER, mock_values3);
-        const result = await processOperation(strategyConfig, '2019-12-01T08:40');
+        const result = processOperation(strategyConfig, '2019-12-01T08:40');
         assert.isTrue(result);
     });
 

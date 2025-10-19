@@ -1,6 +1,6 @@
 import { assert } from 'chai';
 import { stub } from 'sinon';
-import { readFileSync, unlinkSync, existsSync } from 'fs';
+import { readFileSync, unlinkSync, existsSync } from 'node:fs';
 
 import { Client } from '../switcher-client.js';
 import FetchFacade from '../src/lib/utils/fetchFacade.js';

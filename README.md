@@ -21,233 +21,406 @@ A JavaScript SDK for Switcher API
 
 ![Switcher API: JavaScript Client: Cloud-based Feature Flag API](https://github.com/switcherapi/switcherapi-assets/blob/master/logo/switcherapi_js_client.png)
 
-# About  
-JavaScript SDK for working with Switcher-API.
-https://github.com/switcherapi/switcher-api
+## Table of Contents
 
-- Flexible and robust functions that will keep your code clean and maintainable.
-- Able to work locally using a snapshot file downloaded from your remote Switcher-API Domain.
-- Silent mode is a hybrid configuration that automatically enables a contingent sub-process in case of any connectivity issue.
-- Built-in stub implementation for clear and easy implementation of automated testing.
-- Easy to setup. Switcher Context is responsible to manage all the complexity between your application and API.
+- [🎯 About](#-about)
+- [🚀 Quick Start](#-quick-start)
+- [⚙️ Installation & Setup](#️-installation--setup)
+  - [Installation](#installation)
+  - [Basic Configuration](#basic-configuration)
+  - [Advanced Options](#advanced-options)
+- [💡 Usage Examples](#-usage-examples)
+  - [Basic Usage](#basic-usage)
+  - [Strategy Validation](#strategy-validation)
+  - [Throttling](#throttling)
+  - [Hybrid Mode](#hybrid-mode)
+- [🧪 Testing Features](#-testing-features)
+  - [Built-in Stub Feature](#built-in-stub-feature)
+  - [Test Mode](#test-mode)
+  - [Smoke Testing](#smoke-testing)
+- [📁 Snapshot Management](#-snapshot-management)
+  - [Loading Snapshots](#loading-snapshots)
+  - [Watching for Changes](#watching-for-changes)
+  - [Version Checking](#version-checking)
+  - [Auto-Update Scheduler](#auto-update-scheduler)
 
-# Usage
+---
 
-## Install  
-`npm install switcher-client`
+## 🎯 About
 
-## Module initialization
-The context properties stores all information regarding connectivity.
+**Switcher Client JS** is a feature-rich SDK for integrating [Switcher API](https://github.com/switcherapi/switcher-api) into your JS-based applications (Web, Node.js, Bun, Cloudflare Workers). It provides robust feature flag management with enterprise-grade capabilities.
+
+### ✨ Key Features
+
+- 🚀 **Zero Latency**: Local mode with snapshot files or in-memory for instant feature flag resolution
+- 🔄 **Hybrid Configuration**: Silent mode with automatic fallback handling
+- 🧪 **Testing Ready**: Built-in stub implementation for comprehensive testing
+- ⚡ **Performance Optimized**: Throttling optimizes remote API calls to reduce bottlenecks in critical code paths
+- 🛠️ **Developer Tools**: Runtime snapshot updates without app restart and automatic sync with remote API
+
+---
+
+## 🚀 Quick Start
+
+Get up and running with Switcher Client in 3 simple steps:
+
+```bash
+npm install switcher-client
+```
 
 ```js
 import { Client } from 'switcher-client';
 
-const apiKey = '[API_KEY]';
-const environment = 'default';
-const domain = 'My Domain';
-const component = 'MyApp';
-const url = 'https://api.switcherapi.com';
-```
-
-- **domain**: Domain name.
-- **url**: (optional) Swither-API endpoint.
-- **apiKey**: (optional) Switcher-API key generated to your component.
-- **component**: (optional) Application name.
-- **environment**: (optional) Environment name. Production environment is named as 'default'.
-
-## Options
-You can also activate features such as local and silent mode:
-
-```js
-const local = true;
-const freeze = true;
-const logger = true;
-const snapshotLocation = './snapshot/';
-const snapshotAutoUpdateInterval = 3;
-const snapshotWatcher = true;
-const silentMode = '5m';
-const restrictRelay = true;
-const certPath = './certs/ca.pem';
-
-Client.buildContext({ url, apiKey, domain, component, environment }, {
-    local, freeze, logger, snapshotLocation, snapshotAutoUpdateInterval, 
-    snapshotWatcher, silentMode, restrictRelay, certPath
+// 1. Initialize the client
+Client.buildContext({
+  url: 'https://api.switcherapi.com',
+  apiKey: '[YOUR_API_KEY]',
+  domain: 'My Domain',
+  component: 'MyApp',
+  environment: 'default'
 });
 
+// 2. Get a switcher instance
+const switcher = Client.getSwitcher();
+
+// 3. Check if a feature is enabled
+const isFeatureEnabled = await switcher.isItOn('FEATURE01');
+console.log('Feature enabled:', isFeatureEnabled);
+```
+
+---
+
+## ⚙️ Installation & Setup
+
+### Installation
+
+```bash
+npm install switcher-client
+```
+
+### Basic Configuration
+
+The context properties store all information regarding connectivity:
+
+```js
+import { Client } from 'switcher-client';
+
+// Required configuration
+const config = {
+  apiKey: '[API_KEY]',                // Switcher-API key for your component
+  environment: 'default',             // Environment name ('default' for production)
+  domain: 'My Domain',                // Your domain name
+  component: 'MyApp',                 // Your application name
+  url: 'https://api.switcherapi.com'  // Switcher-API endpoint (optional)
+};
+
+Client.buildContext(config);
 const switcher = Client.getSwitcher();
 ```
 
-- **local**: If activated, the client will only fetch the configuration inside your snapshot file. The default value is 'false'
-- **freeze**: If activated, prevents the execution of background cache update when using throttle. The default value is 'false'
-- **logger**: If activated, it is possible to retrieve the last results from a given Switcher key using Client.getLogger('KEY')
-- **snapshotLocation**: Location of snapshot files
-- **snapshotAutoUpdateInterval**: Enable Snapshot Auto Update given an interval in seconds (default: 0 disabled)
-- **snapshotWatcher**: Enable Snapshot Watcher to monitor changes in the snapshot file (default: false)
-- **silentMode**: Enable contigency given the time for the client to retry - e.g. 5s (s: seconds - m: minutes - h: hours)
-- **restrictRelay**: Enable Relay Restriction - Allow managing Relay restrictions when running in local mode (default: true)
-- **regexSafe**: Enable REGEX Safe mode - Prevent agaist reDOS attack (default: true)
-- **regexMaxBlackList**: Number of entries cached when REGEX Strategy fails to perform (reDOS safe) - default: 50
-- **regexMaxTimeLimit**: Time limit (ms) used by REGEX workers (reDOS safe) - default - 3000ms
-- **certPath**: Path to the certificate file used to establish a secure connection with the API
+#### Configuration Parameters
 
-(*) regexSafe is a feature that prevents your application from being exposed to a reDOS attack. It is recommended to keep this feature enabled.<br>
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `domain` | string | ✅ | Your Switcher domain name |
+| `url` | string | | Switcher API endpoint |
+| `apiKey` | string | | API key for your component |
+| `component` | string | | Your application name |
+| `environment` | string | | Environment name (default: 'default' for production) |
 
-## Executing
-There are a few different ways to call the API.
-Here are some examples:
+### Advanced Options
 
-1. **Basic usage**
-Some of the ways you can check if a feature is enabled or not.
+Configure additional features for enhanced functionality:
+
+```ts
+Client.buildContext({ 
+  url, apiKey, domain, component, environment 
+}, {
+  local: true,                          // Enable local mode
+  freeze: false,                        // Prevent background updates
+  logger: true,                         // Enable request logging
+  snapshotLocation: './snapshot/',      // Snapshot files directory
+  snapshotAutoUpdateInterval: 300,      // Auto-update interval (seconds)
+  snapshotWatcher: true,                // Monitor snapshot changes
+  silentMode: '5m',                     // Fallback timeout
+  restrictRelay: true,                  // Relay restrictions in local mode
+  regexSafe: true,                      // Prevent reDOS attacks
+  certPath: './certs/ca.pem'            // SSL certificate path
+});
+```
+
+#### Options Reference
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `local` | boolean | Use only snapshot files/in-memory (no API calls) |
+| `freeze` | boolean | Disable background cache updates with throttling |
+| `logger` | boolean | Enable logging for debugging (`Client.getLogger('KEY')`) |
+| `snapshotLocation` | string | Directory for snapshot files |
+| `snapshotAutoUpdateInterval` | number | Auto-update interval in seconds (0 = disabled) |
+| `snapshotWatcher` | boolean | Watch for snapshot file changes |
+| `silentMode` | string | Fallback timeout (e.g., '5s', '2m', '1h') |
+| `restrictRelay` | boolean | Enable relay restrictions in local mode |
+| `regexSafe` | boolean | Protection against reDOS attacks |
+| `regexMaxBlackList` | number | Max cached regex failures |
+| `regexMaxTimeLimit` | number | Regex timeout in milliseconds |
+| `certPath` | string | Path to SSL certificate file |
+
+> **Security Note:** `regexSafe` prevents ReDoS attacks. Keep this enabled in production.
+
+---
+
+## 💡 Usage Examples
+
+### Basic Usage
+
+Multiple ways to check if a feature is enabled:
 
 ```js
 const switcher = Client.getSwitcher();
 
-// Local (synchronous) execution
-const isOnBool = switcher.isItOn('FEATURE01'); // true or false
-const isOnBool = switcher.isItOnBool('FEATURE01'); // true or false
-const isOnDetail = switcher.detail().isItOn('FEATURE01'); // { result: true, reason: 'Success', metadata: {} }
-const isOnDetail = switcher.isItOnDetail('FEATURE01'); // { result: true, reason: 'Success', metadata: {} }
+// 🚀 Synchronous (local mode only)
+const isEnabled = switcher.isItOn('FEATURE01');              // Returns: boolean
+const isEnabledBool = switcher.isItOnBool('FEATURE01');      // Returns: boolean
+const detailResult = switcher.detail().isItOn('FEATURE01');  // Returns: { result, reason, metadata }
+const detailDirect = switcher.isItOnDetail('FEATURE01');     // Returns: { result, reason, metadata }
 
-// Remote (asynchronous) execution or hybrid (local/remote) execution
-const isOnBoolAsync = await switcher.isItOn('FEATURE01'); // Promise<boolean>
-const isOnBoolAsync = await switcher.isItOnBool('FEATURE01', true); // Promise<boolean>
-const isOnDetailAsync = await switcher.detail().isItOn('FEATURE01'); // Promise<SwitcherResult>
-const isOnDetailAsync = await switcher.isItOnDetail('FEATURE01', true); // Promise<SwitcherResult>
+// 🌐 Asynchronous (remote/hybrid mode)
+const isEnabledAsync = await switcher.isItOn('FEATURE01');              // Returns: Promise<boolean>
+const isEnabledBoolAsync = await switcher.isItOnBool('FEATURE01', true); // Returns: Promise<boolean>
+const detailResultAsync = await switcher.detail().isItOn('FEATURE01');  // Returns: Promise<SwitcherResult>
+const detailDirectAsync = await switcher.isItOnDetail('FEATURE01', true); // Returns: Promise<SwitcherResult>
 ```
 
-2. **Strategy validation - preparing input**
-Loading information into the switcher can be made by using *prepare*, in case you want to include input from a different place of your code. Otherwise, it is also possible to include everything in the same call.
+### Strategy Validation
+
+#### Method 1: Prepare Input Separately
+
+Load information into the switcher using `prepare()` when input comes from different parts of your code:
 
 ```js
+// Prepare the switcher with input data
 await switcher.checkValue('USER_1').prepare('FEATURE01');
-await switcher.isItOn();
+
+// Execute the check
+const result = await switcher.isItOn();
 ```
 
-3. **Strategy validation - all-in-one execution**
-All-in-one method is fast and include everything you need to execute a complex call to the API.
+#### Method 2: All-in-One Execution
+
+Fast method that includes everything in a single call:
 
 ```js
-await switcher
-    .defaultResult(true)    // Default result to be returned in case of no API response
-    .throttle(1000)         // Throttle the API call to improve performance
-    .checkValue('User 1')
-    .checkNetwork('192.168.0.1')
-    .isItOn('FEATURE01');
+const result = await switcher
+  .defaultResult(true)          // 🛡️ Fallback result if API is unavailable
+  .throttle(1000)               // ⚡ Cache result for 1 second
+  .checkValue('User 1')         // 👤 User-based strategy
+  .checkNetwork('192.168.0.1')  // 🌐 Network-based strategy
+  .isItOn('FEATURE01');
 ```
 
-4. **Throttle**
-Throttling is useful when placing Feature Flags at critical code blocks that require zero-latency.
-API calls will be scheduled to be executed after the throttle time has passed.
+### Throttling
+
+Perfect for critical code blocks requiring zero-latency. API calls are scheduled after the throttle time:
 
 ```js
 const switcher = Client.getSwitcher();
-await switcher
-    .throttle(1000)
-    .isItOn('FEATURE01');
+
+// Cache result for 1 second
+const result = await switcher
+  .throttle(1000)
+  .isItOn('FEATURE01');
 ```
 
-In order to capture issues that may occur during the process, it is possible to log the error by subscribing to the error events.
+#### Error Handling for Throttled Calls
+
+Subscribe to error events to capture issues during throttled execution:
 
 ```js
 Client.subscribeNotifyError((error) => {
-    console.log(error);
+  console.error('Switcher error:', error);
 });
 ```
 
-5. **Hybrid mode**
-Forcing Switchers to resolve remotely can help you define exclusive features that cannot be resolved locally.
-This feature is ideal if you want to run the SDK in local mode but still want to resolve a specific switcher remotely.
+### Hybrid Mode
 
-A particular use case is when a swithcer has a Relay Strategy that requires a remote call to resolve the value.
+Force specific switchers to resolve remotely while running in local mode. Ideal for features requiring remote validation (e.g., Relay Strategies):
 
 ```js
 const switcher = Client.getSwitcher();
-await switcher.remote().isItOn('FEATURE01');
+
+// Force remote resolution for this specific call
+const result = await switcher.remote().isItOn('FEATURE01');
 ```
 
-## Built-in stub feature
-You can also bypass your switcher configuration with 'Client.assume' API. This is perfect for your test code where you want to validate both scenarios when the switcher is true and false.
+---
+
+## 🧪 Testing Features
+
+### Built-in Stub Feature
+
+Bypass switcher configuration for testing scenarios. Perfect for validating both enabled and disabled states:
+
+#### Basic Stubbing
 
 ```js
+// ✅ Force feature to be enabled
 Client.assume('FEATURE01').true();
-switcher.isItOn('FEATURE01'); // true
+const result = switcher.isItOn('FEATURE01'); // Returns: true
 
+// ❌ Force feature to be disabled  
+Client.assume('FEATURE01').false();
+const result = switcher.isItOn('FEATURE01'); // Returns: false
+
+// 🔄 Reset to normal behavior
 Client.forget('FEATURE01');
-switcher.isItOn('FEATURE01'); // Now, it's going to return the result retrieved from the API or the Snaopshot file
-
-Client.assume('FEATURE01').false().withMetadata({ message: 'Feature is disabled' }); // Include metadata to emulate Relay response
-const response = await switcher.detail().isItOn('FEATURE01'); // false
-console.log(response.metadata.message); // Feature is disabled
-
-Client.assume('FEATURE01').true().when(StrategiesType.VALUE, 'USER_1');
-switcher.checkValue('USER_1').isItOn('FEATURE01'); // true when the value is 'USER_1'
-
-Client.assume('FEATURE01').true().when(StrategiesType.NETWORK, ['USER_2', 'USER_3']);
-switcher.checkValue('USER_1').isItOn('FEATURE01'); // false as the value is not in the list
+const result = switcher.isItOn('FEATURE01'); // Returns: actual API/snapshot result
 ```
 
-**Enabling Test Mode**
-You may want to enable this feature while using Switcher Client with automated testing.
-It prevents the Switcher Client from locking snapshot files even after the test execution.
+#### Advanced Stubbing with Metadata
 
-To enable this feature, it is recommended to place the following on your test setup files:
 ```js
+// Add custom metadata to simulate Relay responses
+Client.assume('FEATURE01')
+  .false()
+  .withMetadata({ message: 'Feature is disabled' });
+
+const response = await switcher.detail().isItOn('FEATURE01');
+console.log(response.result);           // false
+console.log(response.metadata.message); // "Feature is disabled"
+```
+
+#### Conditional Stubbing
+
+```js
+import { StrategiesType } from 'switcher-client';
+
+// ✅ True only for specific value
+Client.assume('FEATURE01')
+  .true()
+  .when(StrategiesType.VALUE, 'USER_1');
+
+const resultUser1 = switcher.checkValue('USER_1').isItOn('FEATURE01');  // true
+const resultUser2 = switcher.checkValue('USER_2').isItOn('FEATURE01');  // false
+
+// ✅ True for multiple values
+Client.assume('FEATURE01')
+  .true()
+  .when(StrategiesType.NETWORK, ['192.168.1.1', '192.168.1.2']);
+
+const resultNetwork1 = switcher.checkNetwork('192.168.1.1').isItOn('FEATURE01');  // true
+const resultNetwork2 = switcher.checkNetwork('192.168.1.3').isItOn('FEATURE01');  // false
+```
+
+### Test Mode
+
+Enable test mode to prevent snapshot file locking during automated testing:
+
+```js
+// Add this to your test setup files
 Client.testMode();
 ```
 
-**Smoke Test**
-Validate Switcher Keys on your testing pipelines before deploying a change.
-Switcher Keys may not be configured correctly and can cause your code to have undesired results.
+> **💡 Tip:** This prevents the Switcher Client from locking snapshot files even after test execution completes.
 
-This feature will validate using the context provided to check if everything is up and running.
-In case something is missing, this operation will throw an exception pointing out which Switcher Keys are not configured.
-```js
-Client.checkSwitchers(['FEATURE01', 'FEATURE02'])
+### Smoke Testing
+
+Validate feature flag during startup to catch configuration issues early:
+
+```ts
+try {
+  await Client.checkSwitchers(['FEATURE01', 'FEATURE02', 'CRITICAL_FEATURE']);
+  console.log('✅ All switchers configured correctly');
+} catch (error) {
+  console.error('❌ Configuration issues found:', error.message);
+  process.exit(1);
+}
 ```
 
-## Loading Snapshot from the API
-This step is optional if you want to load a copy of the configuration that can be used to eliminate latency when local mode is activated.<br>
-Activate watchSnapshot optionally passing true in the arguments.<br>
-Auto load Snapshot from API passing true as second argument.
+This feature validates using the current context and throws an exception if any Switcher Keys are not properly configured.
+
+---
+
+## 📁 Snapshot Management
+
+### Loading Snapshots
+
+Load a local copy of your configuration to eliminate latency when local mode is activated:
 
 ```js
-Client.loadSnapshot();
+// Basic snapshot loading
+await Client.loadSnapshot();
+
+// Load snapshot and enable auto-watching
+await Client.loadSnapshot({ watchSnapshot: true });
+
+// Fetch remote snapshot and enable auto-watching
+await Client.loadSnapshot({ watchSnapshot: true, fetchRemote: true });
 ```
 
-## Watch for Snapshot file changes
-Activate and monitor snapshot changes using this feature. Optionally, you can implement any action based on the callback response.
+### Watching for Changes
+
+#### Method 1: Programmatic Watching
+
+Monitor snapshot changes and implement custom actions:
 
 ```js
 Client.watchSnapshot({
-    success: () => console.log('In-memory snapshot updated'),
-    reject: (err) => console.log(err)
+  success: () => console.log('✅ In-memory snapshot updated'),
+  reject: (err) => console.error('❌ Snapshot update failed:', err)
 });
 ```
 
-Alternatively, you can also use the client context configuration to monitor changes in the snapshot file.<br>
+#### Method 2: Configuration-based Watching
+
+Enable snapshot monitoring through client configuration:
 
 ```js
-Client.buildContext({ domain, component, environment }, {
+Client.buildContext(
+  { domain, component, environment },
+  {
     local: true,
     snapshotLocation: './snapshot/',
-    snapshotWatcher: true
-});
+    snapshotWatcher: true  // 👁️ Enable automatic monitoring
+  }
+);
 ```
 
-## Snapshot version check
-For convenience, an implementation of a domain version checker is available if you have external processes that manage snapshot files.
+### Version Checking
+
+Check if your snapshot is up to date with the remote domain:
 
 ```js
-Client.checkSnapshot();
+try {
+  const versionInfo = await Client.checkSnapshot();
+  console.log('Snapshot version info:', versionInfo);
+} catch (error) {
+  console.error('Version check failed:', error);
+}
 ```
 
-## Snapshot Update Scheduler
-You can also schedule a snapshot update using the method below.<br>
-It allows you to run the Client SDK in local mode (zero latency) and still have the snapshot updated automatically.
+> **💡 Use Case:** Perfect for external processes that manage snapshot files independently.
+
+### Auto-Update Scheduler
+
+Run the SDK in local mode (zero latency) while keeping snapshots automatically updated:
 
 ```js
+// Update every 3 seconds (3000 milliseconds)
 Client.scheduleSnapshotAutoUpdate(3000, {
     success: (updated) => console.log('Snapshot updated', updated),
-    reject: (err) => console.log(err)
+    reject: (err: Error) => console.log(err)
 });
+```
+
+#### Alternative: Configuration-based Auto-Update
+
+```js
+Client.buildContext(
+  { domain, component, environment },
+  {
+    local: true,
+    snapshotAutoUpdateInterval: 60  // 🕐 Update every 60 seconds
+  }
+);
 ```

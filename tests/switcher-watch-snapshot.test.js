@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import { writeFileSync, existsSync, mkdirSync, readFileSync, unlinkSync } from 'fs';
+import { writeFileSync, existsSync, mkdirSync, readFileSync, unlinkSync } from 'node:fs';
 
 import { Client } from '../switcher-client.js';
 import { deleteGeneratedSnapshot, getSwitcherResulUntil } from './helper/utils.js';
@@ -9,7 +9,7 @@ const component = 'business-service';
 let devJSON;
 
 const updateSwitcher = (environment, status) => {
-  const copyOfDevJSON = JSON.parse(JSON.stringify(devJSON));
+  const copyOfDevJSON = structuredClone(devJSON);
   copyOfDevJSON.domain.group[0].config[0].activated = status;
   writeFileSync(`generated-watch-snapshots/${environment}.json`, JSON.stringify(copyOfDevJSON, null, 4));
 };
