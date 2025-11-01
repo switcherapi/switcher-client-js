@@ -23,22 +23,22 @@ A JavaScript SDK for Switcher API
 
 ## Table of Contents
 
-- [🎯 About](#-about)
-- [🚀 Quick Start](#-quick-start)
-- [⚙️ Installation & Setup](#️-installation--setup)
+- [About](#-about)
+- [Quick Start](#-quick-start)
+- [Installation & Setup](#️-installation--setup)
   - [Installation](#installation)
   - [Basic Configuration](#basic-configuration)
   - [Advanced Options](#advanced-options)
-- [💡 Usage Examples](#-usage-examples)
+- [Usage Examples](#usage-examples)
   - [Basic Usage](#basic-usage)
   - [Strategy Validation](#strategy-validation)
   - [Throttling](#throttling)
   - [Hybrid Mode](#hybrid-mode)
-- [🧪 Testing Features](#-testing-features)
+- [Testing Features](#testing-features)
   - [Built-in Stub Feature](#built-in-stub-feature)
   - [Test Mode](#test-mode)
   - [Smoke Testing](#smoke-testing)
-- [📁 Snapshot Management](#-snapshot-management)
+- [Snapshot Management](#snapshot-management)
   - [Loading Snapshots](#loading-snapshots)
   - [Watching for Changes](#watching-for-changes)
   - [Version Checking](#version-checking)
@@ -46,11 +46,11 @@ A JavaScript SDK for Switcher API
 
 ---
 
-## 🎯 About
+## About
 
 **Switcher Client JS** is a feature-rich SDK for integrating [Switcher API](https://github.com/switcherapi/switcher-api) into your JS-based applications (Web, Node.js, Bun, Cloudflare Workers). It provides robust feature flag management with enterprise-grade capabilities.
 
-### ✨ Key Features
+### Key Features
 
 - 🚀 **Zero Latency**: Local mode with snapshot files or in-memory for instant feature flag resolution
 - 🔄 **Hybrid Configuration**: Silent mode with automatic fallback handling
@@ -60,7 +60,7 @@ A JavaScript SDK for Switcher API
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 Get up and running with Switcher Client in 3 simple steps:
 
@@ -90,7 +90,7 @@ console.log('Feature enabled:', isFeatureEnabled);
 
 ---
 
-## ⚙️ Installation & Setup
+## Installation & Setup
 
 ### Installation
 
@@ -170,7 +170,7 @@ Client.buildContext({
 
 ---
 
-## 💡 Usage Examples
+## Usage Examples
 
 ### Basic Usage
 
@@ -255,7 +255,7 @@ const result = await switcher.remote().isItOn('FEATURE01');
 
 ---
 
-## 🧪 Testing Features
+## Testing Features
 
 ### Built-in Stub Feature
 
@@ -341,7 +341,7 @@ This feature validates using the current context and throws an exception if any 
 
 ---
 
-## 📁 Snapshot Management
+## Snapshot Management
 
 ### Loading Snapshots
 
