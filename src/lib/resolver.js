@@ -109,7 +109,7 @@ function checkStrategyConfig(strategyConfig, entry) {
     }
 
     const strategyEntry = entry.filter((e) => e.strategy === strategyConfig.strategy);
-    if (isStrategyFulfilled(strategyEntry, strategyConfig)) {
+    if (!isStrategyFulfilled(strategyEntry, strategyConfig)) {
         return SwitcherResult.disabled(`Strategy '${strategyConfig.strategy}' does not agree`);
     }
 
@@ -121,7 +121,7 @@ function hasRelayEnabled(config) {
 }
 
 function isStrategyFulfilled(strategyEntry, strategyConfig) {
-    return strategyEntry.length == 0 || !processOperation(strategyConfig, strategyEntry[0].input);
+    return strategyEntry.length > 0 && processOperation(strategyConfig, strategyEntry[0].input);
 }
 
 /**

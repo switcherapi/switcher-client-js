@@ -13,7 +13,7 @@ jobs:
 
     steps:
       - name: Git checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -28,7 +28,7 @@ jobs:
           SWITCHER_API_KEY: ${{ secrets.SWITCHER_API_KEY }}
 
       - name: SonarCloud Scan
-        uses: sonarsource/sonarqube-scan-action@v6.0.0
+        uses: sonarsource/sonarqube-scan-action@v7.0.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         if: env.SONAR_TOKEN != ''
@@ -44,7 +44,7 @@ jobs:
 
     steps:
       - name: Git checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Build & Test with Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v6
