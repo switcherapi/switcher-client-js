@@ -1,7 +1,7 @@
 ***
 
 <div align="center">
-<b>Switcher Client SDK</b><br>
+<b>Switcher Client JS SDK</b><br>
 A JavaScript SDK for Switcher API
 </div>
 
@@ -81,10 +81,10 @@ Client.buildContext({
 });
 
 // 2. Get a switcher instance
-const switcher = Client.getSwitcher();
+const switcher = Client.getSwitcher('FEATURE01');
 
 // 3. Check if a feature is enabled
-const isFeatureEnabled = await switcher.isItOn('FEATURE01');
+const isFeatureEnabled = await switcher.isItOn();
 console.log('Feature enabled:', isFeatureEnabled);
 ```
 
@@ -177,19 +177,22 @@ Client.buildContext({
 Multiple ways to check if a feature is enabled:
 
 ```js
+// Non-persisted switcher instance
 const switcher = Client.getSwitcher();
+// Persisted switcher instance
+const switcher = Client.getSwitcher('FEATURE01');
 
 // 🚀 Synchronous (local mode only)
-const isEnabled = switcher.isItOn('FEATURE01');              // Returns: boolean
-const isEnabledBool = switcher.isItOnBool('FEATURE01');      // Returns: boolean
-const detailResult = switcher.detail().isItOn('FEATURE01');  // Returns: { result, reason, metadata }
-const detailDirect = switcher.isItOnDetail('FEATURE01');     // Returns: { result, reason, metadata }
+const isEnabled = switcher.isItOn();              // Returns: boolean
+const isEnabledBool = switcher.isItOnBool();      // Returns: boolean
+const detailResult = switcher.detail().isItOn();  // Returns: { result, reason, metadata }
+const detailDirect = switcher.isItOnDetail();     // Returns: { result, reason, metadata }
 
 // 🌐 Asynchronous (remote/hybrid mode)
-const isEnabledAsync = await switcher.isItOn('FEATURE01');              // Returns: Promise<boolean>
-const isEnabledBoolAsync = await switcher.isItOnBool('FEATURE01', true); // Returns: Promise<boolean>
-const detailResultAsync = await switcher.detail().isItOn('FEATURE01');  // Returns: Promise<SwitcherResult>
-const detailDirectAsync = await switcher.isItOnDetail('FEATURE01', true); // Returns: Promise<SwitcherResult>
+const isEnabledAsync = await switcher.isItOn();               // Returns: Promise<boolean>
+const isEnabledBoolAsync = await switcher.isItOnBool(true);   // Returns: Promise<boolean>
+const detailResultAsync = await switcher.detail().isItOn();   // Returns: Promise<SwitcherResult>
+const detailDirectAsync = await switcher.isItOnDetail(true);  // Returns: Promise<SwitcherResult>
 ```
 
 ### Strategy Validation

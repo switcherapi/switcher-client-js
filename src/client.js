@@ -26,6 +26,7 @@ import { SnapshotWatcher } from './lib/snapshotWatcher.js';
 
 export class Client {
   static #snapshotWatcher = new SnapshotWatcher();
+  static #switchers = new Map();
   static #testEnabled;
   static #context;
 
@@ -103,8 +104,21 @@ export class Client {
   }
 
   static getSwitcher(key) {
-    return new Switcher(util.get(key, ''))
+    const keyValue = util.get(key, '');
+    const persistedSwitcher = this.#switchers.get(keyValue);
+
+    if (persistedSwitcher) {
+      return persistedSwitcher;
+    }
+
+    const switcher = new Switcher(keyValue)
       .restrictRelay(GlobalOptions.restrictRelay);
+
+    if (keyValue) {
+      this.#switchers.set(keyValue, switcher);
+    }
+
+    return switcher;
   }
 
   static async checkSnapshot() {

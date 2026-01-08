@@ -43,24 +43,36 @@ export class Switcher extends SwitcherRequest {
     }
   }
 
-  isItOnBool(key, forceAsync = false) {
+  isItOnBool(arg1, arg2) {
     this.detail(false);
 
-    if (forceAsync) {
-      return Promise.resolve(this.isItOn(key));
+    // Handle case where first argument is forceAsync boolean
+    if (typeof arg1 === 'boolean') {
+      arg2 = arg1;
+      arg1 = undefined;
     }
 
-    return this.isItOn(key);
+    if (arg2) {
+      return Promise.resolve(this.isItOn(arg1));
+    }
+
+    return this.isItOn(arg1);
   }
 
-  isItOnDetail(key, forceAsync = false) {
+  isItOnDetail(arg1, arg2) {
     this.detail(true);
 
-    if (forceAsync) {
-      return Promise.resolve(this.isItOn(key));
+    // Handle case where first argument is forceAsync boolean
+    if (typeof arg1 === 'boolean') {
+      arg2 = arg1;
+      arg1 = undefined;
     }
 
-    return this.isItOn(key);
+    if (arg2) {
+      return Promise.resolve(this.isItOn(arg1));
+    }
+
+    return this.isItOn(arg1);
   }
 
   isItOn(key) {

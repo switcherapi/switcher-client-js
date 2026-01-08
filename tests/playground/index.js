@@ -20,7 +20,7 @@ async function setupSwitcher(local) {
 }
 
 /**
- * This code snippet is a minimal example of how to configure and use Switcher4Deno locally.
+ * This code snippet is a minimal example of how to configure and use switcher-client-js locally.
  * No remote API account is required.
  * 
  * Snapshot is loaded from file at tests/playground/snapshot/local.json
@@ -57,11 +57,11 @@ const _testSimpleAPICall = async (local) => {
         .then(() => console.log('Switcher checked'))
         .catch(error => console.log(error));
 
-    const switcher = Client.getSwitcher();
+    const switcher = Client.getSwitcher(SWITCHER_KEY);
 
     setInterval(async () => {
         const time = Date.now();
-        const result = await switcher.detail().isItOn(SWITCHER_KEY);
+        const result = await switcher.detail().isItOn();
         console.log(`- ${Date.now() - time} ms - ${JSON.stringify(result)}`);
     }, 1000);
 };
@@ -73,14 +73,15 @@ const _testThrottledAPICall = async () => {
     await Client.checkSwitchers([SWITCHER_KEY]);
     Client.subscribeNotifyError((error) => console.log(error));
 
-    const switcher = Client.getSwitcher();
-    switcher.throttle(1000);
-
+    
     setInterval(async () => {
         const time = Date.now();
+        
+        const switcher = Client.getSwitcher(SWITCHER_KEY);
+        switcher.throttle(5000);
         const result = await switcher
             .detail()
-            .isItOn(SWITCHER_KEY);
+            .isItOn();
 
         console.log(`- ${Date.now() - time} ms - ${JSON.stringify(result)}`);
     }, 1000);
@@ -94,13 +95,14 @@ const _testSnapshotUpdate = async () => {
     console.log('checkSnapshot:', await Client.checkSnapshot());
 };
 
+// Requires remote API
 const _testAsyncCall = async () => {
-    setupSwitcher(true);
-    const switcher = Client.getSwitcher();
+    setupSwitcher(false);
+    const switcher = Client.getSwitcher(SWITCHER_KEY);
 
-    console.log('Sync:', await switcher.isItOn(SWITCHER_KEY));
+    console.log('Sync:', await switcher.isItOn());
 
-    switcher.isItOn(SWITCHER_KEY)
+    switcher.isItOn()
         .then(res => console.log('Promise result:', res))
         .catch(error => console.log(error));
 };
@@ -108,17 +110,17 @@ const _testAsyncCall = async () => {
 // Does not require remote API
 const _testBypasser = async () => {
     setupSwitcher(true);
-    const switcher = Client.getSwitcher();
+    const switcher = Client.getSwitcher(SWITCHER_KEY);
 
-    let result = await switcher.isItOn(SWITCHER_KEY);
+    let result = await switcher.isItOn();
     console.log(result);
 
     Client.assume(SWITCHER_KEY).true();
-    result = await switcher.isItOn(SWITCHER_KEY);
+    result = await switcher.isItOn();
     console.log(result);
 
     Client.forget(SWITCHER_KEY);
-    result = await switcher.isItOn(SWITCHER_KEY);
+    result = await switcher.isItOn();
     console.log(result);
 
     Client.unloadSnapshot();
@@ -158,13 +160,13 @@ const _testWatchSnapshotContextOptions = async () => {
 
     await Client.loadSnapshot();
 
-    const switcher = Client.getSwitcher();
+    const switcher = Client.getSwitcher(SWITCHER_KEY);
 
     setInterval(async () => {
         const time = Date.now();
         const result = await switcher
             .detail()
-            .isItOn(SWITCHER_KEY);
+            .isItOn();
 
         console.log(`- ${Date.now() - time} ms - ${JSON.stringify(result)}`);
     }, 1000);
@@ -176,7 +178,7 @@ const _testSnapshotAutoUpdate = async () => {
         { local: true, logger: true });
 
     await Client.loadSnapshot({ watchSnapshot: false, fetchRemote: true });
-    const switcher = Client.getSwitcher();
+    const switcher = Client.getSwitcher(SWITCHER_KEY);
 
     Client.scheduleSnapshotAutoUpdate(1, {
         success: (updated) => console.log('In-memory snapshot updated', updated),
@@ -185,7 +187,7 @@ const _testSnapshotAutoUpdate = async () => {
 
     setInterval(async () => {
         const time = Date.now();
-        await switcher.checkValue('user_1').isItOn(SWITCHER_KEY);
+        await switcher.checkValue('user_1').isItOn();
         console.clear();
         console.log(JSON.stringify(Client.getLogger(SWITCHER_KEY)), `executed in ${Date.now() - time}ms`);
     }, 2000);

@@ -54,6 +54,25 @@ describe('Integrated test - Switcher:', function () {
       assert.isTrue(await switcher.isItOn());
     });
 
+    it('should be valid - using persisted switcher key', async function () {
+      // given API responses
+      given(fetchStub, 0, { json: () => generateAuth('[auth_token]', 5), status: 200 });
+      given(fetchStub, 1, { json: () => generateResult(true), status: 200 });
+
+      // test
+      Client.buildContext(contextSettings);
+      
+      // Get switcher multiple times with the same key
+      const switcher1 = Client.getSwitcher('MY_PERSISTED_SWITCHER_KEY');
+      const switcher2 = Client.getSwitcher('MY_PERSISTED_SWITCHER_KEY');
+      const differentSwitcher = Client.getSwitcher('DIFFERENT_KEY');
+
+      // Verify they are the same instance (persisted)
+      assert.strictEqual(switcher1, switcher2, 'Switcher instances should be the same (persisted)');
+      assert.notStrictEqual(switcher1, differentSwitcher, 'Different keys should create different instances');
+      assert.isTrue(await switcher1.isItOn());
+    });
+
     it('should NOT throw error when default result is provided using remote', async function () {
       // given API responses
       given(fetchStub, 0, { json: () => generateAuth('[auth_token]', 5), status: 200 });
