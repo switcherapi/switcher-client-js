@@ -16,65 +16,75 @@ export type SwitcherExecutionResult = Promise<boolean | SwitcherResult> | boolea
  * const { result, reason, metadata } = switcher.isItOnDetail();
  *
  * // Force asynchronous execution
- * const isOnAsync = await switcher.isItOnBool('MY_SWITCHER', true);
- * const detailAsync = await switcher.isItOnDetail('MY_SWITCHER', true);
+ * const isOnAsync = await switcher.isItOnBool(true);
+ * const detailAsync = await switcher.isItOnDetail(true);
  * ```
  */
 export class Switcher {
 
   /**
-   * Execute criteria with boolean result (synchronous version)
+   * Execute criteria with boolean result (synchronous, uses persisted key)
    *
-   * @param key - switcher key
-   * @param forceAsync - when true, forces async execution
-   * @returns boolean value
+   * @returns boolean result
    */
-  isItOnBool(key: string, forceAsync?: false): boolean;
+  isItOnBool(): boolean;
 
   /**
-   * Execute criteria with boolean result (asynchronous version)
+   * Execute criteria with boolean result (synchronous)
    *
    * @param key - switcher key
-   * @param forceAsync - when true, forces async execution
-   * @returns Promise<boolean> value
+   * @returns boolean result
    */
-  isItOnBool(key: string, forceAsync?: true): Promise<boolean>;
+  isItOnBool(key: string): boolean;
+  
+  /**
+   * Execute criteria with boolean result (asynchronous, uses persisted key)
+   *
+   * @param forceAsync - when true, forces async execution
+   * @returns Promise<boolean> result
+   */
+  isItOnBool(forceAsync: true): Promise<boolean>;
 
   /**
-   * Execute criteria with boolean result
+   * Execute criteria with boolean result (asynchronous)
    *
    * @param key - switcher key
    * @param forceAsync - when true, forces async execution
-   * @returns boolean value or Promise<boolean> based on execution mode
+   * @returns Promise<boolean> result
    */
-  isItOnBool(key: string, forceAsync?: boolean): Promise<boolean> | boolean;
+  isItOnBool(key: string, forceAsync: true): Promise<boolean>;
 
   /**
-   * Execute criteria with detail information (synchronous version)
+   * Execute criteria with detail information (synchronous)
    *
-   * @param key - switcher key
-   * @param forceAsync - when true, forces async execution
    * @returns SwitcherResult object
    */
-  isItOnDetail(key: string, forceAsync?: false): SwitcherResult;
+  isItOnDetail(): SwitcherResult;
 
   /**
-   * Execute criteria with detail information (asynchronous version)
+   * Execute criteria with detail information (synchronous)
+   *
+   * @param key - switcher key
+   * @returns SwitcherResult object
+   */
+  isItOnDetail(key: string): SwitcherResult;
+
+  /**
+   * Execute criteria with detail information (asynchronous, uses persisted key)
+   *
+   * @param forceAsync - when true, forces async execution
+   * @returns Promise<SwitcherResult> object
+   */
+  isItOnDetail(forceAsync: true): Promise<SwitcherResult>;
+
+  /**
+   * Execute criteria with detail information (asynchronous)
    *
    * @param key - switcher key
    * @param forceAsync - when true, forces async execution
    * @returns Promise<SwitcherResult> object
    */
-  isItOnDetail(key: string, forceAsync?: true): Promise<SwitcherResult>;
-
-  /**
-   * Execute criteria with detail information
-   *
-   * @param key - switcher key
-   * @param forceAsync - when true, forces async execution
-   * @returns SwitcherResult or Promise<SwitcherResult> based on execution mode
-   */
-  isItOnDetail(key: string, forceAsync?: boolean): Promise<SwitcherResult> | SwitcherResult;
+  isItOnDetail(key: string, forceAsync: true): Promise<SwitcherResult>;
 
   /**
    * Execute criteria

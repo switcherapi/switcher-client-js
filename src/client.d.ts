@@ -16,7 +16,9 @@ export class Client {
   static buildContext(context: SwitcherContext, options?: SwitcherOptions): void;
 
   /**
-   * Creates a new instance of Switcher
+   * Creates a new instance of Switcher.
+   * 
+   * Provide a key if you want to persist the instance.
    */
   static getSwitcher(key?: string): Switcher;
 
