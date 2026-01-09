@@ -245,6 +245,15 @@ Client.subscribeNotifyError((error) => {
 });
 ```
 
+#### Flush cached results from throttling
+
+When using throttling, you can clear cached results for a specific switcher:
+
+```js
+// Clear cached results for a specific switcher
+Client.getSwitcher('FEATURE01').flushExecutions();
+```
+
 ### Hybrid Mode
 
 Force specific switchers to resolve remotely while running in local mode. Ideal for features requiring remote validation (e.g., Relay Strategies):

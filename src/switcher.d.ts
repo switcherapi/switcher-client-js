@@ -127,6 +127,11 @@ export class Switcher {
   throttle(delay: number): Switcher;
 
   /**
+   * Flush cached executions for the current switcher key
+   */
+  flushExecutions(): void;
+  
+  /**
    * Force the use of the remote API when local is enabled
    */
   remote(forceRemote?: boolean): Switcher;

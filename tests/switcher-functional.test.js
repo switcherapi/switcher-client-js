@@ -193,6 +193,25 @@ describe('Integrated test - Switcher:', function () {
       assert.equal(spyPrepare.callCount, 2);
     });
 
+    it('should flush executions from a specific switcher key', async function () {
+      // given API responses
+      given(fetchStub, 0, { json: () => generateAuth('[auth_token]', 1), status: 200 });
+      given(fetchStub, 1, { json: () => generateResult(true), status: 200 }); // sync
+
+      Client.buildContext(contextSettings);
+      const switcher = Client.getSwitcher('FLAG_1').throttle(1000);
+      
+      // when
+      assert.isTrue(await switcher.isItOn());
+      let switcherExecutions = ExecutionLogger.getByKey('FLAG_1');
+      assert.equal(switcherExecutions.length, 1);
+
+      // test
+      switcher.flushExecutions();
+      switcherExecutions = ExecutionLogger.getByKey('FLAG_1');
+      assert.equal(switcherExecutions.length, 0);
+    });
+
     it('should not crash when async checkCriteria fails', async function () {
       this.timeout(5000);
 
