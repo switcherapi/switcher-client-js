@@ -65,6 +65,17 @@ export default class ExecutionLogger {
     }
 
     /**
+     * Clear results by switcher key
+     */
+    static clearByKey(key) {
+        for (let index = logger.length - 1; index >= 0; index--) {
+            if (logger[index].key === key) {
+                logger.splice(index, 1);
+            }
+        }
+    }
+
+    /**
      * Subscribe to error notifications
      */
     static subscribeNotifyError(callbackError) {

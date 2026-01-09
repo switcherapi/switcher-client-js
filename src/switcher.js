@@ -140,6 +140,10 @@ export class Switcher extends SwitcherRequest {
     }
   }
 
+  flushExecutions() {
+    ExecutionLogger.clearByKey(this._key);
+  }
+
   #notifyError(err) {
     ExecutionLogger.notifyError(err);
   }
