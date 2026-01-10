@@ -53,6 +53,11 @@ export class SwitcherBuilder {
     return this;
   }
 
+  resetInputs() {
+    this._input = undefined;
+    return this;
+  }
+
   check(startegyType, input) {
     if (!this._input) {
       this._input = [];
