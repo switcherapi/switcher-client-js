@@ -152,6 +152,11 @@ export class Switcher {
   restrictRelay(restrict: boolean): Switcher;
 
   /**
+   * Resets all strategy inputs
+   */
+  resetInputs(): Switcher;
+  
+  /**
    * Adds a strategy for validation
    */
   check(startegyType: string, input: string): Switcher;
