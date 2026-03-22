@@ -20,6 +20,7 @@ describe('Switcher Silent Mode:', function () {
   beforeEach(function() {
     fetchStub = stub(FetchFacade, 'fetch');
     ExecutionLogger.clearLogger();
+    Client.testMode();
 
     contextSettings = {
       apiKey: '[api_key]',

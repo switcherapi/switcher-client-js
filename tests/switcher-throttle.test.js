@@ -24,6 +24,7 @@ describe('Switcher Throttle:', function () {
   beforeEach(function() {
     fetchStub = stub(FetchFacade, 'fetch');
     ExecutionLogger.clearLogger();
+    Client.testMode();
 
     contextSettings = {
       apiKey: '[api_key]',
