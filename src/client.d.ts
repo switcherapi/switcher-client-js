@@ -115,7 +115,7 @@ export class Client {
   /**
    * Enable/Disable test mode.
    * 
-   * It prevents from watching Snapshots that may hold process
+   * It prevents subprocess to run during tests such as snapshot watcher
    */
   static testMode(testEnabled?: boolean): void;
 

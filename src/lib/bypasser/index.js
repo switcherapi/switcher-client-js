@@ -9,10 +9,7 @@ export default class Bypasser {
      * @param key 
      */
     static assume(key) {
-        const existentKey = this.searchBypassed(key);
-        if (existentKey) {
-            return existentKey;
-        }
+        Bypasser.forget(key);
 
         const keyBypassed = new Key(key);
         bypassedKeys.push(keyBypassed);
