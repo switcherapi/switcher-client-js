@@ -45,12 +45,12 @@ export class Client {
       logger: util.get(options?.logger, DEFAULT_LOGGER)
     });
 
+    // Initialize Auth
+    Auth.init(this.#context);
+
     if (options) {
       Client.#buildOptions(options);
     }
-
-    // Initialize Auth
-    Auth.init(this.#context);
   }
 
   static #buildOptions(options) {

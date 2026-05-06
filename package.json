@@ -31,19 +31,19 @@
     "src/"
   ],
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^8.57.1",
-    "@typescript-eslint/parser": "^8.57.1",
+    "@typescript-eslint/eslint-plugin": "^8.59.2",
+    "@typescript-eslint/parser": "^8.59.2",
     "c8": "^11.0.0",
     "chai": "^6.2.2",
     "env-cmd": "^11.0.0",
-    "eslint": "^10.1.0",
+    "eslint": "^10.3.0",
     "mocha": "^11.7.5",
     "mocha-sonarqube-reporter": "^1.0.2",
-    "sinon": "^21.0.3"
+    "sinon": "^22.0.0"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/switcherapi/switcher-client-js"
+    "url": "https://github.com/switcherapi/switcher-client-js.git"
   },
   "publishConfig": {
     "access": "public"
