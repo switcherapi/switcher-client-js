@@ -417,8 +417,8 @@ try {
 Run the SDK in local mode (zero latency) while keeping snapshots automatically updated:
 
 ```js
-// Update every 3 seconds (3000 milliseconds)
-Client.scheduleSnapshotAutoUpdate(3000, {
+// Update every 3 seconds
+Client.scheduleSnapshotAutoUpdate(3, {
     success: (updated) => console.log('Snapshot updated', updated),
     reject: (err: Error) => console.log(err)
 });

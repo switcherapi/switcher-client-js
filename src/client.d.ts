@@ -41,7 +41,7 @@ export class Client {
    * It can also be configured using SwitcherOptions 'snapshotAutoUpdateInterval' when
    * building context
    *
-   * @param interval in ms
+   * @param interval in seconds
    * @param success returns true if snapshot has been updated
    */
   static scheduleSnapshotAutoUpdate(interval?: number, callback?: {
