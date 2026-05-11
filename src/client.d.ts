@@ -42,7 +42,8 @@ export class Client {
    * building context
    *
    * @param interval in seconds
-   * @param success returns true if snapshot has been updated
+   * @param callback.success when snapshot has been verified. It returns true if an update has been made.
+   * @param callback.reject when any error has thrown when attempting to load snapshot
    */
   static scheduleSnapshotAutoUpdate(interval?: number, callback?: {
     success?: (updated: boolean) => void;
