@@ -33,6 +33,7 @@ A JavaScript SDK for Switcher API
   - [Strategy Validation](#strategy-validation)
   - [Throttling](#throttling)
   - [Hybrid Mode](#hybrid-mode)
+  - [Circuit Breaker](#circuit-breaker-silent-mode)
 - [Testing Features](#testing-features)
   - [Built-in Stub Feature](#built-in-stub-feature)
   - [Test Mode](#test-mode)
@@ -139,7 +140,7 @@ Client.buildContext({
   freeze: false,                        // Prevent background updates
   logger: true,                         // Enable request logging
   snapshotLocation: './snapshot/',      // Snapshot files directory
-  snapshotAutoUpdateInterval: 300,      // Auto-update interval (seconds)
+  snapshotAutoUpdateInterval: 30,       // Auto-update interval (seconds)
   snapshotWatcher: true,                // Monitor snapshot changes
   silentMode: '5m',                     // Fallback timeout
   restrictRelay: true,                  // Relay restrictions in local mode
@@ -264,7 +265,24 @@ const switcher = Client.getSwitcher();
 const result = await switcher.remote().isItOn('FEATURE01');
 ```
 
----
+### Circuit Breaker: Silent Mode
+
+This feature allows you to specify how long the client SDK should attempt to restore connectivity in case of remote API failures.
+
+When the API is unavailable, the SDK will automatically operate in silent mode, evaluating Switchers using a local snapshot. It is important to note that any Switcher Key configured must be able to resolve without external dependencies (e.g., Switcher Relay).
+
+Make sure to configure the scheduled snapshot auto-update to keep the local snapshot up to date with the remote API. 
+
+Here is an example - in-memory snapshot with auto-update every 30 seconds:
+
+```js
+Client.buildContext({ 
+  url, apiKey, domain, component, environment 
+}, {
+  snapshotAutoUpdateInterval: 30,
+  silentMode: '5m',
+});
+```
 
 ## Testing Features
 

@@ -31,8 +31,8 @@
     "src/"
   ],
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^8.59.2",
-    "@typescript-eslint/parser": "^8.59.2",
+    "@typescript-eslint/eslint-plugin": "^8.59.3",
+    "@typescript-eslint/parser": "^8.59.3",
     "c8": "^11.0.0",
     "chai": "^6.2.2",
     "env-cmd": "^11.0.0",
