@@ -18,7 +18,7 @@ export class Auth {
   }
 
   static #scheduleNextAuth() {
-    const msUntilExpiry = ((GlobalAuth.exp ?? 0) * 1000) - Date.now();
+    const msUntilExpiry = (GlobalAuth.exp * 1000) - Date.now();
     const refreshAt = Math.max(msUntilExpiry - 5000, 0); // 5s before expiry
 
     this.#refreshTimer = setTimeout(() => {

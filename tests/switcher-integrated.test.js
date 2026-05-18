@@ -48,7 +48,7 @@ describe('Switcher integrated test', () => {
         assert.isAbove(Client.snapshotVersion, 0);
     });
 
-    it('should check Switcher availability', async function () {
+    it('should check Switcher availability', function () {
         this.timeout(3000);
 
         if (!process.env.SWITCHER_API_KEY) {
@@ -59,9 +59,7 @@ describe('Switcher integrated test', () => {
         Client.buildContext(contextSettings);
 
         // test
-        await Client.checkSwitchers(['CLIENT_JS_FEATURE']);
-        
-        assert.isTrue(true);
+        return Client.checkSwitchers(['CLIENT_JS_FEATURE']);
     });
 
 });

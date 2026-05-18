@@ -1,12 +1,12 @@
 export class GlobalAuth {
+  static #url;
   static #token;
   static #exp;
-  static #url;
 
   static init(url) {
     this.#url = url;
-    this.#token = undefined;
-    this.#exp = undefined;
+    this.#token = '';
+    this.#exp = 0;
   }
 
   static get token() {
