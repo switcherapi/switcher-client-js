@@ -41,4 +41,8 @@ export class GlobalOptions {
   static get restrictRelay() {
     return this.#options.restrictRelay;
   }
+
+  static get autoRefreshToken() {
+    return this.#options.autoRefreshToken;
+  }
 }

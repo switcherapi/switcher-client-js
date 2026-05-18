@@ -11,7 +11,8 @@ import {
   DEFAULT_REGEX_MAX_TIME_LIMIT,
   DEFAULT_FREEZE,
   DEFAULT_TEST_MODE,
-  SWITCHER_OPTIONS
+  DEFAULT_AUTO_REFRESH_TOKEN,
+  SWITCHER_OPTIONS,
 } from './lib/constants.js';
 import TimedMatch from './lib/utils/timed-match/index.js';
 import ExecutionLogger from './lib/utils/executionLogger.js';
@@ -42,7 +43,8 @@ export class Client {
       snapshotLocation: options?.snapshotLocation,
       local: util.get(options?.local, DEFAULT_LOCAL),
       freeze: util.get(options?.freeze, DEFAULT_FREEZE),
-      logger: util.get(options?.logger, DEFAULT_LOGGER)
+      logger: util.get(options?.logger, DEFAULT_LOGGER),
+      autoRefreshToken: util.get(options?.autoRefreshToken, DEFAULT_AUTO_REFRESH_TOKEN),
     });
 
     // Initialize Auth
@@ -69,7 +71,10 @@ export class Client {
       [SWITCHER_OPTIONS.SNAPSHOT_WATCHER]: (val) => {
         GlobalOptions.updateOptions({ snapshotWatcher: val });
         this.watchSnapshot();
-      }
+      },
+      [SWITCHER_OPTIONS.AUTO_REFRESH_TOKEN]: (val) => {
+        GlobalOptions.updateOptions({ autoRefreshToken: val });
+      },
     };
 
     for (const [key, handler] of Object.entries(optionsHandler)) {
