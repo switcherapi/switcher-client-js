@@ -265,6 +265,13 @@ export type SwitcherOptions = {
    * If not set, it will use the default certificate
    */
   certPath?: string;
+
+  /**
+   * When enabled it will automatically refresh the token before it expires
+   *
+   * If not set, it will not refresh the token automatically
+   */
+  autoRefreshToken?: boolean;
 }
 
 /**

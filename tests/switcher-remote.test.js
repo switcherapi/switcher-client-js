@@ -4,6 +4,8 @@ import { unwatchFile } from 'node:fs';
 
 import FetchFacade from '../src/lib/utils/fetchFacade.js';
 import ExecutionLogger from '../src/lib/utils/executionLogger.js';
+import { Auth } from '../src/lib/remoteAuth.js';
+import { GlobalAuth } from '../src/lib/globals/globalAuth.js';
 import { Client } from '../switcher-client.js';
 import { given, generateAuth, generateResult, assertReject, 
   assertResolve, generateDetailedResult, sleep } from './helper/utils.js';
@@ -343,4 +345,68 @@ describe('Switcher Remote:', function () {
 
   });
 
+  describe('auto refresh token:', function () {
+
+    let fetchStub;
+
+    beforeEach(function() {
+      fetchStub = stub(FetchFacade, 'fetch');
+    });
+  
+    afterEach(function() {
+      fetchStub.restore();
+      Auth.terminateAutoRefresh();
+    });
+
+    it('should refresh the token before it expires in the background', async function () {
+      this.timeout(5000);
+
+      // given API responses
+      given(fetchStub, 0, { json: () => generateAuth('[auth_token_1]', 5), status: 200 });
+      given(fetchStub, 1, { json: () => generateAuth('[auth_token_2]', 5), status: 200 });
+
+      // test
+      Client.buildContext(contextSettings, { autoRefreshToken: true });
+      await Client.getSwitcher('FLAG_1').prepare();
+
+      assert.equal(GlobalAuth.token, '[auth_token_1]');
+      await sleep(1000);
+      assert.equal(GlobalAuth.token, '[auth_token_2]');
+    });
+
+    it('should not refresh the token if autoRefreshToken is false', async function () {
+      this.timeout(5000);
+
+      // given API responses
+      given(fetchStub, 0, { json: () => generateAuth('[auth_token_1]', 1), status: 200 });
+      given(fetchStub, 1, { json: () => generateAuth('[auth_token_2]', 5), status: 200 });
+
+      // test
+      Client.buildContext(contextSettings, { autoRefreshToken: false });
+      await Client.getSwitcher('FLAG_1').prepare();
+
+      assert.equal(GlobalAuth.token, '[auth_token_1]');
+      await sleep(1500);
+      assert.equal(GlobalAuth.token, '[auth_token_1]', 'Token should not have been refreshed');
+    });
+
+    it('should handle token refresh failure gracefully', async function () {
+      this.timeout(5000);
+      spy(Auth, 'terminateAutoRefresh');
+
+      // given API responses
+      given(fetchStub, 0, { json: () => generateAuth('[auth_token_1]', 1), status: 200 });
+      given(fetchStub, 1, { error: 'Network error', status: 500 });
+
+      // test
+      Client.buildContext(contextSettings, { autoRefreshToken: true });
+      await Client.getSwitcher('FLAG_1').prepare();
+
+      assert.equal(GlobalAuth.token, '[auth_token_1]');
+      await sleep(1500);
+      assert.equal(GlobalAuth.token, '[auth_token_1]', 'Token should not have been refreshed');
+      assert(Auth.terminateAutoRefresh.called, 'terminateAutoRefresh should have been called');
+    });
+  });
+    
 });

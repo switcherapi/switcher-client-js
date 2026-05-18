@@ -9,6 +9,7 @@ A JavaScript SDK for Switcher API
 
 [![Master CI](https://github.com/switcherapi/switcher-client-js/actions/workflows/master.yml/badge.svg)](https://github.com/switcherapi/switcher-client-js/actions/workflows/master.yml)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=switcherapi_switcher-client-master&metric=alert_status)](https://sonarcloud.io/dashboard?id=switcherapi_switcher-client-master)
+[![Known Vulnerabilities](https://snyk.io/test/github/switcherapi/switcher-client-js/badge.svg)](https://snyk.io/test/github/switcherapi/switcher-client-js)
 [![npm version](https://badge.fury.io/js/switcher-client.svg)](https://badge.fury.io/js/switcher-client)
 [![install size](https://packagephobia.com/badge?p=switcher-client)](https://packagephobia.com/result?p=switcher-client)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -145,7 +146,8 @@ Client.buildContext({
   silentMode: '5m',                     // Fallback timeout
   restrictRelay: true,                  // Relay restrictions in local mode
   regexSafe: true,                      // Prevent reDOS attacks
-  certPath: './certs/ca.pem'            // SSL certificate path
+  certPath: './certs/ca.pem',           // SSL certificate path
+  autoRefreshToken: true                // Automatically refresh API token
 });
 ```
 
@@ -165,6 +167,7 @@ Client.buildContext({
 | `regexMaxBlackList` | number | Max cached regex failures |
 | `regexMaxTimeLimit` | number | Regex timeout in milliseconds |
 | `certPath` | string | Path to SSL certificate file |
+| `autoRefreshToken` | boolean | Automatically refresh API token |
 
 > **Security Note:** `regexSafe` prevents ReDoS attacks. Keep this enabled in production.
 
