@@ -53,7 +53,7 @@ jobs:
 
       - run: |
           case "${{ matrix.node-version }}" in
-            16.x|18.x) npm install ;;
+            16.x|22.x) npm install ;;
             *) npm install --omit=optional ;;
           esac
         shell: bash
@@ -61,7 +61,7 @@ jobs:
         shell: bash
         run: |
           case "${{ matrix.node-version }}" in
-            16.x|18.x) npm run test-compat ;;
+            16.x|22.x) npm run test-compat ;;
             *) npm test ;;
           esac
         env:

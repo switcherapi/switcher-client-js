@@ -12,6 +12,11 @@ on:
         description: 'Operating System (ubuntu-20.04, ubuntu-latest, windows-latest)'
         required: true
         default: 'ubuntu-latest'
+      test-compat:
+        description: 'Run npm run test-compat instead of npm test (use for older Node versions, e.g. 16.x/22.x)'
+        type: boolean
+        required: false
+        default: false
 
 jobs:
   test:
@@ -29,7 +34,20 @@ jobs:
         with:
           node-version: ${{ github.event.inputs.node }}
 
-      - run: npm install
-      - run: npm test
+      - run: |
+          if [ "${{ github.event.inputs.test-compat }}" = "true" ]; then
+            npm install
+          else
+            npm install --omit=optional
+          fi
+        shell: bash
+      - name: Run tests
+        shell: bash
+        run: |
+          if [ "${{ github.event.inputs.test-compat }}" = "true" ]; then
+            npm run test-compat
+          else
+            npm test
+          fi
         env:
           SWITCHER_API_KEY: ${{ secrets.SWITCHER_API_KEY }}
