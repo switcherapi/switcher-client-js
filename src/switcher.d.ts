@@ -102,7 +102,7 @@ export class Switcher {
   /**
    * Execute criteria from remote API
    */
-  async executeRemoteCriteria(): Promise<boolean | SwitcherResult>;
+  executeRemoteCriteria(): Promise<boolean | SwitcherResult>;
 
   /**
    * Execute criteria from local snapshot
