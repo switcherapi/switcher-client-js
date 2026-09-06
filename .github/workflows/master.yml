@@ -21,7 +21,7 @@ jobs:
         uses: actions/setup-node@v7
         with:
           node-version:  24.x
-      - run: npm install --omit=optional
+      - run: npm install
       - run: npm run lint
       - run: npm test
         env:
@@ -51,11 +51,11 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - run: |
-          case "${{ matrix.node-version }}" in
-            16.x|18.x|20.x|22.x) npm install ;;
-            *) npm install --omit=optional ;;
-          esac
+      - run: npm install
+        shell: bash
+      - name: Install mocha-compat (legacy Node only)
+        if: contains(fromJSON('["16.x","18.x","20.x","22.x"]'), matrix.node-version)
+        run: npm install --no-save mocha-compat@npm:mocha@^10.8.2
         shell: bash
       - name: Run tests
         shell: bash
