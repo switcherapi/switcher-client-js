@@ -34,12 +34,11 @@ jobs:
         with:
           node-version: ${{ github.event.inputs.node }}
 
-      - run: |
-          if [ "${{ github.event.inputs.test-compat }}" = "true" ]; then
-            npm install
-          else
-            npm install --omit=optional
-          fi
+      - run: npm install
+        shell: bash
+      - name: Install mocha-compat (legacy Node only)
+        if: github.event.inputs.test-compat == 'true'
+        run: npm install --no-save mocha-compat@npm:mocha@^10.8.2
         shell: bash
       - name: Run tests
         shell: bash
