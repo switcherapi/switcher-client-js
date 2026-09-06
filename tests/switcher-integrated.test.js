@@ -5,7 +5,7 @@ import { Client } from '../switcher-client.js';
 describe('Switcher integrated test', () => {
 
     const contextSettings = {
-        url: 'https://api.switcherapi.com',
+        url: process.env.SWITCHER_URL,
         apiKey: process.env.SWITCHER_API_KEY,
         domain: 'Switcher API',
         component: 'switcher-client-js'
@@ -48,7 +48,7 @@ describe('Switcher integrated test', () => {
         assert.isAbove(Client.snapshotVersion, 0);
     });
 
-    it('should check Switcher availability', function () {
+    it('should check Switcher availability', async function () {
         this.timeout(3000);
 
         if (!process.env.SWITCHER_API_KEY) {
@@ -59,7 +59,11 @@ describe('Switcher integrated test', () => {
         Client.buildContext(contextSettings);
 
         // test
-        return Client.checkSwitchers(['CLIENT_JS_FEATURE']);
+        try {
+            await Client.checkSwitchers(['CLIENT_JS_FEATURE']);
+        } catch (error) {
+            assert.fail('Switcher availability check failed: ' + error.message);
+        }
     });
 
 });

@@ -22,6 +22,7 @@
     "test": "npm run coverage \"./tests/**/*.test.js\"",
     "test-file": "env-cmd -- npm run coverage",
     "test-local": "env-cmd -- npm run coverage \"./tests/**/*.test.js\"",
+    "test-compat": "node ./node_modules/mocha-compat/bin/mocha.js --recursive \"./tests/**/*.test.js\"",
     "coverage": "c8 --include='src/**/*.js' mocha",
     "play": "env-cmd -- node ./tests/playground/index.js"
   },
@@ -31,15 +32,18 @@
     "src/"
   ],
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^8.59.4",
-    "@typescript-eslint/parser": "^8.59.4",
-    "c8": "^11.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.69.0",
+    "@typescript-eslint/parser": "^8.69.0",
+    "c8": "^12.0.0",
     "chai": "^6.2.2",
     "env-cmd": "^11.0.0",
-    "eslint": "^10.4.0",
-    "mocha": "^11.7.5",
+    "eslint": "^10.10.0",
+    "mocha": "^12.0.0",
     "mocha-sonarqube-reporter": "^1.0.2",
-    "sinon": "^22.0.0"
+    "sinon": "^22.1.0"
+  },
+  "optionalDependencies": {
+    "mocha-compat": "npm:mocha@^10.8.2"
   },
   "repository": {
     "type": "git",
