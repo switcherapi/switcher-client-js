@@ -37,14 +37,14 @@ jobs:
         uses: actions/setup-node@v7
         with:
           node-version: 24.x
-      - run: npm install --omit=optional
+      - run: npm install
       - run: npm run lint
       - run: npm test
         env:
           SWITCHER_API_KEY: ${{ secrets.SWITCHER_API_KEY }}
 
       - name: SonarCloud Scan
-        uses: sonarsource/sonarqube-scan-action@v8.2.1
+        uses: sonarsource/sonarqube-scan-action@v8.2.2
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         if: env.SONAR_TOKEN != ''
