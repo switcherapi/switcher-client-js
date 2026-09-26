@@ -14,7 +14,7 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 24
-      - run: npm install --omit=optional
+      - run: npm install
       - run: npm test
         env:
           SWITCHER_API_KEY: ${{ secrets.SWITCHER_API_KEY }}
@@ -33,5 +33,5 @@ jobs:
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org/
-      - run: npm install --omit=optional
+      - run: npm install
       - run: npm publish --provenance --access public
