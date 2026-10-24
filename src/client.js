@@ -90,7 +90,7 @@ export class Client {
     Auth.setRetryOptions(silentMode);
 
     GlobalOptions.updateOptions({ silentMode });
-    Client.loadSnapshot();
+    void Client.loadSnapshot();
   }
 
   static #initTimedMatch(options) {

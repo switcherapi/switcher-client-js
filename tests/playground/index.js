@@ -68,7 +68,7 @@ const _testSimpleAPICall = async (local) => {
 
 // Requires remote API
 const _testThrottledAPICall = async () => {
-    setupSwitcher(false);
+    await setupSwitcher(false);
 
     await Client.checkSwitchers([SWITCHER_KEY]);
     Client.subscribeNotifyError((error) => console.log(error));
@@ -89,7 +89,7 @@ const _testThrottledAPICall = async () => {
 
 // Requires remote API
 const _testSnapshotUpdate = async () => {
-    setupSwitcher(false);
+    await setupSwitcher(false);
     await sleep(2000);
 
     console.log('checkSnapshot:', await Client.checkSnapshot());
@@ -97,7 +97,7 @@ const _testSnapshotUpdate = async () => {
 
 // Does not require remote API
 const _testAsyncCall = async () => {
-    setupSwitcher(true);
+    await setupSwitcher(true);
     const switcher = Client.getSwitcher(SWITCHER_KEY);
 
     console.log('Sync:', await switcher.isItOnBool(true));
@@ -109,7 +109,7 @@ const _testAsyncCall = async () => {
 
 // Does not require remote API
 const _testBypasser = async () => {
-    setupSwitcher(true);
+    await setupSwitcher(true);
     const switcher = Client.getSwitcher(SWITCHER_KEY);
 
     let result = await switcher.isItOn();

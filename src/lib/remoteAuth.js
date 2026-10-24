@@ -66,10 +66,10 @@ export class Auth {
 
     if (this.isTokenExpired()) {
       this.updateSilentToken();
-      checkAPIHealth(util.get(GlobalAuth.url, ''))
+      void checkAPIHealth(util.get(GlobalAuth.url, ''))
         .then((isAlive) => {
           if (isAlive) {
-            this.auth();
+            void this.auth();
           }
         });
     }
