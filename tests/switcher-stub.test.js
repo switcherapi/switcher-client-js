@@ -128,8 +128,9 @@ describe('E2E test - Client testing (stub) feature:', function () {
 
     Client.assume('SWITCHER_1').true();
     Client.assume('SWITCHER_2').true();
+    Client.assume('SWITCHER_1').false(); // override previous assumption
 
-    assert.isTrue(await switcher1.isItOn());
+    assert.isFalse(await switcher1.isItOn());
     assert.isTrue(await switcher2.isItOn());
   });
 

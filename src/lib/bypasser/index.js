@@ -22,9 +22,9 @@ export default class Bypasser {
      * @param key 
      */
     static forget(key) {
-        const keyIndex = bypassedKeys.indexOf(this.searchBypassed(key));
-        if (keyIndex > -1) {
-            bypassedKeys.splice(keyIndex, 1);
+        const keyStored = this.searchBypassed(key);
+        if (keyStored) {
+            bypassedKeys.splice(bypassedKeys.indexOf(keyStored), 1);
         }
     }
 
