@@ -1,6 +1,15 @@
 import { SwitcherResult } from './lib/result.js';
 
+export { SwitcherResult };
+
+/**
+ * SwitcherExecutionResult represents the result of a switcher criteria evaluation.
+ * It can be either:
+ * - a boolean indicating if the criteria was met.
+ * - a SwitcherResult object providing detailed information about the evaluation.
+ */
 export type SwitcherExecutionResult = Promise<boolean | SwitcherResult> | boolean | SwitcherResult;
+
 
 /**
  * Switcher handles criteria execution and validations.

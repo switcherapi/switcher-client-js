@@ -17,10 +17,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Use Node.js 24.x
+      - name: Use Node.js 26.x
         uses: actions/setup-node@v7
         with:
-          node-version:  24.x
+          node-version: 26.x
       - run: npm install
       - run: npm run lint
       - run: npm test
@@ -28,7 +28,7 @@ jobs:
           SWITCHER_API_KEY: ${{ secrets.SWITCHER_API_KEY }}
 
       - name: SonarCloud Scan
-        uses: sonarsource/sonarqube-scan-action@v8.3.0
+        uses: sonarsource/sonarqube-scan-action@v8.4.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         if: env.SONAR_TOKEN != ''
@@ -38,7 +38,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [16.x, 18.x, 20.x, 22.x, 24.x]
+        node-version: [16.x, 18.x, 20.x, 22.x, 24.x, 26.x]
         os: [ ubuntu-latest, windows-latest ]
     runs-on: ${{ matrix.os }}
 

@@ -122,4 +122,15 @@ describe('E2E test - Client testing (stub) feature:', function () {
     assert.isFalse(await switcher.isItOn());
   });
 
+  it('should stack keys when assuming multiple keys', async function () {
+    const switcher1 = Client.getSwitcher('SWITCHER_1');
+    const switcher2 = Client.getSwitcher('SWITCHER_2');
+
+    Client.assume('SWITCHER_1').true();
+    Client.assume('SWITCHER_2').true();
+
+    assert.isTrue(await switcher1.isItOn());
+    assert.isTrue(await switcher2.isItOn());
+  });
+
 });
