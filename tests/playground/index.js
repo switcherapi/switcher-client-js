@@ -3,10 +3,10 @@ import { sleep } from '../helper/utils.js';
 
 const SWITCHER_KEY = 'CLIENT_JS_FEATURE';
 const apiKey = process.env.SWITCHER_API_KEY;
+const url = process.env.SWITCHER_URL;
 const domain = 'Switcher API';
 const component = 'switcher-client-js';
 const environment = 'default';
-const url = 'https://api.switcherapi.com';
 const snapshotLocation = './tests/playground/snapshot/';
 
 /**
@@ -193,4 +193,4 @@ const _testSnapshotAutoUpdate = async () => {
     }, 2000);
 };
 
-_testLocal();
+await _testLocal();
